@@ -46,15 +46,19 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  role          String    @default("user")
-  posts         Post[]
-  accounts      Account[]
-  sessions      Session[]
+  id                     String         @id @default(cuid())
+  name                   String?
+  email                  String?        @unique
+  emailVerified          DateTime?
+  image                  String?
+  role                   String         @default("user")
+  posts                  Post[]
+  accounts               Account[]
+  sessions               Session[]
+  UserChat               Chat?          @relation(name: "userChat")
+  PersonnelChats         Chat[]         @relation(name: "personnelChats")
+  UserArchivedChats      ArchivedChat[] @relation(name: "userArchivedChat")
+  PersonnelArchivedChats ArchivedChat[] @relation(name: "personnelArchivedChat")
 }
 
 model VerificationToken {
@@ -64,4 +68,47 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Chat {
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  user        User      @relation(name: "userChat", fields: [userId], references: [id])
+  userId      String    @unique
+  personnel   User      @relation(name: "personnelChats", fields: [personnelId], references: [id])
+  personnelId String
+  Message     Message[]
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  text       String
+  chat       Chat     @relation(fields: [chatId], references: [id])
+  chatId     Int
+  isFromUser Boolean
+  // user          User        @relation(fields: [userId],      references: [id])
+  // userId        String
+  // personnel     Personnel   @relation(fields: [personnelId], references: [id])
+  // personnelId   String
+}
+
+model ArchivedChat {
+  id          Int               @id @default(autoincrement())
+  createdAt   DateTime
+  endedAt     DateTime          @default(now())
+  user        User              @relation(name: "userArchivedChat", fields: [userId], references: [id])
+  userId      String            @unique
+  personnel   User              @relation(name: "personnelArchivedChat", fields: [personnelId], references: [id])
+  personnelId String
+  Message     ArchivedMessage[]
+}
+
+model ArchivedMessage {
+  id         Int          @id @default(autoincrement())
+  createdAt  DateTime
+  text       String
+  chat       ArchivedChat @relation(fields: [chatId], references: [id])
+  chatId     Int
+  isFromUser Boolean
 }
