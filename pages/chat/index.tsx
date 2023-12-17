@@ -1,17 +1,20 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
-import {Box, Grid, IconButton, Paper, TextField, Typography,} from "@mui/material";
+import {Alert, Box, Fade, Grid, IconButton, Paper, TextField, Typography,} from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import Layout from "../../components/Layout";
 import ChatItem from "../../components/ChatItem";
 import {v4 as uuid} from "uuid";
 
+const HEIGHT = '96vh';
+
 const ChatUI = () => {
-    const [messages, setMessages] = useState(0);
+    const [messages, setMessageCount] = useState(0);
     const [input, setInput] = React.useState("");
+    const [error, setError] = React.useState(false);
+
     const inputRef = React.useRef(null);
     const messageEndRef = React.useRef(null);
-
     const wsRef = React.useRef(null);
 
     const messagesRef = React.useRef([]);
@@ -20,7 +23,7 @@ const ChatUI = () => {
         console.log("new message", text, isRemote);
         const message = {id: uuid(), text: text, isRemote};
         messagesRef.current.push(message);
-        setMessages(messagesRef.current.length);
+        setMessageCount(messagesRef.current.length);
         setTimeout(() => {
             messageEndRef.current.scrollIntoView({behavior: "smooth", block: "center"});
         }, 0);
@@ -51,6 +54,13 @@ const ChatUI = () => {
     const handleSend = () => {
         let message = inputRef.current.value
         if (message.trim() !== "") {
+            if (wsRef.current.state !== "OPEN") {
+                setError(true);
+                setTimeout(() => {
+                    setError(false);
+                }, 5000);
+                return;
+            }
             wsRef.current.send(message);
             pushMessage(message);
         }
@@ -63,11 +73,16 @@ const ChatUI = () => {
 
     return (
         <Layout>
+            <Fade in={error}>
+                <Alert variant='filled' severity="error" sx={{position: 'absolute', 'z-index': 1}}>
+                    You are not connected to the internet
+                </Alert>
+            </Fade>
             <Grid container spacing={0}>
                 <Grid item xs={2}>
                     <Box
                         sx={{
-                            height: "89vh",
+                            height: HEIGHT,
                             display: "flex",
                             flexDirection: "column",
                             bgcolor: "grey.300",
@@ -83,7 +98,7 @@ const ChatUI = () => {
                 <Grid item xs={10}>
                     <Box
                         sx={{
-                            height: "89vh",
+                            height: HEIGHT,
                             display: "flex",
                             flexDirection: "column",
                             bgcolor: "grey.400",
