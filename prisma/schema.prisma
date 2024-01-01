@@ -46,20 +46,21 @@ model Session {
 }
 
 model User {
-  id                     String         @id @default(cuid())
-  name                   String?
-  email                  String?        @unique
-  emailVerified          DateTime?
-  image                  String?
-  role                   String         @default("user")
-  isOnline               Boolean        @default(false)
-  posts                  Post[]
-  accounts               Account[]
-  sessions               Session[]
-  UserChat               Chat?          @relation(name: "userChat")
-  PersonnelChats         Chat[]         @relation(name: "personnelChats")
-  UserArchivedChats      ArchivedChat[] @relation(name: "userArchivedChat")
-  PersonnelArchivedChats ArchivedChat[] @relation(name: "personnelArchivedChat")
+  id                         String         @id @default(cuid())
+  name                       String?
+  email                      String?        @unique
+  emailVerified              DateTime?
+  image                      String?
+  role                       String         @default("user")
+  isOnline                   Boolean        @default(false)
+  latestStatusConfirmationAt DateTime       @default(now())
+  posts                      Post[]
+  accounts                   Account[]
+  sessions                   Session[]
+  userChat                   Chat?          @relation(name: "userChat")
+  personnelChats             Chat[]         @relation(name: "personnelChats")
+  userArchivedChats          ArchivedChat[] @relation(name: "userArchivedChat")
+  personnelArchivedChats     ArchivedChat[] @relation(name: "personnelArchivedChat")
 }
 
 model VerificationToken {
@@ -78,7 +79,7 @@ model Chat {
   userId      String    @unique
   personnel   User      @relation(name: "personnelChats", fields: [personnelId], references: [id])
   personnelId String
-  Message     Message[]
+  messages    Message[]
 }
 
 model Message {

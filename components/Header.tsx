@@ -3,21 +3,44 @@ import {useRouter} from 'next/router';
 import {signOut, useSession} from 'next-auth/react';
 import Button from '@mui/material/Button';
 import Box from "@mui/material/Box";
+import OnlinePredictionIcon from '@mui/icons-material/OnlinePrediction';
+import {IconButton} from "@mui/material";
 
-const Header: React.FC = () => {
+type Props = {
+    onlineStatus: boolean
+}
+
+const Header: React.FC = (props: Props) => {
+    const {update: updateSession, data: session, status} = useSession();
+
     const router = useRouter();
+    const [currentStatus, setCurrentStatus] = React.useState(session?.user?.status || false);
     const isActive: (pathname: string) => boolean = (pathname) =>
         router.pathname === pathname;
 
-    const {data: session, status} = useSession();
+    const changeStatus = async (e: React.SyntheticEvent) => {
+        try {
+            const response = await fetch('/api/chat/status', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({status: !session.user.status}),
+            });
+            await updateSession({
+                ...session,
+                status: (await response.json()).status,
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     let left = (
         <div className="left">
             <Button variant="text" href="/" data-active={isActive('/')}>Feed</Button>
             {   // @ts-ignore
                 (session && session.user.role === "operator") && <>
-                <Button href="/drafts" data-active={isActive('/drafts')}>My Drafts</Button>
-                <Button href="/chat" data-active={isActive('/chat')}>My chats</Button>
+                    <Button href="/drafts" data-active={isActive('/drafts')}>My Drafts</Button>
+                    <Button href="/chat" data-active={isActive('/chat')}>My chats</Button>
                 </>
             }
         </div>
@@ -29,8 +52,18 @@ const Header: React.FC = () => {
                 // @ts-ignore
                 (session) ?
                     <>
+                        {
+                            session.user.role === "operator" &&
+                            <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={changeStatus}
+                            >
+                                <OnlinePredictionIcon color={session.user.status ? 'success' : 'warning'}/>
+                            </IconButton>
+                        }
                         <Box component="div" sx={{display: 'inline'}}>
-                            {session.user.name} ({session.user.email}) /{// @ts-ignore
+                            {session.user.name} ({session.user.email}) /{
                             session.user.role}/
                         </Box>
                         <Button href="/create">
@@ -55,11 +88,11 @@ const Header: React.FC = () => {
             {left}
             {right}
             <style jsx>{`
-              nav {
-                display: flex;
-                padding: 0rem;
-                align-items: center;
-              }
+                nav {
+                    display: flex;
+                    padding: 0rem;
+                    align-items: center;
+                }
             `}</style>
         </nav>
     );

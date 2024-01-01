@@ -1,75 +1,127 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
+import {Message} from '@prisma/client';
 import {Alert, Box, Fade, Grid, IconButton, Paper, TextField, Typography,} from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import Layout from "../../components/Layout";
 import ChatItem from "../../components/ChatItem";
 import {v4 as uuid} from "uuid";
+import {useSession} from "next-auth/react";
+import prisma from "../../lib/prisma";
 
 const HEIGHT = '96vh';
 
 const ChatUI = () => {
-    const [messages, setMessageCount] = useState(0);
-    const [input, setInput] = React.useState("");
+    const {data: session, status} = useSession();
+
     const [error, setError] = React.useState(false);
+    const [currentChat, setCurrentChat] = React.useState(0);
+    const [messageCount, setMessageCount] = React.useState(0);
+    const [chatCount, setChatCount] = React.useState(0);
 
     const inputRef = React.useRef(null);
     const messageEndRef = React.useRef(null);
     const wsRef = React.useRef(null);
 
-    const messagesRef = React.useRef([]);
+    const messagesRef = React.useRef({});
 
-    function pushMessage(text, isRemote = false) {
-        console.log("new message", text, isRemote);
-        const message = {id: uuid(), text: text, isRemote};
-        messagesRef.current.push(message);
-        setMessageCount(messagesRef.current.length);
+    async function loadNewChats(chatId: number) {
+        const newChat = await prisma.chat.findFirst({
+            where: {
+                id: chatId
+            },
+        })
+
+        newChat.messages = await prisma.message.findMany({
+            where: {
+                chatId: chatId
+            },
+            orderBy: {
+                createdAt: 'asc'
+            }
+        })
+
+        session.personnel.chats[newChat.id] = newChat;
+        setChatCount(session.personnel.chats.length);
+    }
+
+    function pushMessage(message: Message) {
+        console.log("new message", message.text, message.isFromUser);
+
+        let messageChatIndex = -1;
+
+        if (!(message.chatId in session.personnel.chats)) {
+            // loadNewChats(message.chatId);
+        }
+
+        session.personnel.chats[message.chatId].messages.push(message);
+        setMessageCount(session.personnel.chats[message.chatId].messages.length);
+
         setTimeout(() => {
             messageEndRef.current.scrollIntoView({behavior: "smooth", block: "center"});
         }, 0);
     }
 
+    useEffect(() => {
+        scrollToBottom(false);
+    }, []);
 
     useEffect(() => {
-        wsRef.current = new WebSocket("wss://unapi.pp.ua/ws");
-        wsRef.current.onopen = () => console.log("ws opened");
-        wsRef.current.onclose = () => console.log("ws closed");
-        wsRef.current.onerror = () => console.log("ws error");
+        if (status !== "authenticated") return;
+
+        setCurrentChat(Object.values(session.personnel.chats)[0].id);
+
+        wsRef.current = new WebSocket(`wss://unapi.pp.ua/ws/${session?.user?.id}`);
+        wsRef.current.onopen = () => console.log("[Router] Connection established");
+        wsRef.current.onclose = () => console.log("[Router] Connection closed");
+        wsRef.current.onerror = () => console.log("[Router] Connection error");
 
         wsRef.current.onmessage = (event) => {
-            pushMessage(event.data, true);
+            const message = JSON.parse(event.data);
+            pushMessage(message);
         }
 
         return () => {
             wsRef.current.close();
         }
-    }, [])
+    }, [status])
 
-    let chats = []
-
-    for (let i = 0; i < 20; i++) {
-        chats.push({name: "Chat " + i, lastMessage: "Last message " + i})
+    const scrollToBottom = (smooth: boolean = true) => {
+        setTimeout(() => {
+            messageEndRef.current.scrollIntoView({behavior: smooth ? 'smooth' : 'instant', block: "center"});
+        }, 0);
     }
 
     const handleSend = () => {
         let message = inputRef.current.value
         if (message.trim() !== "") {
-            if (wsRef.current.state !== "OPEN") {
+            if (wsRef.current.readyState !== WebSocket.OPEN) {
                 setError(true);
                 setTimeout(() => {
                     setError(false);
                 }, 5000);
                 return;
             }
-            wsRef.current.send(message);
-            pushMessage(message);
+
+            const chat = session.personnel.chats[currentChat];
+            wsRef.current.send(JSON.stringify({
+                text: message,
+                userId: chat.userId,
+                chatId: chat.id,
+                isFromUser: false
+            }));
         }
         inputRef.current.value = "";
         inputRef.current.focus();
-        setTimeout(() => {
-            messageEndRef.current.scrollIntoView({behavior: "smooth", block: "center"});
-        }, 0);
+        scrollToBottom();
     };
+
+    const changeChat = async (index: number) => {
+        // console.log(e.target?.chat?.id)
+        // console.log('changeChat', e.currentTarget)
+        setCurrentChat(index);
+        scrollToBottom(false);
+    }
 
     return (
         <Layout>
@@ -89,8 +141,8 @@ const ChatUI = () => {
                         }}
                     >
                         <Box sx={{flexGrow: 1, overflow: "auto", p: 2}}>
-                            {chats.map((chat) => (
-                                <ChatItem key={chat.name} chat={chat} onClick={() => console.log(chat.name)}/>
+                            {session && Object.values(session.personnel.chats).map((chat, index) => (
+                                <ChatItem key={index} chat={chat} onClick={() => changeChat(chat.id)}/>
                             ))}
                         </Box>
                     </Box>
@@ -105,7 +157,7 @@ const ChatUI = () => {
                         }}
                     >
                         <Box sx={{flexGrow: 1, overflow: "auto", p: 2}}>
-                            {messagesRef.current.map((message) => (
+                            {session && session.personnel.chats[currentChat]?.messages?.map((message) => (
                                 <Message key={message.id} message={message}/>
                             ))}
                             <div ref={messageEndRef}></div>
@@ -145,7 +197,7 @@ const ChatUI = () => {
 };
 
 const Message = ({message}) => {
-    const isRemote = message.isRemote;
+    const isRemote = message.isFromUser;
 
     return (
         <Box
