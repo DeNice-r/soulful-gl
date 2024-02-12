@@ -5,6 +5,8 @@ import Button from '@mui/material/Button';
 import Box from "@mui/material/Box";
 import OnlinePredictionIcon from '@mui/icons-material/OnlinePrediction';
 import {IconButton} from "@mui/material";
+import Link from "next/link";
+import NavLink from "./NavLink";
 
 type Props = {
     onlineStatus: boolean
@@ -36,11 +38,17 @@ const Header: React.FC = (props: Props) => {
 
     let left = (
         <div className="left">
-            <Button variant="text" href="/" data-active={isActive('/')}>Feed</Button>
+            <NavLink href="/">
+                Home
+            </NavLink>
             {   // @ts-ignore
                 (session && session.user.role === "operator") && <>
-                    <Button href="/drafts" data-active={isActive('/drafts')}>My Drafts</Button>
-                    <Button href="/chat" data-active={isActive('/chat')}>My chats</Button>
+                    <NavLink href="/drafts">
+                        My Drafts
+                    </NavLink>
+                    <NavLink href="/chat">
+                        My chats
+                    </NavLink>
                 </>
             }
         </div>
