@@ -7,10 +7,8 @@ import { authOptions } from '../auth/[...nextauth]';
 // Optional fields in body: content
 export default async function handle(req, res) {
   const { title, content } = req.body;
-  console.log("req -------------------------------\n", req)
 
   const session = await getServerSession(req, res, authOptions);
-  console.log("session --------------------------------\n", session)
   const result = await prisma.post.create({
     data: {
       title: title,
@@ -18,6 +16,5 @@ export default async function handle(req, res) {
       author: { connect: { email: session?.user?.email } },
     },
   });
-  console.log("result ---------------------------------\n", result)
   res.json(result);
 }

@@ -5,7 +5,6 @@ import Button from '@mui/material/Button';
 import Box from "@mui/material/Box";
 import OnlinePredictionIcon from '@mui/icons-material/OnlinePrediction';
 import {IconButton} from "@mui/material";
-import Link from "next/link";
 import NavLink from "./NavLink";
 
 type Props = {
