@@ -1,21 +1,21 @@
 import React from 'react';
-import {GetServerSideProps} from 'next';
+import { GetServerSideProps } from 'next';
 import ReactMarkdown from 'react-markdown';
 import Router from 'next/router';
 import Layout from '../../components/Layout';
-import {PostProps} from '../../components/Post';
-import {useSession} from 'next-auth/react';
+import { PostProps } from '../../components/Post';
+import { useSession } from 'next-auth/react';
 import prisma from '../../lib/prisma';
-import ConstrainedLayout from "../../components/ConstrainedLayout";
+import ConstrainedLayout from '../../components/ConstrainedLayout';
 
-export const getServerSideProps: GetServerSideProps = async ({params}) => {
+export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const post = await prisma.post.findUnique({
         where: {
             id: String(params?.id),
         },
         include: {
             author: {
-                select: {name: true, email: true},
+                select: { name: true, email: true },
             },
         },
     });
@@ -39,7 +39,7 @@ async function deletePost(id: string): Promise<void> {
 }
 
 const Post: React.FC<PostProps> = (props) => {
-    const {data: session, status} = useSession();
+    const { data: session, status } = useSession();
     if (status === 'loading') {
         return <div>Authenticating ...</div>;
     }
@@ -55,38 +55,38 @@ const Post: React.FC<PostProps> = (props) => {
             <div>
                 <h2>{title}</h2>
                 <p>By {props?.author?.name || 'Unknown author'}</p>
-                <ReactMarkdown children={props.content}/>
-                {
-                    !props.published && userHasValidSession && postBelongsToUser && (
-                        <button onClick={() => publishPost(props.id)}>Publish</button>
-                    )
-                }
-                {
-                    userHasValidSession && postBelongsToUser && (
-                        <button onClick={() => deletePost(props.id)}>Delete</button>
-                    )
-                }
+                <ReactMarkdown children={props.content} />
+                {!props.published &&
+                    userHasValidSession &&
+                    postBelongsToUser && (
+                        <button onClick={() => publishPost(props.id)}>
+                            Publish
+                        </button>
+                    )}
+                {userHasValidSession && postBelongsToUser && (
+                    <button onClick={() => deletePost(props.id)}>Delete</button>
+                )}
             </div>
             <style jsx>{`
-              .page {
-                background: var(--geist-background);
-                padding: 2rem;
-              }
+                .page {
+                    background: var(--geist-background);
+                    padding: 2rem;
+                }
 
-              .actions {
-                margin-top: 2rem;
-              }
+                .actions {
+                    margin-top: 2rem;
+                }
 
-              button {
-                background: #ececec;
-                border: 0;
-                border-radius: 0.125rem;
-                padding: 1rem 2rem;
-              }
+                button {
+                    background: #ececec;
+                    border: 0;
+                    border-radius: 0.125rem;
+                    padding: 1rem 2rem;
+                }
 
-              button + button {
-                margin-left: 1rem;
-              }
+                button + button {
+                    margin-left: 1rem;
+                }
             `}</style>
         </ConstrainedLayout>
     );

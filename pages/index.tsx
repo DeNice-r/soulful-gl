@@ -1,28 +1,28 @@
-import React from "react"
-import {GetStaticProps} from "next"
-import Layout from "../components/Layout"
-import Post, {PostProps} from "../components/Post"
+import React from 'react';
+import { GetStaticProps } from 'next';
+import Layout from '../components/Layout';
+import Post, { PostProps } from '../components/Post';
 import prisma from '../lib/prisma';
-import ConstrainedLayout from "../components/ConstrainedLayout";
+import ConstrainedLayout from '../components/ConstrainedLayout';
 
 export const getStaticProps: GetStaticProps = async () => {
     const feed = await prisma.post.findMany({
-        where: {published: true},
+        where: { published: true },
         include: {
             author: {
-                select: {name: true},
+                select: { name: true },
             },
         },
     });
     return {
-        props: {feed},
+        props: { feed },
         revalidate: 10,
     };
 };
 
 type Props = {
-    feed: PostProps[]
-}
+    feed: PostProps[];
+};
 
 const Blog: React.FC<Props> = (props) => {
     return (
@@ -32,27 +32,27 @@ const Blog: React.FC<Props> = (props) => {
                 <main>
                     {props.feed.map((post) => (
                         <div key={post.id} className="post">
-                            <Post post={post}/>
+                            <Post post={post} />
                         </div>
                     ))}
                 </main>
             </div>
             <style jsx>{`
-              .post {
-                background: white;
-                transition: box-shadow 0.1s ease-in;
-              }
+                .post {
+                    background: white;
+                    transition: box-shadow 0.1s ease-in;
+                }
 
-              .post:hover {
-                box-shadow: 1px 1px 3px #aaa;
-              }
+                .post:hover {
+                    box-shadow: 1px 1px 3px #aaa;
+                }
 
-              .post + .post {
-                margin-top: 2rem;
-              }
+                .post + .post {
+                    margin-top: 2rem;
+                }
             `}</style>
         </ConstrainedLayout>
-    )
-}
+    );
+};
 
-export default Blog
+export default Blog;

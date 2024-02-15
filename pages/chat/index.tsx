@@ -1,18 +1,26 @@
-import * as React from "react";
-import {useEffect, useState} from "react";
-import {Message} from '@prisma/client';
-import {Alert, Box, Fade, Grid, IconButton, Paper, TextField, Typography,} from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
-import Layout from "../../components/Layout";
-import ChatItem from "../../components/ChatItem";
-import {v4 as uuid} from "uuid";
-import {useSession} from "next-auth/react";
-import prisma from "../../lib/prisma";
+import * as React from 'react';
+import { useEffect } from 'react';
+import { Message } from '@prisma/client';
+import {
+    Alert,
+    Box,
+    Fade,
+    Grid,
+    IconButton,
+    Paper,
+    TextField,
+    Typography,
+} from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
+import Layout from '../../components/Layout';
+import ChatItem from '../../components/ChatItem';
+import { useSession } from 'next-auth/react';
+import prisma from '../../lib/prisma';
 
 const HEIGHT = '96vh';
 
 const ChatUI = () => {
-    const {data: session, status} = useSession();
+    const { data: session, status } = useSession();
 
     const [error, setError] = React.useState(false);
     const [currentChat, setCurrentChat] = React.useState(0);
@@ -28,25 +36,25 @@ const ChatUI = () => {
     async function loadNewChats(chatId: number) {
         const newChat = await prisma.chat.findFirst({
             where: {
-                id: chatId
+                id: chatId,
             },
-        })
+        });
 
         newChat.messages = await prisma.message.findMany({
             where: {
-                chatId: chatId
+                chatId: chatId,
             },
             orderBy: {
-                createdAt: 'asc'
-            }
-        })
+                createdAt: 'asc',
+            },
+        });
 
         session.personnel.chats[newChat.id] = newChat;
         setChatCount(session.personnel.chats.length);
     }
 
     function pushMessage(message: Message) {
-        console.log("new message", message.text, message.isFromUser);
+        console.log('new message', message.text, message.isFromUser);
 
         let messageChatIndex = -1;
 
@@ -55,10 +63,15 @@ const ChatUI = () => {
         }
 
         session.personnel.chats[message.chatId].messages.push(message);
-        setMessageCount(session.personnel.chats[message.chatId].messages.length);
+        setMessageCount(
+            session.personnel.chats[message.chatId].messages.length,
+        );
 
         setTimeout(() => {
-            messageEndRef.current.scrollIntoView({behavior: "smooth", block: "center"});
+            messageEndRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+            });
         }, 0);
     }
 
@@ -67,34 +80,40 @@ const ChatUI = () => {
     }, []);
 
     useEffect(() => {
-        if (status !== "authenticated") return;
+        if (status !== 'authenticated') return;
 
         setCurrentChat(Object.values(session.personnel.chats)[0].id);
 
-        wsRef.current = new WebSocket(`wss://unapi.pp.ua/ws/${session?.user?.id}`);
-        wsRef.current.onopen = () => console.log("[Router] Connection established");
-        wsRef.current.onclose = () => console.log("[Router] Connection closed");
-        wsRef.current.onerror = () => console.log("[Router] Connection error");
+        wsRef.current = new WebSocket(
+            `wss://unapi.pp.ua/ws/${session?.user?.id}`,
+        );
+        wsRef.current.onopen = () =>
+            console.log('[Router] Connection established');
+        wsRef.current.onclose = () => console.log('[Router] Connection closed');
+        wsRef.current.onerror = () => console.log('[Router] Connection error');
 
         wsRef.current.onmessage = (event) => {
             const message = JSON.parse(event.data);
             pushMessage(message);
-        }
+        };
 
         return () => {
             wsRef.current.close();
-        }
-    }, [status])
+        };
+    }, [status]);
 
     const scrollToBottom = (smooth: boolean = true) => {
         setTimeout(() => {
-            messageEndRef.current.scrollIntoView({behavior: smooth ? 'smooth' : 'instant', block: "center"});
+            messageEndRef.current.scrollIntoView({
+                behavior: smooth ? 'smooth' : 'instant',
+                block: 'center',
+            });
         }, 0);
-    }
+    };
 
     const handleSend = () => {
-        let message = inputRef.current.value
-        if (message.trim() !== "") {
+        let message = inputRef.current.value;
+        if (message.trim() !== '') {
             if (wsRef.current.readyState !== WebSocket.OPEN) {
                 setError(true);
                 setTimeout(() => {
@@ -104,14 +123,16 @@ const ChatUI = () => {
             }
 
             const chat = session.personnel.chats[currentChat];
-            wsRef.current.send(JSON.stringify({
-                text: message,
-                userId: chat.userId,
-                chatId: chat.id,
-                isFromUser: false
-            }));
+            wsRef.current.send(
+                JSON.stringify({
+                    text: message,
+                    userId: chat.userId,
+                    chatId: chat.id,
+                    isFromUser: false,
+                }),
+            );
         }
-        inputRef.current.value = "";
+        inputRef.current.value = '';
         inputRef.current.focus();
         scrollToBottom();
     };
@@ -121,12 +142,16 @@ const ChatUI = () => {
         // console.log('changeChat', e.currentTarget)
         setCurrentChat(index);
         scrollToBottom(false);
-    }
+    };
 
     return (
         <Layout>
             <Fade in={error}>
-                <Alert variant='filled' severity="error" sx={{position: 'absolute', 'z-index': 1}}>
+                <Alert
+                    variant="filled"
+                    severity="error"
+                    sx={{ position: 'absolute', 'z-index': 1 }}
+                >
                     You are not connected to the internet
                 </Alert>
             </Fade>
@@ -135,15 +160,22 @@ const ChatUI = () => {
                     <Box
                         sx={{
                             height: HEIGHT,
-                            display: "flex",
-                            flexDirection: "column",
-                            bgcolor: "grey.300",
+                            display: 'flex',
+                            flexDirection: 'column',
+                            bgcolor: 'grey.300',
                         }}
                     >
-                        <Box sx={{flexGrow: 1, overflow: "auto", p: 2}}>
-                            {session && Object.values(session.personnel.chats).map((chat, index) => (
-                                <ChatItem key={index} chat={chat} onClick={() => changeChat(chat.id)}/>
-                            ))}
+                        <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
+                            {session &&
+                                Object.values(session.personnel.chats).map(
+                                    (chat, index) => (
+                                        <ChatItem
+                                            key={index}
+                                            chat={chat}
+                                            onClick={() => changeChat(chat.id)}
+                                        />
+                                    ),
+                                )}
                         </Box>
                     </Box>
                 </Grid>
@@ -151,18 +183,24 @@ const ChatUI = () => {
                     <Box
                         sx={{
                             height: HEIGHT,
-                            display: "flex",
-                            flexDirection: "column",
-                            bgcolor: "grey.400",
+                            display: 'flex',
+                            flexDirection: 'column',
+                            bgcolor: 'grey.400',
                         }}
                     >
-                        <Box sx={{flexGrow: 1, overflow: "auto", p: 2}}>
-                            {session && session.personnel.chats[currentChat]?.messages?.map((message) => (
-                                <Message key={message.id} message={message}/>
-                            ))}
+                        <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
+                            {session &&
+                                session.personnel.chats[
+                                    currentChat
+                                ]?.messages?.map((message) => (
+                                    <Message
+                                        key={message.id}
+                                        message={message}
+                                    />
+                                ))}
                             <div ref={messageEndRef}></div>
                         </Box>
-                        <Box sx={{p: 0.5, backgroundColor: "grey.300"}}>
+                        <Box sx={{ p: 0.5, backgroundColor: 'grey.300' }}>
                             <Grid container spacing={1}>
                                 <Grid item xs={11.5}>
                                     <TextField
@@ -172,7 +210,7 @@ const ChatUI = () => {
                                         variant="outlined"
                                         inputRef={inputRef}
                                         onKeyDown={(event) => {
-                                            if (event.key === "Enter") {
+                                            if (event.key === 'Enter') {
                                                 handleSend();
                                             }
                                         }}
@@ -184,7 +222,7 @@ const ChatUI = () => {
                                         color="primary"
                                         onClick={handleSend}
                                     >
-                                        <SendIcon/>
+                                        <SendIcon />
                                     </IconButton>
                                 </Grid>
                             </Grid>
@@ -196,14 +234,14 @@ const ChatUI = () => {
     );
 };
 
-const Message = ({message}) => {
+const Message = ({ message }) => {
     const isRemote = message.isFromUser;
 
     return (
         <Box
             sx={{
-                display: "flex",
-                justifyContent: isRemote ? "flex-start" : "flex-end",
+                display: 'flex',
+                justifyContent: isRemote ? 'flex-start' : 'flex-end',
                 mb: 2,
             }}
         >
@@ -211,9 +249,15 @@ const Message = ({message}) => {
                 variant="outlined"
                 sx={{
                     p: 2,
-                    backgroundColor: isRemote ? "primary.light" : "secondary.light",
-                    color: isRemote ? "primary.contrastText" : "secondary.contrastText",
-                    borderRadius: isRemote ? "20px 20px 20px 5px" : "20px 20px 5px 20px",
+                    backgroundColor: isRemote
+                        ? 'primary.light'
+                        : 'secondary.light',
+                    color: isRemote
+                        ? 'primary.contrastText'
+                        : 'secondary.contrastText',
+                    borderRadius: isRemote
+                        ? '20px 20px 20px 5px'
+                        : '20px 20px 5px 20px',
                 }}
             >
                 <Typography variant="body1">{message.text}</Typography>

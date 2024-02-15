@@ -1,5 +1,5 @@
-import React, {ReactNode} from "react";
-import Layout from "./Layout";
+import React, { ReactNode } from 'react';
+import Layout from './Layout';
 
 type Props = {
     children: ReactNode;
@@ -7,13 +7,11 @@ type Props = {
 
 const ConstrainedLayout: React.FC<Props> = (props) => (
     <>
-        <Layout>
-            {props.children}
-        </Layout>
+        <Layout>{props.children}</Layout>
         <style jsx global>{`
-          .layout {
-            padding: 0 2rem;
-          }
+            .layout {
+                padding: 0 2rem;
+            }
         `}</style>
     </>
 );

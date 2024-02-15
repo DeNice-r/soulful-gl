@@ -1,0 +1,7 @@
+build
+*.json
+*.md
+*.yml
+*.yaml
+*.prisma
+.*

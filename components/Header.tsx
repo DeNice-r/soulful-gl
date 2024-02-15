@@ -1,21 +1,23 @@
 import React from 'react';
-import {useRouter} from 'next/router';
-import {signOut, useSession} from 'next-auth/react';
+import { useRouter } from 'next/router';
+import { signOut, useSession } from 'next-auth/react';
 import Button from '@mui/material/Button';
-import Box from "@mui/material/Box";
+import Box from '@mui/material/Box';
 import OnlinePredictionIcon from '@mui/icons-material/OnlinePrediction';
-import {IconButton} from "@mui/material";
-import NavLink from "./NavLink";
+import { IconButton } from '@mui/material';
+import NavLink from './NavLink';
 
 type Props = {
-    onlineStatus: boolean
-}
+    onlineStatus: boolean;
+};
 
 const Header: React.FC = (props: Props) => {
-    const {update: updateSession, data: session, status} = useSession();
+    const { update: updateSession, data: session, status } = useSession();
 
     const router = useRouter();
-    const [currentStatus, setCurrentStatus] = React.useState(session?.user?.status || false);
+    const [currentStatus, setCurrentStatus] = React.useState(
+        session?.user?.status || false,
+    );
     const isActive: (pathname: string) => boolean = (pathname) =>
         router.pathname === pathname;
 
@@ -23,8 +25,8 @@ const Header: React.FC = (props: Props) => {
         try {
             const response = await fetch('/api/chat/status', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({status: !session.user.status}),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: !session.user.status }),
             });
             await updateSession({
                 ...session,
@@ -37,58 +39,61 @@ const Header: React.FC = (props: Props) => {
 
     let left = (
         <div className="left">
-            <NavLink href="/">
-                Home
-            </NavLink>
-            {   // @ts-ignore
-                (session && session.user.role === "operator") && <>
-                    <NavLink href="/drafts">
-                        My Drafts
-                    </NavLink>
-                    <NavLink href="/chat">
-                        My chats
-                    </NavLink>
-                </>
+            <NavLink href="/">Home</NavLink>
+            {
+                // @ts-ignore
+                session && session.user.role === 'operator' && (
+                    <>
+                        <NavLink href="/drafts">My Drafts</NavLink>
+                        <NavLink href="/chat">My chats</NavLink>
+                    </>
+                )
             }
         </div>
     );
 
     let right = (
-        <Box sx={{marginLeft: 'auto'}}>
+        <Box sx={{ marginLeft: 'auto' }}>
             {
                 // @ts-ignore
-                (session) ?
+                session ? (
                     <>
-                        {
-                            session.user.role === "operator" &&
+                        {session.user.role === 'operator' && (
                             <IconButton
                                 size="small"
                                 color="primary"
                                 onClick={changeStatus}
                             >
-                                <OnlinePredictionIcon color={session.user.status ? 'success' : 'warning'}/>
+                                <OnlinePredictionIcon
+                                    color={
+                                        session.user.status
+                                            ? 'success'
+                                            : 'warning'
+                                    }
+                                />
                             </IconButton>
-                        }
-                        <Box component="div" sx={{display: 'inline'}}>
-                            {session.user.name} ({session.user.email}) /{
-                            session.user.role}/
+                        )}
+                        <Box component="div" sx={{ display: 'inline' }}>
+                            {session.user.name} ({session.user.email}) /
+                            {session.user.role}/
                         </Box>
-                        <Button href="/create">
-                            New post
-                        </Button>
+                        <Button href="/create">New post</Button>
 
-                        <Button onClick={() => signOut()}>
-                            Log out
-                        </Button>
+                        <Button onClick={() => signOut()}>Log out</Button>
                     </>
-                    :
+                ) : (
                     <>
-                        <Button href="/api/auth/signin" data-active={isActive('/signup')}>
+                        <Button
+                            href="/api/auth/signin"
+                            data-active={isActive('/signup')}
+                        >
                             Log in
                         </Button>
                     </>
+                )
             }
-        </Box>)
+        </Box>
+    );
 
     return (
         <nav>
