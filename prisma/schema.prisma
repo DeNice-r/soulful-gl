@@ -51,7 +51,7 @@ model User {
   email                      String?        @unique
   emailVerified              DateTime?
   image                      String?
-  role                       String         @default("user")
+  role                       Int            @default(0)
   isOnline                   Boolean        @default(false)
   latestStatusConfirmationAt DateTime       @default(now())
   posts                      Post[]
@@ -61,6 +61,7 @@ model User {
   personnelChats             Chat[]         @relation(name: "personnelChats")
   userArchivedChats          ArchivedChat[] @relation(name: "userArchivedChat")
   personnelArchivedChats     ArchivedChat[] @relation(name: "personnelArchivedChat")
+  notes                      String?
 }
 
 model VerificationToken {

@@ -1,15 +1,30 @@
 import { getServerSession } from 'next-auth/next';
+import prisma from '#prisma';
+import { authOptions } from '%/auth/[...nextauth]';
+import { UserRole } from '#/types';
+import { STATUS_CODES } from 'node:http';
 
 export default async function handle(req, res) {
-    const { status } = req.body;
+    const { userId, notes } = req.body;
 
     const session = await getServerSession(req, res, authOptions);
-    const result = await prisma.user.update({
-        where: { email: session?.user?.email },
-        data: {
-            isOnline: status,
-            latestStatusConfirmationAt: new Date(),
-        },
-    });
-    res.json({ status: result.isOnline });
+
+    if (session.user.role < UserRole.OPERATOR) {
+        return res.status(403).send('Unauthorized');
+    }
+
+    try {
+        await prisma.user.update({
+            where: { id: userId },
+            data: {
+                notes,
+            },
+        });
+    } catch (error) {
+        return res
+            .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
+            .send(error.message);
+    }
+
+    return res.status(STATUS_CODES.OK);
 }

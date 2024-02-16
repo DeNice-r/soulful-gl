@@ -16,7 +16,7 @@ declare module 'next-auth' {
             name: string;
             email: string;
             image: string;
-            role: string;
+            role: number;
             status: boolean;
         };
         personnel: {
@@ -56,7 +56,7 @@ async function session({ session, user }) {
         chats[chat.id] = chat;
     }
 
-    for (let chatId in chats) {
+    for (const chatId in chats) {
         chats[chatId].messages = await prisma.message.findMany({
             where: {
                 chatId: Number(chatId),
