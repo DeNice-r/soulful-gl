@@ -62,6 +62,8 @@ model User {
   userArchivedChats          ArchivedChat[] @relation(name: "userArchivedChat")
   personnelArchivedChats     ArchivedChat[] @relation(name: "personnelArchivedChat")
   notes                      String?
+  createdAt                  DateTime       @default(now())
+  password                   String?
 }
 
 model VerificationToken {

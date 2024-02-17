@@ -5,6 +5,7 @@ import Layout from '../components/Layout';
 import Post, { PostProps } from '../components/Post';
 import prisma from '../lib/prisma';
 import ConstrainedLayout from '../components/ConstrainedLayout';
+import { UserRole } from '#types';
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
     const session = await getSession({ req });
@@ -36,8 +37,7 @@ type Props = {
 const Drafts: React.FC<Props> = (props) => {
     const { data: session } = useSession();
 
-    // @ts-ignore
-    if (!(session && session.user.role === 'operator')) {
+    if (!session || session.user.role < UserRole.OPERATOR) {
         return (
             <Layout>
                 <div>You are unauthorized to view this page.</div>
@@ -59,7 +59,6 @@ const Drafts: React.FC<Props> = (props) => {
             </div>
             <style jsx>{`
                 .post {
-                    background: var(--geist-background);
                     transition: box-shadow 0.1s ease-in;
                 }
 

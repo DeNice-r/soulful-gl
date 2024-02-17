@@ -6,92 +6,85 @@ import Box from '@mui/material/Box';
 import OnlinePredictionIcon from '@mui/icons-material/OnlinePrediction';
 import { IconButton } from '@mui/material';
 import NavLink from './NavLink';
+import { UserRole } from '#types';
 
-type Props = {
-    onlineStatus: boolean;
-};
-
-const Header: React.FC = (props: Props) => {
+const Header: React.FC = () => {
     const { update: updateSession, data: session, status } = useSession();
 
     const router = useRouter();
     const [currentStatus, setCurrentStatus] = React.useState(
-        session?.user?.status || false,
+        session?.user?.isOnline || false,
     );
     const isActive: (pathname: string) => boolean = (pathname) =>
         router.pathname === pathname;
 
-    const changeStatus = async (e: React.SyntheticEvent) => {
+    const changeStatus = async () => {
         try {
             const response = await fetch('/api/chat/status', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: !session.user.status }),
+                body: JSON.stringify({ isOnline: !session.user.isOnline }),
             });
             await updateSession({
                 ...session,
-                status: (await response.json()).status,
+                ...(await response.json()),
             });
         } catch (error) {
             console.error(error);
         }
     };
 
-    let left = (
+    const left = (
         <div className="left">
             <NavLink href="/">Home</NavLink>
-            {
-                // @ts-ignore
-                session && session.user.role === 'operator' && (
-                    <>
-                        <NavLink href="/drafts">My Drafts</NavLink>
-                        <NavLink href="/chat">My chats</NavLink>
-                    </>
-                )
-            }
+            {session && session.user.role >= UserRole.OPERATOR && (
+                <NavLink href="/drafts">My Drafts</NavLink>
+            )}
+            {session && session.user.role === UserRole.OPERATOR && (
+                <>
+                    <NavLink href="/chat">My chats</NavLink>
+                </>
+            )}
         </div>
     );
 
-    let right = (
-        <Box sx={{ marginLeft: 'auto' }}>
-            {
-                // @ts-ignore
-                session ? (
-                    <>
-                        {session.user.role === 'operator' && (
-                            <IconButton
-                                size="small"
-                                color="primary"
-                                onClick={changeStatus}
-                            >
-                                <OnlinePredictionIcon
-                                    color={
-                                        session.user.status
-                                            ? 'success'
-                                            : 'warning'
-                                    }
-                                />
-                            </IconButton>
-                        )}
-                        <Box component="div" sx={{ display: 'inline' }}>
-                            {session.user.name} ({session.user.email}) /
-                            {session.user.role}/
-                        </Box>
-                        <Button href="/create">New post</Button>
+    console.log(session);
 
-                        <Button onClick={() => signOut()}>Log out</Button>
-                    </>
-                ) : (
-                    <>
-                        <Button
-                            href="/api/auth/signin"
-                            data-active={isActive('/signup')}
+    const right = (
+        <Box sx={{ marginLeft: 'auto' }}>
+            {session ? (
+                <>
+                    {session.user.role >= UserRole.USER && (
+                        <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={changeStatus}
                         >
-                            Log in
-                        </Button>
-                    </>
-                )
-            }
+                            <OnlinePredictionIcon
+                                color={
+                                    session.user.isOnline ? 'success' : 'warning'
+                                }
+                            />
+                        </IconButton>
+                    )}
+                    <Box component="div" sx={{ display: 'inline' }}>
+                        {session.user.name} ({session.user.email}) /
+                        {session.user.role}/
+                    </Box>
+                    <Button href="/create">New post</Button>
+
+                    <Button onClick={() => signOut()}>Log out</Button>
+                </>
+            ) : (
+                <>
+                    <Button
+                        href="/api/auth/signin"
+                        data-active={isActive('/signup')}
+                    >
+                        Log in
+                    </Button>
+                </>
+            )}
         </Box>
     );
 
@@ -102,7 +95,7 @@ const Header: React.FC = (props: Props) => {
             <style jsx>{`
                 nav {
                     display: flex;
-                    padding: 0rem;
+                    padding: 0;
                     align-items: center;
                 }
             `}</style>

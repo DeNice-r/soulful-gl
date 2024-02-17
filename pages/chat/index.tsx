@@ -44,9 +44,6 @@ const ChatUI = () => {
             where: {
                 chatId: chatId,
             },
-            orderBy: {
-                createdAt: 'asc',
-            },
         });
 
         session.personnel.chats[newChat.id] = newChat;
@@ -82,7 +79,11 @@ const ChatUI = () => {
     useEffect(() => {
         if (status !== 'authenticated') return;
 
-        setCurrentChat(Object.values(session.personnel.chats)[0].id);
+        const chats = Object.values(session.personnel.chats);
+
+        if (!chats.length || chats.length === 0) return;
+
+        setCurrentChat(chats[0].id!);
 
         wsRef.current = new WebSocket(
             `wss://unapi.pp.ua/ws/${session?.user?.id}`,
@@ -112,7 +113,7 @@ const ChatUI = () => {
     };
 
     const handleSend = () => {
-        let message = inputRef.current.value;
+        const message = inputRef.current.value;
         if (message.trim() !== '') {
             if (wsRef.current.readyState !== WebSocket.OPEN) {
                 setError(true);

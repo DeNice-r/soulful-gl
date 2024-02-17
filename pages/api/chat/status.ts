@@ -1,18 +1,17 @@
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../auth/[...nextauth]';
 import prisma from '../../../lib/prisma';
+import { getServerAuthSession } from '#getServerAuthSession';
 
 export default async function handle(req, res) {
-    const { status } = req.body;
-    const fuck = 'off';
+    const { isOnline } = req.body;
 
-    const session = await getServerSession(req, res, authOptions);
+    const session = await getServerAuthSession(req, res);
+    console.log('session', session);
     const result = await prisma.user.update({
         where: { email: session?.user?.email },
         data: {
-            isOnline: status,
+            isOnline,
             latestStatusConfirmationAt: new Date(),
         },
     });
-    res.json({ status: result.isOnline });
+    res.json({ isOnline: result.isOnline });
 }

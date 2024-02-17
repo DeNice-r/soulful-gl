@@ -1,13 +1,12 @@
-import { getServerSession } from 'next-auth/next';
 import prisma from '#prisma';
-import { authOptions } from '%/auth/[...nextauth]';
 import { UserRole } from '#/types';
 import { STATUS_CODES } from 'node:http';
+import { getServerAuthSession } from '#getServerAuthSession';
 
 export default async function handle(req, res) {
     const { userId, notes } = req.body;
 
-    const session = await getServerSession(req, res, authOptions);
+    const session = await getServerAuthSession(req, res);
 
     if (session.user.role < UserRole.OPERATOR) {
         return res.status(403).send('Unauthorized');
