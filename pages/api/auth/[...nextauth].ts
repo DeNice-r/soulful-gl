@@ -8,6 +8,7 @@ import { randomUUID } from 'crypto';
 import Cookies from 'cookies';
 import { decode, encode } from 'next-auth/jwt';
 import { ExtendedChat } from '#types';
+import bcrypt from 'bcrypt';
 
 declare module 'next-auth' {
     interface Session {
@@ -50,7 +51,6 @@ export function requestWrapper(
     const adapter = PrismaAdapter(prisma);
 
     const opts: NextAuthOptions = {
-        // Include user.id on session
         adapter: adapter,
         callbacks: {
             async session({ session, user }) {
@@ -140,7 +140,7 @@ export function requestWrapper(
                 return decode({ token, secret });
             },
         },
-        // Configure one or more authentication providers
+
         secret: process.env.NEXTAUTH_SECRET,
         debug: true,
         providers: [
@@ -171,11 +171,15 @@ export function requestWrapper(
                         },
                     });
 
-                    if (!user) return null;
+                    if (!user || user.password === null) return null;
 
-                    if (user.password === null) return null;
-
-                    if (user.password !== credentials?.password) return null;
+                    if (
+                        !(await bcrypt.compare(
+                            credentials?.password,
+                            user.password,
+                        ))
+                    )
+                        return null;
 
                     return user;
                 },
