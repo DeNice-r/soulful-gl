@@ -1,9 +1,8 @@
 import { Box, ButtonBase, Typography } from '@mui/material';
+import { ExtendedChat } from '#types';
 
 interface ChatItemProps {
-    chat: {
-        id: number;
-    };
+    chat: ExtendedChat;
     onClick: (e: React.SyntheticEvent) => void;
 }
 

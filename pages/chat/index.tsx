@@ -16,6 +16,7 @@ import Layout from '../../components/Layout';
 import ChatItem from '../../components/ChatItem';
 import { useSession } from 'next-auth/react';
 import prisma from '../../lib/prisma';
+import { ExtendedChat } from '#types';
 
 const HEIGHT = '96vh';
 
@@ -34,7 +35,7 @@ const ChatUI = () => {
     const messagesRef = React.useRef({});
 
     async function loadNewChats(chatId: number) {
-        const newChat = await prisma.chat.findFirst({
+        const newChat: ExtendedChat = await prisma.chat.findFirst({
             where: {
                 id: chatId,
             },
@@ -47,13 +48,11 @@ const ChatUI = () => {
         });
 
         session.personnel.chats[newChat.id] = newChat;
-        setChatCount(session.personnel.chats.length);
+        setChatCount(Object.values(session.personnel.chats).length);
     }
 
     function pushMessage(message: Message) {
-        console.log('new message', message.text, message.isFromUser);
-
-        let messageChatIndex = -1;
+        const messageChatIndex = -1;
 
         if (!(message.chatId in session.personnel.chats)) {
             // loadNewChats(message.chatId);
@@ -86,7 +85,7 @@ const ChatUI = () => {
         setCurrentChat(chats[0].id!);
 
         wsRef.current = new WebSocket(
-            `wss://unapi.pp.ua/ws/${session?.user?.id}`,
+            `${process.env.NEXT_PUBLIC_WSS_ENDPOINT}/${session?.user?.id}`,
         );
         wsRef.current.onopen = () =>
             console.log('[Router] Connection established');
@@ -139,8 +138,6 @@ const ChatUI = () => {
     };
 
     const changeChat = async (index: number) => {
-        // console.log(e.target?.chat?.id)
-        // console.log('changeChat', e.currentTarget)
         setCurrentChat(index);
         scrollToBottom(false);
     };

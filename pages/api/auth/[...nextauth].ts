@@ -7,7 +7,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { randomUUID } from 'crypto';
 import Cookies from 'cookies';
 import { decode, encode } from 'next-auth/jwt';
-import { Chat, Message } from '@prisma/client';
+import { ExtendedChat } from '#types';
 
 declare module 'next-auth' {
     interface Session {
@@ -20,7 +20,7 @@ declare module 'next-auth' {
             isOnline: boolean;
         };
         personnel: {
-            chats: Record<number, Chat>;
+            chats: Record<number, ExtendedChat>;
         };
     }
 
@@ -29,10 +29,6 @@ declare module 'next-auth' {
         role: number;
         isOnline: boolean;
     }
-}
-
-interface ExtendedChat extends Chat {
-    messages?: Message[];
 }
 
 export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -169,8 +165,6 @@ export function requestWrapper(
                     },
                 },
                 async authorize(credentials, req) {
-                    console.log(credentials);
-
                     const user = await prisma.user.findUnique({
                         where: {
                             email: credentials?.email,

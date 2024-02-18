@@ -10,7 +10,7 @@ const MyLink = ({
 }: {
     href: string;
     children: any;
-    props?: any;
+    props?: never;
 }) => {
     const pathname = usePathname();
     const isActive = pathname === href;

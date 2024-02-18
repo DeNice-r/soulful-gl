@@ -48,8 +48,6 @@ const Header: React.FC = () => {
         </div>
     );
 
-    console.log(session);
-
     const right = (
         <Box sx={{ marginLeft: 'auto' }}>
             {session ? (
@@ -62,7 +60,9 @@ const Header: React.FC = () => {
                         >
                             <OnlinePredictionIcon
                                 color={
-                                    session.user.isOnline ? 'success' : 'warning'
+                                    session.user.isOnline
+                                        ? 'success'
+                                        : 'warning'
                                 }
                             />
                         </IconButton>

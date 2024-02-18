@@ -2,7 +2,6 @@ import React from 'react';
 import { GetServerSideProps } from 'next';
 import ReactMarkdown from 'react-markdown';
 import Router from 'next/router';
-import Layout from '../../components/Layout';
 import { PostProps } from '../../components/Post';
 import { useSession } from 'next-auth/react';
 import prisma from '../../lib/prisma';
@@ -59,10 +58,10 @@ const Post: React.FC<PostProps> = (props) => {
                 {!props.published &&
                     userHasValidSession &&
                     postBelongsToUser && (
-                        <button onClick={() => publishPost(props.id)}>
+                    <button onClick={() => publishPost(props.id)}>
                             Publish
-                        </button>
-                    )}
+                    </button>
+                )}
                 {userHasValidSession && postBelongsToUser && (
                     <button onClick={() => deletePost(props.id)}>Delete</button>
                 )}

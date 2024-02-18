@@ -5,7 +5,6 @@ export default async function handle(req, res) {
     const { isOnline } = req.body;
 
     const session = await getServerAuthSession(req, res);
-    console.log('session', session);
     const result = await prisma.user.update({
         where: { email: session?.user?.email },
         data: {
