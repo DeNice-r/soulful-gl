@@ -2,7 +2,7 @@ import React from 'react';
 import { GetServerSideProps } from 'next';
 import ReactMarkdown from 'react-markdown';
 import Router from 'next/router';
-import { PostProps } from '../../components/Post';
+import { PostProps } from '$/Post';
 import { useSession } from 'next-auth/react';
 import prisma from '../../lib/prisma';
 import ConstrainedLayout from '../../components/ConstrainedLayout';
