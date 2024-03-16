@@ -1,10 +1,11 @@
 import prisma from '#prisma';
-import { UserRole } from '#/types';
+import { UserRole } from '#types';
 import { STATUS_CODES } from 'node:http';
 import { getServerAuthSession } from '#getServerAuthSession';
 
 export default async function handle(req, res) {
-    const { userId, notes } = req.body;
+    const { notes } = req.body;
+    const userId = req.query.userId as string;
 
     const session = await getServerAuthSession(req, res);
 
