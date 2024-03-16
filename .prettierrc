@@ -5,5 +5,5 @@
     "semi": true,
     "bracketSpacing": true,
     "parser": "typescript",
-    "endOfLine": "crlf"
+    "endOfLine": "auto"
 }
