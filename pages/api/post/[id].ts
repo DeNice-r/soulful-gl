@@ -1,4 +1,5 @@
 import prisma from '../../../lib/prisma';
+import { StatusCodes } from 'http-status-codes';
 
 // DELETE /api/post/:id
 export default async function handle(req, res) {
@@ -9,8 +10,6 @@ export default async function handle(req, res) {
         });
         res.json(post);
     } else {
-        throw new Error(
-            `The HTTP ${req.method} method is not supported at this route.`,
-        );
+        return res.status(StatusCodes.METHOD_NOT_ALLOWED);
     }
 }

@@ -3,16 +3,17 @@ import { UserRole } from '#types';
 import { getServerAuthSession } from '#getServerAuthSession';
 import { NextApiRequest as Request, NextApiResponse as Response } from 'next';
 import bcrypt from 'bcrypt';
+import { StatusCodes } from 'http-status-codes';
 
 export default async function handle(req: Request, res: Response) {
     if (req.method !== 'POST') {
-        return res.status(400).send('Method not allowed');
+        return res.status(StatusCodes.METHOD_NOT_ALLOWED);
     }
 
     const session = await getServerAuthSession(req, res);
 
     if (session.user.role < UserRole.ADMIN) {
-        return res.status(403).send('Unauthorized');
+        return res.status(StatusCodes.UNAUTHORIZED);
     }
 
     const { name, email, image, description, role, password } = req.body;
@@ -29,8 +30,10 @@ export default async function handle(req: Request, res: Response) {
             },
         });
     } catch (error) {
-        return res.status(500).send(error.message);
+        return res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .send(error.message);
     }
 
-    return res.status(200);
+    return res.status(StatusCodes.OK);
 }

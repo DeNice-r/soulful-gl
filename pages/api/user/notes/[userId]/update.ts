@@ -1,6 +1,6 @@
 import prisma from '#prisma';
 import { UserRole } from '#types';
-import { STATUS_CODES } from 'node:http';
+import { StatusCodes } from 'http-status-codes';
 import { getServerAuthSession } from '#getServerAuthSession';
 
 export default async function handle(req, res) {
@@ -10,7 +10,7 @@ export default async function handle(req, res) {
     const session = await getServerAuthSession(req, res);
 
     if (session.user.role < UserRole.OPERATOR) {
-        return res.status(403).send('Unauthorized');
+        return res.status(StatusCodes.UNAUTHORIZED);
     }
 
     try {
@@ -22,9 +22,9 @@ export default async function handle(req, res) {
         });
     } catch (error) {
         return res
-            .status(STATUS_CODES.INTERNAL_SERVER_ERROR)
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
             .send(error.message);
     }
 
-    return res.status(STATUS_CODES.OK);
+    return res.status(StatusCodes.OK);
 }
