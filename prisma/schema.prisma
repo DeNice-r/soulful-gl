@@ -46,24 +46,27 @@ model Session {
 }
 
 model User {
-  id                         String         @id @default(cuid())
-  name                       String?
-  email                      String?        @unique
-  emailVerified              DateTime?
-  image                      String?
-  role                       Int            @default(0)
-  isOnline                   Boolean        @default(false)
-  latestStatusConfirmationAt DateTime       @default(now())
-  posts                      Post[]
-  accounts                   Account[]
-  sessions                   Session[]
-  userChat                   Chat?          @relation(name: "userChat")
-  personnelChats             Chat[]         @relation(name: "personnelChats")
-  userArchivedChats          ArchivedChat[] @relation(name: "userArchivedChat")
-  personnelArchivedChats     ArchivedChat[] @relation(name: "personnelArchivedChat")
-  notes                      String?
-  createdAt                  DateTime       @default(now())
-  password                   String?
+  id            String    @id @default(cuid())
+  name          String?
+  description   String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          Int       @default(0)
+  isOnline      Boolean   @default(false)
+  notes         String?
+  password      String?
+
+  posts                  Post[]
+  accounts               Account[]
+  sessions               Session[]
+  userChat               Chat?          @relation(name: "userChat")
+  personnelChats         Chat[]         @relation(name: "personnelChats")
+  userArchivedChats      ArchivedChat[] @relation(name: "userArchivedChat")
+  personnelArchivedChats ArchivedChat[] @relation(name: "personnelArchivedChat")
+
+  createdAt                  DateTime @default(now())
+  latestStatusConfirmationAt DateTime @default(now())
 }
 
 model VerificationToken {
