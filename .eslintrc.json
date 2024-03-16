@@ -24,7 +24,10 @@
             "error",
             4
         ],
-        "linebreak-style": "off",
+        "linebreak-style": [
+            "error",
+            "windows"
+        ],
         "quotes": [
             "error",
             "single"
