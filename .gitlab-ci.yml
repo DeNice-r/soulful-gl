@@ -6,7 +6,7 @@ deploy_preview:
     except:
         - main
     script:
-        - vercel pull --yes --environment=preview --token=$VERCEL_TOKEN --name=soulful
+        - vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
         - vercel deploy --token=$VERCEL_TOKEN --name=soulful
 
 deploy_production:
