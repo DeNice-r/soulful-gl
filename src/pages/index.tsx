@@ -28,28 +28,17 @@ const Blog: React.FC<Props> = (props) => {
         <ConstrainedLayout>
             <div className="page">
                 <h1>Public Feed</h1>
-                <main>
+                <main className="flex flex-col ">
                     {props.feed.map((post) => (
-                        <div key={post.id} className="post">
+                        <div
+                            key={post.id}
+                            className="w-full bg-slate-50 transition-shadow duration-100 ease-in hover:shadow"
+                        >
                             <Post post={post} />
                         </div>
                     ))}
                 </main>
             </div>
-            <style jsx>{`
-                .post {
-                    background: white;
-                    transition: box-shadow 0.1s ease-in;
-                }
-
-                .post:hover {
-                    box-shadow: 1px 1px 3px #aaa;
-                }
-
-                .post + .post {
-                    margin-top: 2rem;
-                }
-            `}</style>
         </ConstrainedLayout>
     );
 };

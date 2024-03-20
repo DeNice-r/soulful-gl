@@ -36,71 +36,60 @@ const Header: React.FC = () => {
         }
     };
 
-    const left = (
-        <div className="left">
-            <NavLink href="/">Home</NavLink>
-            {session && session.user.role >= (UserRole.OPERATOR as number) && (
-                <NavLink href="/drafts">My Drafts</NavLink>
-            )}
-            {session && session.user.role === (UserRole.OPERATOR as number) && (
-                <>
-                    <NavLink href="/chat">My chats</NavLink>
-                </>
-            )}
-        </div>
-    );
-
-    const right = (
-        <Box sx={{ marginLeft: 'auto' }}>
-            {session ? (
-                <>
-                    {session.user.role > (UserRole.USER as number) && (
-                        <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={changeStatus}
-                        >
-                            <OnlinePredictionIcon
-                                color={
-                                    session.user.isOnline
-                                        ? 'success'
-                                        : 'warning'
-                                }
-                            />
-                        </IconButton>
-                    )}
-                    <Box component="div" sx={{ display: 'inline' }}>
-                        {session.user.name} ({session.user.email}) /
-                        {session.user.role}/
-                    </Box>
-                    <Button href="/create">New post</Button>
-
-                    <Button onClick={() => signOut()}>Log out</Button>
-                </>
-            ) : (
-                <>
-                    <Button
-                        href="/api/auth/signin"
-                        data-active={isActive('/signup')}
-                    >
-                        Log in
-                    </Button>
-                </>
-            )}
-        </Box>
-    );
-
     return (
-        <nav>
-            {left}
-            {right}
-            <style jsx>{`
-                nav {
-                    display: flex;
-                    padding: 0;
-                    align-items: center;
-                }
-            `}</style>
+        <nav className="flex items-center p-0">
+            <div className="left">
+                <NavLink href="/">Home</NavLink>
+                {session &&
+                    session.user.role >= (UserRole.OPERATOR as number) && (
+                        <NavLink href="/drafts">My Drafts</NavLink>
+                    )}
+
+                {session &&
+                    session.user.role === (UserRole.OPERATOR as number) && (
+                        <>
+                            <NavLink href="/chat">My chats</NavLink>
+                        </>
+                    )}
+            </div>
+            <Box sx={{ marginLeft: 'auto' }}>
+                {session ? (
+                    <>
+                        {session.user.role > (UserRole.USER as number) && (
+                            <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={changeStatus}
+                            >
+                                <OnlinePredictionIcon
+                                    color={
+                                        session.user.isOnline
+                                            ? 'success'
+                                            : 'warning'
+                                    }
+                                />
+                            </IconButton>
+                        )}
+
+                        <Box component="div" sx={{ display: 'inline' }}>
+                            {session.user.name} ({session.user.email}) /
+                            {session.user.role}/
+                        </Box>
+                        <Button href="/create">New post</Button>
+
+                        <Button onClick={() => signOut()}>Log out</Button>
+                    </>
+                ) : (
+                    <>
+                        <Button
+                            href="/api/auth/signin"
+                            data-active={isActive('/signup')}
+                        >
+                            Log in
+                        </Button>
+                    </>
+                )}
+            </Box>
         </nav>
     );
 };
