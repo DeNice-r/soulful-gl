@@ -1,5 +1,5 @@
 import { UserRole } from '~/utils/types';
-import { getServerSession } from '~/utils/getServerSession';
+import { getServerSession } from '~/utils/auth';
 import {
     type NextApiRequest as Request,
     type NextApiResponse as Response,

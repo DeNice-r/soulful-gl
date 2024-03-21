@@ -1,4 +1,4 @@
-import { getServerSession } from '~/utils/getServerSession';
+import { getServerSession } from '~/utils/auth';
 import { type NextApiRequest, type NextApiResponse } from 'next';
 import { db } from '~/server/db';
 
