@@ -13,7 +13,7 @@ import { type Session } from 'next-auth';
 import superjson from 'superjson';
 import { ZodError } from 'zod';
 
-import { getServerSession } from '~/utils/getServerSession';
+import { getServerSession } from '~/utils/auth';
 import { db } from '~/server/db';
 
 /**

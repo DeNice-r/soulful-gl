@@ -2,7 +2,7 @@ import { UserRole } from '~/utils/types';
 import { StatusCodes } from 'http-status-codes';
 import { db } from '~/server/db';
 import { type NextApiRequest, type NextApiResponse } from 'next';
-import { getServerSession } from '~/utils/getServerSession';
+import { getServerSession } from '~/utils/auth';
 
 export default async function handle(
     req: NextApiRequest,
