@@ -60,7 +60,7 @@ const Post: React.FC<PostProps> = (props) => {
             <div>
                 <h2>{title}</h2>
                 <p>By {props?.author?.name || 'Unknown author'}</p>
-                <ReactMarkdown>props.content</ReactMarkdown>
+                <ReactMarkdown>{props.content}</ReactMarkdown>
                 {!props.published &&
                     userHasValidSession &&
                     postBelongsToUser && (
