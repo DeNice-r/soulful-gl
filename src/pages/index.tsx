@@ -26,13 +26,13 @@ type Props = {
 const Blog: React.FC<Props> = (props) => {
     return (
         <ConstrainedLayout>
-            <div className="page">
-                <h1>Public Feed</h1>
-                <main className="flex flex-col ">
+            <div className="flex flex-col gap-4">
+                <h1 className="text-2xl font-medium">Public Feed</h1>
+                <main className="flex flex-col gap-4">
                     {props.feed.map((post) => (
                         <div
                             key={post.id}
-                            className="w-full bg-slate-50 transition-shadow duration-100 ease-in hover:shadow"
+                            className="w-fullp-1 bg-emerald-50 transition-shadow duration-100 ease-in hover:shadow"
                         >
                             <Post post={post} />
                         </div>

@@ -2,11 +2,12 @@ import React from 'react';
 import { useRouter } from 'next/router';
 import { signOut, useSession } from 'next-auth/react';
 import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
 import OnlinePredictionIcon from '@mui/icons-material/OnlinePrediction';
 import { IconButton } from '@mui/material';
 import NavLink from './NavLink';
 import { UserRole } from '~/utils/types';
+import Image from 'next/image';
+import Link from 'next/link';
 
 const Header: React.FC = () => {
     const { update: updateSession, data: session, status } = useSession();
@@ -37,8 +38,11 @@ const Header: React.FC = () => {
     };
 
     return (
-        <nav className="flex items-center p-0">
-            <div className="left">
+        <nav className="flex items-center justify-between p-2 align-middle">
+            <div className="flex basis-1/4 items-center justify-start">
+                <Link href={'/'}>Soulful</Link>
+            </div>
+            <div className="flex basis-1/2 items-center justify-center">
                 <NavLink href="/">Home</NavLink>
                 {session &&
                     session.user.role >= (UserRole.OPERATOR as number) && (
@@ -52,7 +56,7 @@ const Header: React.FC = () => {
                         </>
                     )}
             </div>
-            <Box sx={{ marginLeft: 'auto' }}>
+            <div className="flex basis-1/4 justify-end">
                 {session ? (
                     <>
                         {session.user.role > (UserRole.USER as number) && (
@@ -71,13 +75,28 @@ const Header: React.FC = () => {
                             </IconButton>
                         )}
 
-                        <Box component="div" sx={{ display: 'inline' }}>
-                            {session.user.name} ({session.user.email}) /
-                            {session.user.role}/
-                        </Box>
-                        <Button href="/create">New post</Button>
+                        <div className="flex items-center gap-2">
+                            <Image
+                                src={session.user.image}
+                                alt={`@${session.user.name}'s profile`}
+                                className="hidden rounded-full lg:block"
+                                width={32}
+                                height={32}
+                            />
+                            <p
+                                className="leading-4"
+                                title={`${session.user.email}) /
+                                ${session.user.role}/`}
+                            >{`${session.user.name}`}</p>
+                            <Link
+                                href="/create"
+                                className="text-center align-middle"
+                            >
+                                New post
+                            </Link>
 
-                        <Button onClick={() => signOut()}>Log out</Button>
+                            <button onClick={() => signOut()}>Log out</button>
+                        </div>
                     </>
                 ) : (
                     <>
@@ -89,7 +108,7 @@ const Header: React.FC = () => {
                         </Button>
                     </>
                 )}
-            </Box>
+            </div>
         </nav>
     );
 };

@@ -8,18 +8,8 @@ type Props = {
 const Layout: React.FC<Props> = (props) => (
     <div>
         <Header />
-        <div className="layout">{props.children}</div>
+        <div className="px-8">{props.children}</div>
         <style jsx global>{`
-            html {
-                box-sizing: border-box;
-            }
-
-            *,
-            *:before,
-            *:after {
-                box-sizing: inherit;
-            }
-
             body {
                 margin: 0;
                 padding: 0;
@@ -28,20 +18,6 @@ const Layout: React.FC<Props> = (props) => (
                     Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji',
                     'Segoe UI Emoji', 'Segoe UI Symbol';
                 background: rgba(0, 0, 0, 0.05);
-            }
-
-            input,
-            textarea {
-                font-size: 16px;
-            }
-
-            button {
-                cursor: pointer;
-            }
-        `}</style>
-        <style jsx>{`
-            .layout {
-                //padding: 0 2rem;
             }
         `}</style>
     </div>
