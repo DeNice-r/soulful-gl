@@ -1,11 +1,16 @@
 import { type Session } from 'next-auth';
 import { SessionProvider } from 'next-auth/react';
 import { type AppType } from 'next/app';
-import { Inter } from 'next/font/google';
+import { Inter, Truculenta } from 'next/font/google';
 
 import { api } from '~/utils/api';
 
 import '~/styles/globals.css';
+
+export const truculenta = Truculenta({
+    subsets: ['latin'],
+    weight: '900',
+});
 
 const inter = Inter({
     subsets: ['latin'],

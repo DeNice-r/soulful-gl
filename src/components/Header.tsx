@@ -8,6 +8,7 @@ import NavLink from './NavLink';
 import { UserRole } from '~/utils/types';
 import Image from 'next/image';
 import Link from 'next/link';
+import { truculenta } from '~/pages/_app';
 
 const Header: React.FC = () => {
     const { update: updateSession, data: session, status } = useSession();
@@ -39,7 +40,9 @@ const Header: React.FC = () => {
 
     return (
         <nav className="flex items-center justify-between p-2 align-middle">
-            <div className="flex basis-1/4 items-center justify-start">
+            <div
+                className={`${truculenta.className} flex basis-1/4 items-center justify-start text-2xl text-cyan-800`}
+            >
                 <Link href={'/'}>Soulful</Link>
             </div>
             <div className="flex basis-1/2 items-center justify-center">
