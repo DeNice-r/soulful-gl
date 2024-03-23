@@ -6,13 +6,15 @@ deploy_preview:
     except:
         - main
     script:
+        - vercel pull --yes --token=$VERCEL_TOKEN --environment=preview
         - vercel build --yes --token=$VERCEL_TOKEN
-        - vercel deploy --prebuilt --yes --token=$VERCEL_TOKEN
+        - vercel deploy --yes --prebuilt --token=$VERCEL_TOKEN
 
 deploy_production:
     stage: deploy
     only:
         - main
     script:
-        - vercel build --prod --yes --token=$VERCEL_TOKEN
-        - vercel deploy --prebuilt --prod --yes --token=$VERCEL_TOKEN
+        - vercel pull --yes --token=$VERCEL_TOKEN --environment=production
+        - vercel build --yes --prod --token=$VERCEL_TOKEN
+        - vercel deploy --yes --prebuilt --prod --token=$VERCEL_TOKEN
