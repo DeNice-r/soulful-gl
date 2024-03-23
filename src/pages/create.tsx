@@ -1,15 +1,28 @@
-import React, { useState } from 'react';
+import React, { type ChangeEvent, useState } from 'react';
 import Router from 'next/router';
 import ConstrainedLayout from '../components/ConstrainedLayout';
+import { uploadImage } from '~/utils/s3/frontend';
 
 const Draft: React.FC = () => {
-    const [title, setTitle] = useState('');
-    const [content, setContent] = useState('');
+    const [title, setTitle] = useState('Title');
+    const [content, setContent] = useState('Description');
+    const [file, setFile] = useState<File | null>();
 
     const submitData = async (e: React.SyntheticEvent) => {
         e.preventDefault();
+        if (!file) {
+            alert('Please select a file first.');
+            return;
+        }
+
+        const imageUrl = await uploadImage(file);
+
+        if (!imageUrl) {
+            alert('Failed to upload image');
+        }
+
         try {
-            const body = { title, content };
+            const body = { title, content, image: imageUrl };
             await fetch('/api/post', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -19,6 +32,17 @@ const Draft: React.FC = () => {
         } catch (error) {
             console.error(error);
         }
+    };
+
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        if (
+            !event.target.files ||
+            !(event.target.files[0] instanceof File) ||
+            !event.target.files[0].name.match(/\.(jpg|jpeg|png|gif)$/i)
+        ) {
+            return;
+        }
+        setFile(event.target.files[0]);
     };
 
     return (
@@ -40,6 +64,7 @@ const Draft: React.FC = () => {
                         rows={8}
                         value={content}
                     />
+                    <input type="file" onChange={handleFileChange} />
                     <input
                         disabled={!content || !title}
                         type="submit"
