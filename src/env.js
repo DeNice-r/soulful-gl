@@ -30,6 +30,12 @@ export const env = createEnv({
 
         GITHUB_ID: z.string().refine(validator.isHexadecimal),
         GITHUB_SECRET: z.string().refine(validator.isHexadecimal),
+
+        AWS_REGION: z.string(),
+        AWS_ACCESS_KEY_ID: z.string(),
+        AWS_SECRET_ACCESS_KEY: z.string(),
+
+        AWS_S3_BUCKET: z.string(),
     },
 
     /**
@@ -56,6 +62,12 @@ export const env = createEnv({
 
         GITHUB_ID: process.env.GITHUB_ID,
         GITHUB_SECRET: process.env.GITHUB_SECRET,
+
+        AWS_REGION: process.env.AWS_REGION,
+        AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+        AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+
+        AWS_S3_BUCKET: process.env.AWS_S3_BUCKET,
 
         NEXT_PUBLIC_WSS_ENDPOINT: process.env.NEXT_PUBLIC_WSS_ENDPOINT,
     },

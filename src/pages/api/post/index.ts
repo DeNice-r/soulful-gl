@@ -18,16 +18,18 @@ export default async function handle(
         res.status(400).end();
         return;
     }
-    const { title, content } = req.body as {
+    const { title, content, image } = req.body as {
         title: string;
         content: string;
+        image: string;
     };
 
     const session = await getServerSession(req, res);
     const result = await db.post.create({
         data: {
-            title: title,
-            content: content,
+            title,
+            content,
+            image,
             author: { connect: { email: session?.user?.email } },
         },
     });

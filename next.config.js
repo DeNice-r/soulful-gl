@@ -17,6 +17,16 @@ const config = {
         locales: ['en'],
         defaultLocale: 'en',
     },
+
+    images: {
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'soulful-images.s3.eu-central-1.amazonaws.com',
+                port: '',
+            },
+        ],
+    },
 };
 
 export default config;

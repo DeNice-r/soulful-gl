@@ -1,6 +1,7 @@
 import React from 'react';
 import Router from 'next/router';
 import ReactMarkdown from 'react-markdown';
+import Image from 'next/image';
 
 export type PostProps = {
     id: string;
@@ -10,6 +11,7 @@ export type PostProps = {
         email: string;
     } | null;
     content: string;
+    image: string;
     published: boolean;
 };
 
@@ -18,6 +20,14 @@ const Post: React.FC<{ post: PostProps }> = ({ post }) => {
     return (
         <div onClick={() => Router.push('/post/[id]', `/post/${post.id}`)}>
             <h2>{post.title}</h2>
+            {post.image && (
+                <Image
+                    src={post.image}
+                    width={500}
+                    height={500}
+                    alt={post.title}
+                ></Image>
+            )}
             <small>By {authorName}</small>
             <ReactMarkdown>post.content</ReactMarkdown>
             <style jsx>{`

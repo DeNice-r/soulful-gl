@@ -6,6 +6,7 @@ import { type PostProps } from '~/components/Post';
 import { useSession } from 'next-auth/react';
 import ConstrainedLayout from '~/components/ConstrainedLayout';
 import { db } from '~/server/db';
+import Image from 'next/image';
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const post = await db.post.findUnique({
@@ -60,6 +61,12 @@ const Post: React.FC<PostProps> = (props) => {
             <div>
                 <h2>{title}</h2>
                 <p>By {props?.author?.name || 'Unknown author'}</p>
+                <Image
+                    src={props.image}
+                    alt={`Image for ${props.title}`}
+                    width={200}
+                    height={200}
+                />
                 <ReactMarkdown>props.content</ReactMarkdown>
                 {!props.published &&
                     userHasValidSession &&
