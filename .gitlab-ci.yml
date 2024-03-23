@@ -6,11 +6,11 @@ deploy_preview:
     except:
         - main
     script:
-        - pnpm run deploy --token=$VERCEL_TOKEN
+        - vercel deploy --yes --token=$VERCEL_TOKEN
 
 deploy_production:
     stage: deploy
     only:
         - main
     script:
-        - pnpm run deploy:prod --token=$VERCEL_TOKEN
+        - vercel deploy --prod --yes --token=$VERCEL_TOKEN

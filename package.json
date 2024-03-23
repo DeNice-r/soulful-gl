@@ -16,7 +16,7 @@
 
         "lint": "next lint",
 
-        "deploy": "vercel --yes",
+        "deploy": "vercel deploy --yes",
         "deploy:offline": "vercel build --yes && vercel deploy --prebuilt",
         "deploy:prod": "vercel deploy --prod --yes",
         "deploy:prod:offline": "vercel build --yes && vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN"
