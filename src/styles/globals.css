@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    .btn-warning {
+        @apply rounded px-2 py-1 text-red-600 outline outline-2 outline-red-600 transition-all hover:bg-red-600 hover:text-slate-50;
+    }
+    .btn-primary {
+        @apply rounded px-2 py-1 uppercase text-sky-600 transition-colors hover:bg-sky-600 hover:text-slate-50
+    }
+    .btn-active{
+        @apply rounded px-2 py-1 uppercase text-sky-400 underline cursor-default
+    }
+}
