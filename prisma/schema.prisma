@@ -123,7 +123,7 @@ model Tag {
   exercises Exercise[]
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @updatedAt @default(now())
 }
 
 model Post {
@@ -137,6 +137,9 @@ model Post {
   author    User?   @relation(fields: [authorId], references: [id])
   authorId  String?
   tags      Tag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
 }
 
 model Exercise {
@@ -149,7 +152,7 @@ model Exercise {
   tags Tag[]
 
   createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  updatedAt     DateTime       @updatedAt @default(now())
   exerciseSteps ExerciseStep[]
 }
 
