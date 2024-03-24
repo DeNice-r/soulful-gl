@@ -1,4 +1,5 @@
 import {
+    CUIDObjectSchema,
     ExerciseSchema,
     ExerciseStepSchema,
     ExerciseUpdateSchema,
@@ -12,22 +13,18 @@ import {
 } from '~/server/api/trpc';
 
 export const exerciseRouter = createTRPCRouter({
-    get: publicProcedure.input(PageSchema).query(({ input, ctx }) => {
-        const exercises = ctx.db.exercise.findMany({
+    get: publicProcedure.input(PageSchema).query(async ({ input, ctx }) => {
+        return ctx.db.exercise.findMany({
             orderBy: { createdAt: 'desc' },
             skip: (input.page - 1) * input.limit,
             take: input.limit,
         });
-
-        return {
-            exercises,
-        };
     }),
 
     create: protectedProcedure
         .input(ExerciseSchema)
         .mutation(async ({ ctx, input }) => {
-            const exercise = ctx.db.exercise.create({
+            return ctx.db.exercise.create({
                 data: {
                     ...input,
                     tags: {
@@ -47,28 +44,20 @@ export const exerciseRouter = createTRPCRouter({
                     },
                 },
             });
-
-            return {
-                exercise,
-            };
         }),
 
     createStep: protectedProcedure
         .input(ExerciseStepSchema)
         .mutation(async ({ ctx, input }) => {
-            const step = ctx.db.exerciseStep.create({
+            return ctx.db.exerciseStep.create({
                 data: input,
             });
-
-            return {
-                step,
-            };
         }),
 
     update: protectedProcedure
         .input(ExerciseUpdateSchema)
         .mutation(async ({ ctx, input }) => {
-            const exercise = ctx.db.exercise.update({
+            return ctx.db.exercise.update({
                 where: { id: input.id },
                 data: {
                     title: input.title,
@@ -93,13 +82,26 @@ export const exerciseRouter = createTRPCRouter({
                     }),
                 },
             });
-
-            return {
-                exercise,
-            };
         }),
 
-    getSecretMessage: protectedProcedure.query(() => {
-        return 'you can now see this secret message!';
-    }),
+    updateStep: protectedProcedure
+        .input(ExerciseStepSchema)
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.exerciseStep.update({
+                where: { id: input.id },
+                data: input,
+            });
+        }),
+
+    delete: protectedProcedure
+        .input(CUIDObjectSchema)
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.exercise.delete({ where: { ...input } });
+        }),
+
+    deleteStep: protectedProcedure
+        .input(CUIDObjectSchema)
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.exerciseStep.delete({ where: { ...input } });
+        }),
 });

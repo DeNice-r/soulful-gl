@@ -7,6 +7,9 @@ export const PageSchema = z.object({
     limit: z.number().min(1).max(100),
 });
 
+export const CUIDSchema = z.string().cuid();
+export const CUIDObjectSchema = z.object({ id: CUIDSchema });
+
 export const TitleSchema = z.string().min(1).max(200);
 export const RichTextSchema = z.string().min(1).max(15000);
 
@@ -32,6 +35,13 @@ export const ExerciseStepSchema = TDISchema.extend({
     id: z.string().cuid().optional(),
     backgroundPattern: z.nativeEnum(BackgroundPattern).optional(),
     timeSeconds: z.number().min(1).max(3600),
+});
+
+export const ExerciseStepUpdateSchema = TDIUpdateSchema.extend({
+    id: z.string().cuid(),
+
+    backgroundPattern: z.nativeEnum(BackgroundPattern).optional(),
+    timeSeconds: z.number().min(1).max(3600).or(z.null()).optional(),
 });
 
 export const ExerciseSchema = TDISchema.extend({
