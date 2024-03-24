@@ -59,7 +59,7 @@ model User {
 
   createdAt                  DateTime   @default(now())
   latestStatusConfirmationAt DateTime   @default(now())
-  Exercise                   Exercise[]
+  exercise                   Exercise[]
 }
 
 model VerificationToken {
