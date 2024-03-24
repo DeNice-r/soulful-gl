@@ -7,16 +7,7 @@ datasource db {
   url      = env("DATABASE_URL") // uses connection pooling
 }
 
-model Post {
-  id        String  @id @default(cuid())
-  title     String
-  content   String
-  image     String?
-  published Boolean @default(false)
-  author    User?   @relation(fields: [authorId], references: [id])
-  authorId  String?
-}
-
+// Auth-related models
 model Account {
   id                 String  @id @default(cuid())
   userId             String  @map("user_id")
@@ -79,6 +70,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// Chat-related models
 model Chat {
   id          Int       @id @default(autoincrement())
   createdAt   DateTime  @default(now())
@@ -120,4 +112,54 @@ model ArchivedMessage {
   chat       ArchivedChat @relation(fields: [chatId], references: [id])
   chatId     Int
   isFromUser Boolean
+}
+
+// Content-related models
+model Tag {
+  id    Int    @id @default(autoincrement())
+  title String @unique
+
+  posts     Post[]
+  exercises Exercise[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Post {
+  id String @id @default(cuid())
+
+  title   String
+  content String
+  image   String?
+
+  published Boolean @default(false)
+  author    User?   @relation(fields: [authorId], references: [id])
+  authorId  String?
+  tags      Tag[]
+}
+
+model Exercise {
+  id String @id @default(cuid())
+
+  title       String
+  description String
+  image       String?
+
+  tags Tag[]
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  exerciseSteps ExerciseStep[]
+}
+
+model ExerciseStep {
+  id String @id @default(cuid())
+
+  title       String
+  description String
+  image       String?
+  timeSeconds Int
+
+  exercises Exercise[]
 }

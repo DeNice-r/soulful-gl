@@ -6,6 +6,15 @@ export const enum UserRole {
     ADMIN,
 }
 
+export const enum BackgroundPattern {
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+}
+
 export interface ExtendedChat extends Chat {
     messages: Message[];
 }
