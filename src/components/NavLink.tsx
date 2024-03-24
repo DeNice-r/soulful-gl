@@ -1,5 +1,4 @@
 import React from 'react';
-import Button from '@mui/material/Button';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -17,9 +16,9 @@ const MyLink = ({
 
     return (
         <Link href={isActive ? '' : href} passHref {...props}>
-            <Button variant={isActive ? 'text' : 'contained'}>
+            <button className={isActive ? 'btn-active' : 'btn-primary'}>
                 {children}
-            </Button>
+            </button>
         </Link>
     );
 };

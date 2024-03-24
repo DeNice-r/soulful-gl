@@ -1,7 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 import { signOut, useSession } from 'next-auth/react';
-import Button from '@mui/material/Button';
 import OnlinePredictionIcon from '@mui/icons-material/OnlinePrediction';
 import { IconButton } from '@mui/material';
 import NavLink from './NavLink';
@@ -49,13 +48,13 @@ const Header: React.FC = () => {
                 <NavLink href="/">Home</NavLink>
                 {session &&
                     session.user.role >= (UserRole.OPERATOR as number) && (
-                        <NavLink href="/drafts">My Drafts</NavLink>
+                        <NavLink href="/drafts">Чернетки</NavLink>
                     )}
 
                 {session &&
                     session.user.role === (UserRole.OPERATOR as number) && (
                         <>
-                            <NavLink href="/chat">My chats</NavLink>
+                            <NavLink href="/chat">Чати</NavLink>
                         </>
                     )}
             </div>
@@ -91,24 +90,27 @@ const Header: React.FC = () => {
                                 title={`${session.user.email}) /
                                 ${session.user.role}/`}
                             >{`${session.user.name}`}</p>
-                            <Link
-                                href="/create"
-                                className="text-center align-middle"
-                            >
-                                New post
+                            <Link href="/create" className="btn-primary">
+                                Новий допис
                             </Link>
 
-                            <button onClick={() => signOut()}>Log out</button>
+                            <button
+                                className="btn-warning uppercase"
+                                onClick={() => signOut()}
+                            >
+                                Вихід
+                            </button>
                         </div>
                     </>
                 ) : (
                     <>
-                        <Button
+                        <Link
                             href="/api/auth/signin"
                             data-active={isActive('/signup')}
+                            className=""
                         >
-                            Log in
-                        </Button>
+                            Увійти
+                        </Link>
                     </>
                 )}
             </div>
