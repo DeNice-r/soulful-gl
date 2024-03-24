@@ -166,7 +166,7 @@ model ExerciseStep {
   description       String
   image             String?
   backgroundPattern Int?
-  timeSeconds       Int
+  timeSeconds       Int?
 
   exercises Exercise[]
 }
