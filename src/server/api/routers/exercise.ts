@@ -1,6 +1,7 @@
 import {
     ExerciseSchema,
     ExerciseStepSchema,
+    ExerciseUpdateSchema,
     PageSchema,
 } from '~/utils/schemas';
 
@@ -61,6 +62,40 @@ export const exerciseRouter = createTRPCRouter({
 
             return {
                 step,
+            };
+        }),
+
+    update: protectedProcedure
+        .input(ExerciseUpdateSchema)
+        .mutation(async ({ ctx, input }) => {
+            const exercise = ctx.db.exercise.update({
+                where: { id: input.id },
+                data: {
+                    title: input.title,
+                    description: input.description,
+                    image: input.image,
+
+                    ...(input.tags && {
+                        tags: {
+                            connectOrCreate: input.tags.map((tag) => ({
+                                where: { title: tag },
+                                create: { title: tag },
+                            })),
+                        },
+                    }),
+                    ...(input.steps && {
+                        steps: {
+                            connectOrCreate: input.steps.map((step) => ({
+                                where: { id: step.id },
+                                create: { ...step },
+                            })),
+                        },
+                    }),
+                },
+            });
+
+            return {
+                exercise,
             };
         }),
 

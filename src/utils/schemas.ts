@@ -22,6 +22,11 @@ export const TDISchema = z.object({
     description: RichTextSchema,
     image: ImageSchema.optional(),
 });
+export const TDIUpdateSchema = z.object({
+    title: TitleSchema.optional(),
+    description: RichTextSchema.optional(),
+    image: ImageSchema.optional(),
+});
 
 export const ExerciseStepSchema = TDISchema.extend({
     id: z.string().cuid().optional(),
@@ -32,4 +37,11 @@ export const ExerciseStepSchema = TDISchema.extend({
 export const ExerciseSchema = TDISchema.extend({
     tags: z.array(z.string()).min(1).max(25),
     steps: z.array(ExerciseStepSchema).min(1).max(100),
+});
+
+export const ExerciseUpdateSchema = TDIUpdateSchema.extend({
+    id: z.string().cuid(),
+
+    tags: z.array(z.string()).min(1).max(25).optional(),
+    steps: z.array(ExerciseStepSchema).min(1).max(100).optional(),
 });
