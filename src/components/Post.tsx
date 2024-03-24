@@ -17,7 +17,7 @@ const Post: React.FC<{ post: PostProps }> = ({ post }) => {
     const authorName = post.author ? post.author.name : 'Unknown author';
     return (
         <div
-            className="p-8 text-inherit"
+            className="flex flex-col items-center p-8 text-inherit"
             onClick={() => Router.push('/post/[id]', `/post/${post.id}`)}
         >
             <p className="text-xl">{post.title}</p>

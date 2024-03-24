@@ -6,20 +6,9 @@ type Props = {
 };
 
 const Layout: React.FC<Props> = (props) => (
-    <div>
+    <div className="flex h-screen flex-col">
         <Header />
-        <div className="px-8">{props.children}</div>
-        <style jsx global>{`
-            body {
-                margin: 0;
-                padding: 0;
-                font-size: 16px;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
-                    Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji',
-                    'Segoe UI Emoji', 'Segoe UI Symbol';
-                background: rgba(0, 0, 0, 0.05);
-            }
-        `}</style>
+        <div className="flex-auto">{props.children}</div>
     </div>
 );
 
