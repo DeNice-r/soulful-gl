@@ -1,12 +1,12 @@
 import { type Chat, type Message } from '@prisma/client';
 
-export const enum UserRole {
+export enum UserRole {
     USER,
     OPERATOR,
     ADMIN,
 }
 
-export const enum BackgroundPattern {
+export enum BackgroundPattern {
     A,
     B,
     C,

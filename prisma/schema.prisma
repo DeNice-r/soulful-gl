@@ -57,8 +57,9 @@ model User {
   userArchivedChats      ArchivedChat[] @relation(name: "userArchivedChat")
   personnelArchivedChats ArchivedChat[] @relation(name: "personnelArchivedChat")
 
-  createdAt                  DateTime @default(now())
-  latestStatusConfirmationAt DateTime @default(now())
+  createdAt                  DateTime   @default(now())
+  latestStatusConfirmationAt DateTime   @default(now())
+  exercise                   Exercise[]
 }
 
 model VerificationToken {
@@ -123,7 +124,7 @@ model Tag {
   exercises Exercise[]
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Post {
@@ -137,6 +138,9 @@ model Post {
   author    User?   @relation(fields: [authorId], references: [id])
   authorId  String?
   tags      Tag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Exercise {
@@ -146,20 +150,23 @@ model Exercise {
   description String
   image       String?
 
-  tags Tag[]
+  tags     Tag[]
+  steps    ExerciseStep[]
+  author   User?          @relation(fields: [authorId], references: [id])
+  authorId String?
 
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  exerciseSteps ExerciseStep[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model ExerciseStep {
   id String @id @default(cuid())
 
-  title       String
-  description String
-  image       String?
-  timeSeconds Int
+  title             String
+  description       String
+  image             String?
+  backgroundPattern Int?
+  timeSeconds       Int?
 
   exercises Exercise[]
 }

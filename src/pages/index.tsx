@@ -13,8 +13,19 @@ export const getStaticProps: GetStaticProps = async () => {
             },
         },
     });
+
+    const noDate = feed.map((post) => {
+        return {
+            ...post,
+            createdAt: post.createdAt.toString(),
+            updatedAt: post.updatedAt.toString(),
+        };
+    });
+
     return {
-        props: { feed },
+        props: {
+            feed: noDate,
+        },
         revalidate: 10,
     };
 };

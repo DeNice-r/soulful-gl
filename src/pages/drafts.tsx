@@ -26,8 +26,17 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
             },
         },
     });
+
+    const noDate = drafts.map((post) => {
+        return {
+            ...post,
+            createdAt: post.createdAt.toString(),
+            updatedAt: post.updatedAt.toString(),
+        };
+    });
+
     return {
-        props: { drafts },
+        props: { drafts: noDate },
     };
 };
 
