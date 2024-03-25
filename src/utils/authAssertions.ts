@@ -17,5 +17,11 @@ export const isPermitted = (
     entity: string,
     action: string,
 ) => {
-    return userPermissions.includes(`${entity}:${action}`);
+    const fitPermissions = [
+        `${entity}:${action}`,
+        `${entity}:*`,
+        `*:${action}`,
+        '*:*',
+    ];
+    return userPermissions.some((element) => fitPermissions.includes(element));
 };
