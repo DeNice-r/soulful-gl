@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Router from 'next/router';
-import ConstrainedLayout from '../components/ConstrainedLayout';
+import Layout from '~/components/Layout';
 
 const Draft: React.FC = () => {
     const [title, setTitle] = useState('');
@@ -22,7 +22,7 @@ const Draft: React.FC = () => {
     };
 
     return (
-        <ConstrainedLayout>
+        <Layout>
             <div className="flex h-full flex-col items-center justify-center gap-4">
                 <p className="text-center text-2xl font-bold">Новий Допис</p>
                 <form
@@ -70,7 +70,7 @@ const Draft: React.FC = () => {
                     </div>
                 </form>
             </div>
-        </ConstrainedLayout>
+        </Layout>
     );
 };
 

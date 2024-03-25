@@ -3,7 +3,6 @@ import { type GetServerSideProps } from 'next';
 import { getSession, useSession } from 'next-auth/react';
 import Layout from '~/components/Layout';
 import Post, { type PostProps } from '../components/Post';
-import ConstrainedLayout from '../components/ConstrainedLayout';
 import { UserRole } from '~/utils/types';
 import { StatusCodes } from 'http-status-codes';
 import { db } from '~/server/db';
@@ -47,7 +46,7 @@ const Drafts: React.FC<Props> = (props) => {
     }
 
     return (
-        <ConstrainedLayout>
+        <Layout>
             <div className="flex flex-col items-center justify-center p-3">
                 <h1>My Drafts</h1>
                 <div className="flex flex-col gap-2">
@@ -61,7 +60,7 @@ const Drafts: React.FC<Props> = (props) => {
                     ))}
                 </div>
             </div>
-        </ConstrainedLayout>
+        </Layout>
     );
 };
 

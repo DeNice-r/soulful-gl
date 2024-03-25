@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import Router from 'next/router';
 import { type PostProps } from '~/components/Post';
 import { useSession } from 'next-auth/react';
-import ConstrainedLayout from '~/components/ConstrainedLayout';
+import Layout from '~/components/Layout';
 import { db } from '~/server/db';
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
@@ -56,7 +56,7 @@ const Post: React.FC<PostProps> = (props) => {
     }
 
     return (
-        <ConstrainedLayout>
+        <Layout>
             <div>
                 <h2>{title}</h2>
                 <p>By {props?.author?.name || 'Unknown author'}</p>
@@ -72,7 +72,7 @@ const Post: React.FC<PostProps> = (props) => {
                     <button onClick={() => deletePost(props.id)}>Delete</button>
                 )}
             </div>
-        </ConstrainedLayout>
+        </Layout>
     );
 };
 
