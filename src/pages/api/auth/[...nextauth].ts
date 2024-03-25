@@ -23,6 +23,7 @@ declare module 'next-auth' {
             image: string;
             role: number;
             isOnline: boolean;
+            permissions: string[];
         };
         personnel: {
             chats: Record<number, ExtendedChat>;
@@ -33,6 +34,7 @@ declare module 'next-auth' {
         id: string;
         role: number;
         isOnline: boolean;
+        permissions: string[];
     }
 }
 
@@ -63,6 +65,25 @@ export function requestWrapper(
                 session.user.email = user.email;
                 session.user.role = user.role;
                 session.user.isOnline = user.isOnline;
+
+                const u = await db.user.findUnique({
+                    where: {
+                        id: user.id,
+                    },
+                    select: {
+                        permissions: {
+                            select: {
+                                title: true,
+                            },
+                        },
+                    },
+                });
+
+                if (u?.permissions) {
+                    session.user.permissions = u.permissions.map(
+                        (permission) => permission.title,
+                    );
+                }
 
                 const chatList = await db.chat.findMany({
                     where: {
