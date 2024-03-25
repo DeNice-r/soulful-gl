@@ -1,6 +1,7 @@
 import {
+    adminProcedure,
     createTRPCRouter,
-    protectedProcedure,
+    personnelProcedure,
     publicProcedure,
 } from '~/server/api/trpc';
 import {
@@ -9,23 +10,46 @@ import {
     PostSchema,
     PostUpdateSchema,
 } from '~/utils/schemas';
+import type { z } from 'zod';
+import { isAtLeast } from '~/utils/frontend/auth';
+import { UserRole } from '~/utils/types';
+
+function getUpdateData(input: z.infer<typeof PostUpdateSchema>) {
+    return {
+        title: input.title,
+        description: input.description,
+        image: input.image,
+
+        published: input.published,
+
+        ...(input.tags && {
+            tags: {
+                connectOrCreate: input.tags.map((tag) => ({
+                    where: { title: tag },
+                    create: { title: tag },
+                })),
+            },
+        }),
+    };
+}
 
 export const postRouter = createTRPCRouter({
     get: publicProcedure.input(PageSchema).query(async ({ input, ctx }) => {
         return ctx.db.post.findMany({
-            orderBy: { createdAt: 'desc' },
-            skip: (input.page - 1) * input.limit,
-            take: input.limit,
             include: {
                 author: {
                     select: { name: true },
                 },
             },
+
+            orderBy: { createdAt: 'desc' },
+            skip: (input.page - 1) * input.limit,
+            take: input.limit,
         });
     }),
 
     getById: publicProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
-        return ctx.db.post.findUnique({
+        const post = await ctx.db.post.findUnique({
             where: { id: input },
             include: {
                 author: {
@@ -33,9 +57,21 @@ export const postRouter = createTRPCRouter({
                 },
             },
         });
+
+        if (!post) return null;
+
+        if (
+            post.published ||
+            (ctx.session &&
+                (ctx.session.user.id === post.authorId ||
+                    isAtLeast(ctx?.session.user?.role, UserRole.ADMIN)))
+        )
+            return post;
+
+        return null;
     }),
 
-    getUnpublished: protectedProcedure
+    getMyUnpublished: personnelProcedure
         .input(PageSchema)
         .query(async ({ input, ctx }) => {
             return ctx.db.post.findMany({
@@ -48,10 +84,33 @@ export const postRouter = createTRPCRouter({
                         select: { name: true },
                     },
                 },
+
+                orderBy: { createdAt: 'desc' },
+                skip: (input.page - 1) * input.limit,
+                take: input.limit,
             });
         }),
 
-    create: protectedProcedure
+    getUnpublished: adminProcedure
+        .input(PageSchema)
+        .query(async ({ input, ctx }) => {
+            return ctx.db.post.findMany({
+                where: {
+                    published: false,
+                },
+                include: {
+                    author: {
+                        select: { name: true },
+                    },
+                },
+
+                orderBy: { createdAt: 'desc' },
+                skip: (input.page - 1) * input.limit,
+                take: input.limit,
+            });
+        }),
+
+    create: personnelProcedure
         .input(PostSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.post.create({
@@ -70,31 +129,33 @@ export const postRouter = createTRPCRouter({
             });
         }),
 
-    update: protectedProcedure
+    updateMy: personnelProcedure
+        .input(PostUpdateSchema)
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.post.update({
+                where: { id: input.id, authorId: ctx.session.user.id },
+                data: getUpdateData(input),
+            });
+        }),
+
+    update: adminProcedure
         .input(PostUpdateSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.post.update({
                 where: { id: input.id },
-                data: {
-                    title: input.title,
-                    description: input.description,
-                    image: input.image,
-
-                    published: input.published,
-
-                    ...(input.tags && {
-                        tags: {
-                            connectOrCreate: input.tags.map((tag) => ({
-                                where: { title: tag },
-                                create: { title: tag },
-                            })),
-                        },
-                    }),
-                },
+                data: getUpdateData(input),
             });
         }),
 
-    delete: protectedProcedure
+    deleteMy: personnelProcedure
+        .input(CUIDSchema)
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.post.delete({
+                where: { id: input, authorId: ctx.session.user.id },
+            });
+        }),
+
+    delete: adminProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.post.delete({ where: { id: input } });
