@@ -49,18 +49,23 @@ model User {
   notes         String?
   password      String?
 
-  posts                  Post[]
-  accounts               Account[]
-  sessions               Session[]
+  // Auth-related relations
+  accounts Account[]
+  sessions Session[]
+
+  // Chat-related relations
   userChat               Chat?          @relation(name: "userChat")
   personnelChats         Chat[]         @relation(name: "personnelChats")
   userArchivedChats      ArchivedChat[] @relation(name: "userArchivedChat")
   personnelArchivedChats ArchivedChat[] @relation(name: "personnelArchivedChat")
 
-  createdAt                  DateTime     @default(now())
-  latestStatusConfirmationAt DateTime     @default(now())
-  exercise                   Exercise[]
-  Suggestion                 Suggestion[]
+  // Content-related relations
+  recommendations Recommendation[]
+  posts           Post[]
+  exercises       Exercise[]
+
+  createdAt                  DateTime @default(now())
+  latestStatusConfirmationAt DateTime @default(now())
 }
 
 model VerificationToken {
@@ -128,6 +133,20 @@ model Tag {
   updatedAt DateTime @default(now()) @updatedAt
 }
 
+model Recommendation {
+  id String @id @default(cuid())
+
+  title       String
+  description String
+  image       String?
+
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
 model Post {
   id String @id @default(cuid())
 
@@ -155,9 +174,10 @@ model Exercise {
 
   published Boolean @default(false)
 
-  tags     Tag[]
-  steps    ExerciseStep[]
-  author   User?          @relation(fields: [authorId], references: [id])
+  tags  Tag[]
+  steps ExerciseStep[]
+
+  author   User?   @relation(fields: [authorId], references: [id])
   authorId String?
 
   createdAt DateTime @default(now())
