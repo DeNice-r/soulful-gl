@@ -2,10 +2,14 @@ import { z } from 'zod';
 import { BackgroundPattern } from '~/utils/types';
 import { env } from '~/env';
 
-export const PageSchema = z.object({
-    page: z.number().min(1).default(1),
-    limit: z.number().min(1).max(100).default(10),
-});
+const FirstPage = 1;
+const DefaultLimit = 10;
+export const PageSchema = z
+    .object({
+        page: z.number().min(1).default(FirstPage),
+        limit: z.number().min(1).max(100).default(DefaultLimit),
+    })
+    .default({ page: FirstPage, limit: DefaultLimit });
 
 export const CUIDSchema = z.string().cuid();
 export const CUIDObjectSchema = z.object({ id: CUIDSchema });

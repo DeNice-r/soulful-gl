@@ -1,83 +1,69 @@
 import React from 'react';
-import { type GetServerSideProps } from 'next';
 import ReactMarkdown from 'react-markdown';
-import Router from 'next/router';
-import { type PostProps } from '~/components/Post';
+import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import ConstrainedLayout from '~/components/ConstrainedLayout';
-import { db } from '~/server/db';
 import Image from 'next/image';
+import { api } from '~/utils/api';
+import { isAtLeast } from '~/utils/frontend/auth';
+import { UserRole } from '~/utils/types';
 
-export const getServerSideProps: GetServerSideProps = async ({ params }) => {
-    const post = await db.post.findUnique({
-        where: {
-            id: String(params?.id),
-        },
-        include: {
-            author: {
-                select: { name: true, email: true },
-            },
-        },
-    });
-
-    if (!post) {
-        return {
-            notFound: true,
-        };
-    }
-    return {
-        props: post,
-    };
-};
-
-async function publishPost(id: string): Promise<void> {
-    await fetch(`/api/publish/${id}`, {
-        method: 'PUT',
-    });
-    await Router.push('/');
-}
-
-async function deletePost(id: string): Promise<void> {
-    await fetch(`/api/post/${id}`, {
-        method: 'DELETE',
-    });
-    await Router.push('/');
-}
-
-const Post: React.FC<PostProps> = (props) => {
+const Post: React.FC = () => {
+    const router = useRouter();
     const { data: session, status } = useSession();
-    if (status === 'loading') {
-        return <div>Authenticating ...</div>;
-    }
+    const deleteMutation = api.post.delete.useMutation();
+    const updateMutation = api.post.update.useMutation();
+
+    const id = router.query.id;
+    const query = api.post.getById.useQuery(id as string);
+    const post = query.data;
+
     const userHasValidSession = Boolean(session);
-    const postBelongsToUser = session?.user?.email === props.author?.email;
-    let title = props.title;
-    if (!props.published) {
-        title = `${title} (Draft)`;
+
+    if (status === 'loading' || !post) {
+        return <div>Loading...</div>;
     }
+
+    const handleDelete = async (id: string) => {
+        if (window.confirm('Are you sure you want to delete this post?')) {
+            await deleteMutation.mutateAsync(id);
+            router.push('/');
+        }
+    };
 
     return (
         <ConstrainedLayout>
             <div>
-                <h2>{title}</h2>
-                <p>By {props?.author?.name || 'Unknown author'}</p>
-                <Image
-                    src={props.image}
-                    alt={`Image for ${props.title}`}
-                    width={200}
-                    height={200}
-                />
-                <ReactMarkdown>{props.description}</ReactMarkdown>
-                {!props.published &&
-                    userHasValidSession &&
-                    postBelongsToUser && (
-                        <button onClick={() => publishPost(props.id)}>
+                <h2>{post.title}</h2>
+                <p>By {post?.author?.name || 'Unknown author'}</p>
+                {post.image && (
+                    <Image
+                        src={post.image}
+                        alt={`Image for ${post.title}`}
+                        width={200}
+                        height={200}
+                    />
+                )}
+                <ReactMarkdown>{post.description}</ReactMarkdown>
+                {!post.published &&
+                    isAtLeast(session?.user.role, UserRole.OPERATOR) && (
+                        <button
+                            onClick={() =>
+                                updateMutation.mutate({
+                                    id: post.id,
+                                    published: true,
+                                })
+                            }
+                        >
                             Publish
                         </button>
                     )}
-                {userHasValidSession && postBelongsToUser && (
-                    <button onClick={() => deletePost(props.id)}>Delete</button>
-                )}
+                {userHasValidSession &&
+                    isAtLeast(session?.user.role, UserRole.OPERATOR) && (
+                        <button onClick={() => handleDelete(post.id)}>
+                            Delete
+                        </button>
+                    )}
             </div>
             <style jsx>{`
                 .page {

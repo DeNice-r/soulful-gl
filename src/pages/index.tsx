@@ -1,50 +1,21 @@
 import React from 'react';
-import { type GetStaticProps } from 'next';
-import Post, { type PostProps } from '../components/Post';
+import Post from '../components/Post';
 import ConstrainedLayout from '../components/ConstrainedLayout';
-import { db } from '~/server/db';
+import { api } from '~/utils/api';
 
-export const getStaticProps: GetStaticProps = async () => {
-    const feed = await db.post.findMany({
-        where: { published: true },
-        include: {
-            author: {
-                select: { name: true },
-            },
-        },
-    });
-
-    const noDate = feed.map((post) => {
-        return {
-            ...post,
-            createdAt: post.createdAt.toString(),
-            updatedAt: post.updatedAt.toString(),
-        };
-    });
-
-    return {
-        props: {
-            feed: noDate,
-        },
-        revalidate: 10,
-    };
-};
-
-type Props = {
-    feed: PostProps[];
-};
-
-const Blog: React.FC<Props> = (props) => {
+const Blog: React.FC = () => {
+    const posts = api.post.get.useQuery();
     return (
         <ConstrainedLayout>
             <div className="page">
                 <h1>Public Feed</h1>
                 <main>
-                    {props.feed.map((post) => (
-                        <div key={post.id} className="post">
-                            <Post post={post} />
-                        </div>
-                    ))}
+                    {posts.data &&
+                        posts.data.map((post) => (
+                            <div key={post.id} className="post">
+                                <Post post={post} />
+                            </div>
+                        ))}
                 </main>
             </div>
             <style jsx>{`

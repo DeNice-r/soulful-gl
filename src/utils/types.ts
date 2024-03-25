@@ -18,3 +18,8 @@ export enum BackgroundPattern {
 export interface ExtendedChat extends Chat {
     messages: Message[];
 }
+
+export type RoleAssertionFunction = (
+    userRole: UserRole | undefined,
+    thresholdRole: UserRole,
+) => boolean;

@@ -4,7 +4,7 @@ import {
     publicProcedure,
 } from '~/server/api/trpc';
 import {
-    CUIDObjectSchema,
+    CUIDSchema,
     PageSchema,
     PostSchema,
     PostUpdateSchema,
@@ -16,6 +16,17 @@ export const postRouter = createTRPCRouter({
             orderBy: { createdAt: 'desc' },
             skip: (input.page - 1) * input.limit,
             take: input.limit,
+            include: {
+                author: {
+                    select: { name: true },
+                },
+            },
+        });
+    }),
+
+    getById: publicProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
+        return ctx.db.post.findUnique({
+            where: { id: input },
             include: {
                 author: {
                     select: { name: true },
@@ -66,8 +77,8 @@ export const postRouter = createTRPCRouter({
         }),
 
     delete: protectedProcedure
-        .input(CUIDObjectSchema)
+        .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
-            return ctx.db.post.delete({ where: { ...input } });
+            return ctx.db.post.delete({ where: { id: input } });
         }),
 });
