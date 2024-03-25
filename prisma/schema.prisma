@@ -10,7 +10,7 @@ datasource db {
 model Post {
   id        String  @id @default(cuid())
   title     String
-  content   String?
+  description   String
   published Boolean @default(false)
   author    User?   @relation(fields: [authorId], references: [id])
   authorId  String?
