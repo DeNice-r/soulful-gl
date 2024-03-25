@@ -1,7 +1,7 @@
 import {
     adminProcedure,
     createTRPCRouter,
-    personnelProcedure,
+    permissionProcedure,
     publicProcedure,
 } from '~/server/api/trpc';
 import {
@@ -62,7 +62,7 @@ export const recommendationRouter = createTRPCRouter({
         return null;
     }),
 
-    getMyUnpublished: personnelProcedure
+    getOwnUnpublished: permissionProcedure
         .input(PageSchema)
         .query(async ({ input, ctx }) => {
             return ctx.db.recommendation.findMany({
@@ -82,7 +82,7 @@ export const recommendationRouter = createTRPCRouter({
             });
         }),
 
-    getUnpublished: adminProcedure
+    getAnyUnpublished: permissionProcedure
         .input(PageSchema)
         .query(async ({ input, ctx }) => {
             return ctx.db.recommendation.findMany({
@@ -101,7 +101,7 @@ export const recommendationRouter = createTRPCRouter({
             });
         }),
 
-    create: personnelProcedure
+    create: permissionProcedure
         .input(RecommendationSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.recommendation.create({
@@ -114,7 +114,7 @@ export const recommendationRouter = createTRPCRouter({
             });
         }),
 
-    updateMy: personnelProcedure
+    updateOwn: permissionProcedure
         .input(RecommendationUpdateSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.recommendation.update({
@@ -123,7 +123,7 @@ export const recommendationRouter = createTRPCRouter({
             });
         }),
 
-    update: adminProcedure
+    updateAny: permissionProcedure
         .input(RecommendationUpdateSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.recommendation.update({
@@ -132,7 +132,7 @@ export const recommendationRouter = createTRPCRouter({
             });
         }),
 
-    deleteMy: personnelProcedure
+    deleteOwn: permissionProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.recommendation.delete({
@@ -140,7 +140,7 @@ export const recommendationRouter = createTRPCRouter({
             });
         }),
 
-    delete: adminProcedure
+    deleteAny: adminProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.recommendation.delete({ where: { id: input } });
