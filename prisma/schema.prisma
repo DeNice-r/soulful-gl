@@ -7,15 +7,7 @@ datasource db {
   url      = env("DATABASE_URL") // uses connection pooling
 }
 
-model Post {
-  id        String  @id @default(cuid())
-  title     String
-  description   String
-  published Boolean @default(false)
-  author    User?   @relation(fields: [authorId], references: [id])
-  authorId  String?
-}
-
+// Auth-related models
 model Account {
   id                 String  @id @default(cuid())
   userId             String  @map("user_id")
@@ -57,13 +49,21 @@ model User {
   notes         String?
   password      String?
 
-  posts                  Post[]
-  accounts               Account[]
-  sessions               Session[]
+  // Auth-related relations
+  accounts Account[]
+  sessions Session[]
+
+  // Chat-related relations
   userChat               Chat?          @relation(name: "userChat")
   personnelChats         Chat[]         @relation(name: "personnelChats")
   userArchivedChats      ArchivedChat[] @relation(name: "userArchivedChat")
   personnelArchivedChats ArchivedChat[] @relation(name: "personnelArchivedChat")
+
+  // Content-related relations
+  recommendations Recommendation[]
+  posts           Post[]
+  exercises       Exercise[]
+  exerciseSteps   ExerciseStep[]
 
   createdAt                  DateTime @default(now())
   latestStatusConfirmationAt DateTime @default(now())
@@ -78,6 +78,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// Chat-related models
 model Chat {
   id          Int       @id @default(autoincrement())
   createdAt   DateTime  @default(now())
@@ -119,4 +120,88 @@ model ArchivedMessage {
   chat       ArchivedChat @relation(fields: [chatId], references: [id])
   chatId     Int
   isFromUser Boolean
+}
+
+// Content-related models
+model Tag {
+  id    Int    @id @default(autoincrement())
+  title String @unique
+
+  posts     Post[]
+  exercises Exercise[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Recommendation {
+  id String @id @default(cuid())
+
+  title       String
+  description String
+  image       String?
+
+  published Boolean @default(false)
+
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Post {
+  id String @id @default(cuid())
+
+  title       String
+  description String
+  image       String?
+
+  published Boolean @default(false)
+
+  tags Tag[]
+
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Exercise {
+  id String @id @default(cuid())
+
+  title       String
+  description String
+  image       String?
+
+  published Boolean @default(false)
+
+  tags  Tag[]
+  steps ExerciseStep[]
+
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model ExerciseStep {
+  id String @id @default(cuid())
+
+  title       String
+  description String
+  image       String?
+
+  backgroundPattern Int?
+  timeSeconds       Int?
+
+  exercises Exercise[]
+
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }

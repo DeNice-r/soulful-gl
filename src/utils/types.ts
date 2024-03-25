@@ -1,11 +1,25 @@
 import { type Chat, type Message } from '@prisma/client';
 
-export const enum UserRole {
+export enum UserRole {
     USER,
     OPERATOR,
     ADMIN,
 }
 
+export enum BackgroundPattern {
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+}
+
 export interface ExtendedChat extends Chat {
     messages: Message[];
 }
+
+export type RoleAssertionFunction = (
+    userRole: UserRole | undefined,
+    thresholdRole: UserRole,
+) => boolean;

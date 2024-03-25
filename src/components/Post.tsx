@@ -1,19 +1,12 @@
 import React from 'react';
 import Router from 'next/router';
 import ReactMarkdown from 'react-markdown';
+import Image from 'next/image';
+import { type RouterOutputs } from '~/utils/api';
 
-export type PostProps = {
-    id: string;
-    title: string;
-    author: {
-        name: string;
-        email: string;
-    } | null;
-    description: string;
-    published: boolean;
-};
-
-const Post: React.FC<{ post: PostProps }> = ({ post }) => {
+const Post: React.FC<{ post: RouterOutputs['post']['get'][number] }> = ({
+    post,
+}) => {
     const authorName = post.author ? post.author.name : 'Unknown author';
     return (
         <div
@@ -21,6 +14,14 @@ const Post: React.FC<{ post: PostProps }> = ({ post }) => {
             onClick={() => Router.push('/post/[id]', `/post/${post.id}`)}
         >
             <p className="text-xl">{post.title}</p>
+            {post.image && (
+                <Image
+                    src={post.image}
+                    width={500}
+                    height={500}
+                    alt={post.title}
+                ></Image>
+            )}
             <small>By {authorName}</small>
             <ReactMarkdown>{post.description}</ReactMarkdown>
         </div>

@@ -8,6 +8,13 @@ await import('./src/env.js');
 const config = {
     reactStrictMode: true,
     images: {
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'soulful-images.s3.eu-central-1.amazonaws.com',
+                port: '',
+            },
+        ],
         domains: ['avatars.githubusercontent.com'],
     },
     /**
