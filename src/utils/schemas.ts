@@ -31,6 +31,18 @@ export const TDIUpdateSchema = z.object({
     image: ImageSchema.optional(),
 });
 
+export const PostSchema = TDISchema.extend({
+    tags: z.array(z.string()).min(1).max(25),
+    published: z.boolean(),
+});
+
+export const PostUpdateSchema = TDIUpdateSchema.extend({
+    id: z.string().cuid(),
+
+    tags: z.array(z.string()).min(1).max(25).optional(),
+    published: z.boolean().optional(),
+});
+
 export const ExerciseStepSchema = TDISchema.extend({
     id: z.string().cuid().optional(),
     backgroundPattern: z.nativeEnum(BackgroundPattern).optional(),
