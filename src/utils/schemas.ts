@@ -2,10 +2,14 @@ import { z } from 'zod';
 import { BackgroundPattern } from '~/utils/types';
 import { env } from '~/env';
 
-export const PageSchema = z.object({
-    page: z.number().min(1),
-    limit: z.number().min(1).max(100),
-});
+const FirstPage = 1;
+const DefaultLimit = 10;
+export const PageSchema = z
+    .object({
+        page: z.number().min(1).default(FirstPage),
+        limit: z.number().min(1).max(100).default(DefaultLimit),
+    })
+    .default({ page: FirstPage, limit: DefaultLimit });
 
 export const CUIDSchema = z.string().cuid();
 export const CUIDObjectSchema = z.object({ id: CUIDSchema });
@@ -29,6 +33,23 @@ export const TDIUpdateSchema = z.object({
     title: TitleSchema.optional(),
     description: RichTextSchema.optional(),
     image: ImageSchema.optional(),
+});
+
+export const PostSchema = TDISchema.extend({
+    tags: z.array(z.string()).min(1).max(25),
+    published: z.boolean(),
+});
+
+export const PostSearchSchema = z.object({
+    query: z.string().min(1).max(200).optional(),
+    published: z.boolean().optional(),
+});
+
+export const PostUpdateSchema = TDIUpdateSchema.extend({
+    id: z.string().cuid(),
+
+    tags: z.array(z.string()).min(1).max(25).optional(),
+    published: z.boolean().optional(),
 });
 
 export const ExerciseStepSchema = TDISchema.extend({

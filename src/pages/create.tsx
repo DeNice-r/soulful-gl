@@ -5,7 +5,7 @@ import { uploadImage } from '~/utils/s3/frontend';
 
 const Draft: React.FC = () => {
     const [title, setTitle] = useState('Title');
-    const [content, setContent] = useState('Description');
+    const [description, setDescription] = useState('Description');
     const [file, setFile] = useState<File | null>();
 
     const submitData = async (e: React.SyntheticEvent) => {
@@ -15,14 +15,14 @@ const Draft: React.FC = () => {
             return;
         }
 
-        const imageUrl = await uploadImage(file);
+        const image = await uploadImage(file);
 
-        if (!imageUrl) {
+        if (!image) {
             alert('Failed to upload image');
         }
 
         try {
-            const body = { title, content, image: imageUrl };
+            const body = { title, description, image };
             await fetch('/api/post', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -59,14 +59,14 @@ const Draft: React.FC = () => {
                     />
                     <textarea
                         cols={50}
-                        onChange={(e) => setContent(e.target.value)}
-                        placeholder="Content"
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Description"
                         rows={8}
-                        value={content}
+                        value={description}
                     />
                     <input type="file" onChange={handleFileChange} />
                     <input
-                        disabled={!content || !title}
+                        disabled={!description || !title}
                         type="submit"
                         value="Create"
                     />
