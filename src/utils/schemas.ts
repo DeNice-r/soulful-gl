@@ -46,8 +46,8 @@ export const RecommendationUpdateSchema = TDIUpdateSchema.extend({
 });
 
 export const PostSchema = TDISchema.extend({
-    tags: z.array(z.string()).min(1).max(25),
-    published: z.boolean(),
+    tags: z.array(z.string()).min(1).max(25).default([]),
+    published: z.boolean().default(false),
 });
 
 export const PostSearchSchema = z.object({

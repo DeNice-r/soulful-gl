@@ -2,31 +2,30 @@ import React, { type ChangeEvent, useState } from 'react';
 import Router from 'next/router';
 import Layout from '~/components/Layout';
 import { uploadImage } from '~/utils/s3/frontend';
+import { api } from '~/utils/api';
 
 const Draft: React.FC = () => {
     const [title, setTitle] = useState('Title');
     const [description, setDescription] = useState('Description');
     const [file, setFile] = useState<File | null>();
+    const createMutation = api.post.create.useMutation();
 
     const submitData = async (e: React.SyntheticEvent) => {
         e.preventDefault();
-        if (!file) {
-            alert('Please select a file first.');
-            return;
-        }
-
-        const image = await uploadImage(file);
-
-        if (!image) {
-            alert('Failed to upload image');
+        let image: string | false = false;
+        if (file) {
+            image = await uploadImage(file);
+            if (!image) {
+                alert('Failed to upload image');
+                return;
+            }
         }
 
         try {
-            const body = { title, description, image };
-            await fetch('/api/post', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
+            await createMutation.mutateAsync({
+                title,
+                description,
+                ...(image && { image }),
             });
             await Router.push('/drafts');
         } catch (error) {
@@ -55,12 +54,29 @@ const Draft: React.FC = () => {
                 >
                     <div className="flex h-2/3 flex-col gap-4 md:w-11/12 md:flex-row">
                         <div className="flex basis-1/3 items-start">
-                            <div className="aspect-1.91/1 w-full rounded-lg border-2 bg-white shadow-inner">
+                            <label
+                                htmlFor="dropzone-file"
+                                className="flex aspect-1.91/1 w-full cursor-pointer items-center justify-center rounded-lg border-2 bg-white transition hover:bg-slate-50"
+                            >
+                                <div className="flex flex-col items-center justify-center pb-6 pt-5">
+                                    <p className="mb-2 text-sm text-gray-500">
+                                        <span className="font-semibold">
+                                            Click to upload
+                                        </span>{' '}
+                                        or drag and drop
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                        PNG, JPG, JPEG or GIF (MAX. 5 MiB)
+                                    </p>
+                                </div>
                                 <input
+                                    id="dropzone-file"
                                     type="file"
+                                    className="hidden"
                                     onChange={handleFileChange}
+                                    accept=".png,.jpeg,.gif,.jpg"
                                 />
-                            </div>
+                            </label>
                         </div>
                         <div className="flex basis-2/3 flex-col gap-4">
                             <input
@@ -69,7 +85,7 @@ const Draft: React.FC = () => {
                                 placeholder="Заголовок"
                                 type="text"
                                 value={title}
-                                className="mx-0 rounded-lg border-2 border-solid p-2 active:border-slate-800"
+                                className="mx-0 rounded-lg border-2 border-solid p-2 transition hover:bg-slate-50 active:border-slate-400"
                             />
                             <textarea
                                 cols={50}
@@ -77,7 +93,7 @@ const Draft: React.FC = () => {
                                 placeholder="Вміст"
                                 rows={8}
                                 value={description}
-                                className="row-span-3 mx-0 flex-grow resize-none rounded-lg border-2 border-solid p-2 active:border-slate-800"
+                                className="row-span-3 mx-0 flex-grow resize-none rounded-lg border-2 border-solid p-2 transition hover:bg-slate-50 active:border-slate-400"
                             />
                         </div>
                     </div>
