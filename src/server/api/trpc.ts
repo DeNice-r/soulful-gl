@@ -15,7 +15,7 @@ import { ZodError } from 'zod';
 
 import { getServerSession } from '~/utils/auth';
 import { db } from '~/server/db';
-import { isAtLeast } from '~/utils/frontend/auth';
+import { isAtLeast, isPermitted } from '~/utils/authAssertions';
 import { UserRole } from '~/utils/types';
 
 /**
@@ -58,6 +58,18 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
 
     // Get the session from the server using the getServerSession wrapper function
     const session = await getServerSession(req, res);
+
+    if (session && req.query.trpc && typeof req.query.trpc === 'string') {
+        const [entity, action] = req.query.trpc.split('.').splice(0, 2);
+
+        return createInnerTRPCContext({
+            session: {
+                ...session,
+                entity,
+                action,
+            },
+        });
+    }
 
     return createInnerTRPCContext({
         session,
@@ -138,15 +150,28 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
     });
 });
 
+export const permissionProcedure = protectedProcedure.use(({ ctx, next }) => {
+    if (
+        !isPermitted(
+            ctx.session.user.permissions,
+            ctx.session.entity,
+            ctx.session.action,
+        )
+    ) {
+        throw new TRPCError({ code: 'UNAUTHORIZED' });
+    }
+    return next();
+});
+
 export const personnelProcedure = protectedProcedure.use(({ ctx, next }) => {
-    if (isAtLeast(ctx?.session?.user?.role, UserRole.OPERATOR)) {
+    if (!isAtLeast(ctx?.session?.user?.role, UserRole.OPERATOR)) {
         throw new TRPCError({ code: 'UNAUTHORIZED' });
     }
     return next();
 });
 
 export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
-    if (isAtLeast(ctx?.session?.user?.role, UserRole.ADMIN)) {
+    if (!isAtLeast(ctx?.session?.user?.role, UserRole.ADMIN)) {
         throw new TRPCError({ code: 'UNAUTHORIZED' });
     }
     return next();

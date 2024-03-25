@@ -10,7 +10,7 @@ import {
     RecommendationSchema,
     RecommendationUpdateSchema,
 } from '~/utils/schemas';
-import { isAtLeast } from '~/utils/frontend/auth';
+import { isAtLeast } from '~/utils/authAssertions';
 import { UserRole } from '~/utils/types';
 import { type z } from 'zod';
 

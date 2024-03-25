@@ -11,7 +11,7 @@ import {
     PostUpdateSchema,
 } from '~/utils/schemas';
 import type { z } from 'zod';
-import { isAtLeast } from '~/utils/frontend/auth';
+import { isAtLeast } from '~/utils/authAssertions';
 import { UserRole } from '~/utils/types';
 
 function getUpdateData(input: z.infer<typeof PostUpdateSchema>) {

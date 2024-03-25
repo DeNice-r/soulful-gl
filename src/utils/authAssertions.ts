@@ -11,3 +11,11 @@ export const isAtMost: RoleAssertionFunction = (userRole, thesholdRole) => {
 export const isExactly: RoleAssertionFunction = (userRole, thesholdRole) => {
     return (userRole as number) === (thesholdRole as number);
 };
+
+export const isPermitted = (
+    userPermissions: string[],
+    entity: string,
+    action: string,
+) => {
+    return userPermissions.includes(`${entity}:${action}`);
+};

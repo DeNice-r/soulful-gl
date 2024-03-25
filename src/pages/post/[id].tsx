@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import ConstrainedLayout from '~/components/ConstrainedLayout';
 import Image from 'next/image';
 import { api } from '~/utils/api';
-import { isAtLeast } from '~/utils/frontend/auth';
+import { isAtLeast } from '~/utils/authAssertions';
 import { UserRole } from '~/utils/types';
 
 const Post: React.FC = () => {
