@@ -35,6 +35,16 @@ export const TDIUpdateSchema = z.object({
     image: ImageSchema.optional(),
 });
 
+export const RecommendationSchema = TDISchema.extend({
+    published: z.boolean(),
+});
+
+export const RecommendationUpdateSchema = TDIUpdateSchema.extend({
+    id: z.string().cuid(),
+
+    published: z.boolean().optional(),
+});
+
 export const PostSchema = TDISchema.extend({
     tags: z.array(z.string()).min(1).max(25),
     published: z.boolean(),
