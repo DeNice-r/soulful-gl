@@ -40,6 +40,11 @@ export const PostSchema = TDISchema.extend({
     published: z.boolean(),
 });
 
+export const PostSearchSchema = z.object({
+    query: z.string().min(1).max(200).optional(),
+    published: z.boolean().optional(),
+});
+
 export const PostUpdateSchema = TDIUpdateSchema.extend({
     id: z.string().cuid(),
 

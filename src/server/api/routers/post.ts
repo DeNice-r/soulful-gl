@@ -35,6 +35,22 @@ export const postRouter = createTRPCRouter({
         });
     }),
 
+    getUnpublished: protectedProcedure
+        .input(PageSchema)
+        .query(async ({ input, ctx }) => {
+            return ctx.db.post.findMany({
+                where: {
+                    author: { email: ctx.session.user.email },
+                    published: false,
+                },
+                include: {
+                    author: {
+                        select: { name: true },
+                    },
+                },
+            });
+        }),
+
     create: protectedProcedure
         .input(PostSchema)
         .mutation(async ({ ctx, input }) => {
