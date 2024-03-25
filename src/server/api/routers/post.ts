@@ -16,6 +16,11 @@ export const postRouter = createTRPCRouter({
             orderBy: { createdAt: 'desc' },
             skip: (input.page - 1) * input.limit,
             take: input.limit,
+            include: {
+                author: {
+                    select: { name: true },
+                },
+            },
         });
     }),
 
