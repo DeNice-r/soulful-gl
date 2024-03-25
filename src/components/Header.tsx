@@ -44,17 +44,24 @@ const Header: React.FC = () => {
             >
                 <Link href={'/'}>Soulful</Link>
             </div>
-            <div className="flex basis-1/2 items-center justify-center">
-                <NavLink href="/">Home</NavLink>
+            <div className="flex w-1/4 divide-x-2 divide-slate-200 rounded-lg shadow">
+                <NavLink className="rounded-l-md" href="/">
+                    Home
+                </NavLink>
                 {session &&
-                    session.user.role >= (UserRole.OPERATOR as number) && (
-                        <NavLink href="/drafts">Чернетки</NavLink>
+                    session.user.role > (UserRole.OPERATOR as number) && (
+                        <NavLink className="rounded-r-md" href="/drafts">
+                            Чернетки
+                        </NavLink>
                     )}
 
                 {session &&
                     session.user.role === (UserRole.OPERATOR as number) && (
                         <>
-                            <NavLink href="/chat">Чати</NavLink>
+                            <NavLink href="/drafts">Чернетки</NavLink>
+                            <NavLink className="rounded-r-md" href="/chat">
+                                Чати
+                            </NavLink>
                         </>
                     )}
             </div>
