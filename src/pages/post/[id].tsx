@@ -31,6 +31,11 @@ const Post: React.FC = () => {
         }
     };
 
+    const handlePublish = async (id: string) => {
+        await updateMutation.mutateAsync({ id, published: true });
+        router.reload();
+    };
+
     return (
         <ConstrainedLayout>
             <div>
@@ -47,14 +52,7 @@ const Post: React.FC = () => {
                 <ReactMarkdown>{post.description}</ReactMarkdown>
                 {!post.published &&
                     isAtLeast(session?.user.role, UserRole.OPERATOR) && (
-                        <button
-                            onClick={() =>
-                                updateMutation.mutate({
-                                    id: post.id,
-                                    published: true,
-                                })
-                            }
-                        >
+                        <button onClick={() => handlePublish(post.id)}>
                             Publish
                         </button>
                     )}

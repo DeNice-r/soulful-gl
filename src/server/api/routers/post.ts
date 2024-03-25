@@ -80,6 +80,8 @@ export const postRouter = createTRPCRouter({
                     description: input.description,
                     image: input.image,
 
+                    published: input.published,
+
                     ...(input.tags && {
                         tags: {
                             connectOrCreate: input.tags.map((tag) => ({
