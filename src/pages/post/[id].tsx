@@ -11,8 +11,8 @@ import { UserRole } from '~/utils/types';
 const Post: React.FC = () => {
     const router = useRouter();
     const { data: session, status } = useSession();
-    const deleteMutation = api.post.delete.useMutation();
-    const updateMutation = api.post.update.useMutation();
+    const deleteMutation = api.post.deleteOwn.useMutation();
+    const updateMutation = api.post.updateOwn.useMutation();
 
     const id = router.query.id;
     const query = api.post.getById.useQuery(id as string);
