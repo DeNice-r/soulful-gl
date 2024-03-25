@@ -48,29 +48,19 @@ const Drafts: React.FC<Props> = (props) => {
 
     return (
         <ConstrainedLayout>
-            <div className="page">
+            <div className="flex flex-col items-center justify-center p-3">
                 <h1>My Drafts</h1>
-                <main>
+                <div className="flex flex-col gap-2">
                     {props.drafts.map((post) => (
-                        <div key={post.id} className="post">
+                        <div
+                            key={post.id}
+                            className="bg-slate-100 transition hover:shadow"
+                        >
                             <Post post={post} />
                         </div>
                     ))}
-                </main>
+                </div>
             </div>
-            <style jsx>{`
-                .post {
-                    transition: box-shadow 0.1s ease-in;
-                }
-
-                .post:hover {
-                    box-shadow: 1px 1px 3px #aaa;
-                }
-
-                .post + .post {
-                    margin-top: 2rem;
-                }
-            `}</style>
         </ConstrainedLayout>
     );
 };

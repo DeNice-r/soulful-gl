@@ -70,15 +70,6 @@ const Draft: React.FC = () => {
                     </div>
                 </form>
             </div>
-            <style jsx>{`
-                .page {
-                    background: var(--geist-background);
-                    padding: 3rem;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                }
-            `}</style>
         </ConstrainedLayout>
     );
 };
