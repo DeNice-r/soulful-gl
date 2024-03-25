@@ -34,7 +34,6 @@ declare module 'next-auth' {
         id: string;
         role: number;
         isOnline: boolean;
-        permissions: string[];
     }
 }
 
