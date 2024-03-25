@@ -15,6 +15,8 @@ import { ZodError } from 'zod';
 
 import { getServerSession } from '~/utils/auth';
 import { db } from '~/server/db';
+import { isAtLeast } from '~/utils/frontend/auth';
+import { UserRole } from '~/utils/types';
 
 /**
  * 1. CONTEXT
@@ -134,4 +136,18 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
             session: { ...ctx.session, user: ctx.session.user },
         },
     });
+});
+
+export const personnelProcedure = protectedProcedure.use(({ ctx, next }) => {
+    if (isAtLeast(ctx?.session?.user?.role, UserRole.OPERATOR)) {
+        throw new TRPCError({ code: 'UNAUTHORIZED' });
+    }
+    return next();
+});
+
+export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+    if (isAtLeast(ctx?.session?.user?.role, UserRole.ADMIN)) {
+        throw new TRPCError({ code: 'UNAUTHORIZED' });
+    }
+    return next();
 });

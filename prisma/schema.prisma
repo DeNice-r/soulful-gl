@@ -49,17 +49,24 @@ model User {
   notes         String?
   password      String?
 
-  posts                  Post[]
-  accounts               Account[]
-  sessions               Session[]
+  // Auth-related relations
+  accounts Account[]
+  sessions Session[]
+
+  // Chat-related relations
   userChat               Chat?          @relation(name: "userChat")
   personnelChats         Chat[]         @relation(name: "personnelChats")
   userArchivedChats      ArchivedChat[] @relation(name: "userArchivedChat")
   personnelArchivedChats ArchivedChat[] @relation(name: "personnelArchivedChat")
 
-  createdAt                  DateTime   @default(now())
-  latestStatusConfirmationAt DateTime   @default(now())
-  exercise                   Exercise[]
+  // Content-related relations
+  recommendations Recommendation[]
+  posts           Post[]
+  exercises       Exercise[]
+  exerciseSteps   ExerciseStep[]
+
+  createdAt                  DateTime @default(now())
+  latestStatusConfirmationAt DateTime @default(now())
 }
 
 model VerificationToken {
@@ -127,6 +134,22 @@ model Tag {
   updatedAt DateTime @default(now()) @updatedAt
 }
 
+model Recommendation {
+  id String @id @default(cuid())
+
+  title       String
+  description String
+  image       String?
+
+  published Boolean @default(false)
+
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
 model Post {
   id String @id @default(cuid())
 
@@ -135,9 +158,11 @@ model Post {
   image       String?
 
   published Boolean @default(false)
-  author    User?   @relation(fields: [authorId], references: [id])
-  authorId  String?
-  tags      Tag[]
+
+  tags Tag[]
+
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -150,9 +175,12 @@ model Exercise {
   description String
   image       String?
 
-  tags     Tag[]
-  steps    ExerciseStep[]
-  author   User?          @relation(fields: [authorId], references: [id])
+  published Boolean @default(false)
+
+  tags  Tag[]
+  steps ExerciseStep[]
+
+  author   User?   @relation(fields: [authorId], references: [id])
   authorId String?
 
   createdAt DateTime @default(now())
@@ -162,11 +190,18 @@ model Exercise {
 model ExerciseStep {
   id String @id @default(cuid())
 
-  title             String
-  description       String
-  image             String?
+  title       String
+  description String
+  image       String?
+
   backgroundPattern Int?
   timeSeconds       Int?
 
   exercises Exercise[]
+
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }

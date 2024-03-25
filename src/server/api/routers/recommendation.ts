@@ -7,35 +7,26 @@ import {
 import {
     CUIDSchema,
     PageSchema,
-    PostSchema,
-    PostUpdateSchema,
+    RecommendationSchema,
+    RecommendationUpdateSchema,
 } from '~/utils/schemas';
-import type { z } from 'zod';
 import { isAtLeast } from '~/utils/frontend/auth';
 import { UserRole } from '~/utils/types';
+import { type z } from 'zod';
 
-function getUpdateData(input: z.infer<typeof PostUpdateSchema>) {
+function getUpdateData(input: z.infer<typeof RecommendationUpdateSchema>) {
     return {
         title: input.title,
         description: input.description,
         image: input.image,
 
         published: input.published,
-
-        ...(input.tags && {
-            tags: {
-                connectOrCreate: input.tags.map((tag) => ({
-                    where: { title: tag },
-                    create: { title: tag },
-                })),
-            },
-        }),
     };
 }
 
-export const postRouter = createTRPCRouter({
+export const recommendationRouter = createTRPCRouter({
     get: publicProcedure.input(PageSchema).query(async ({ input, ctx }) => {
-        return ctx.db.post.findMany({
+        return ctx.db.recommendation.findMany({
             include: {
                 author: {
                     select: { name: true },
@@ -49,7 +40,7 @@ export const postRouter = createTRPCRouter({
     }),
 
     getById: publicProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
-        const post = await ctx.db.post.findUnique({
+        const recommendation = await ctx.db.recommendation.findUnique({
             where: { id: input },
             include: {
                 author: {
@@ -58,15 +49,15 @@ export const postRouter = createTRPCRouter({
             },
         });
 
-        if (!post) return null;
+        if (!recommendation) return null;
 
         if (
-            post.published ||
+            recommendation.published ||
             (ctx.session &&
-                (ctx.session.user.id === post.authorId ||
+                (ctx.session.user.id === recommendation.authorId ||
                     isAtLeast(ctx?.session.user?.role, UserRole.ADMIN)))
         )
-            return post;
+            return recommendation;
 
         return null;
     }),
@@ -74,7 +65,7 @@ export const postRouter = createTRPCRouter({
     getMyUnpublished: personnelProcedure
         .input(PageSchema)
         .query(async ({ input, ctx }) => {
-            return ctx.db.post.findMany({
+            return ctx.db.recommendation.findMany({
                 where: {
                     authorId: ctx.session.user.id,
                     published: false,
@@ -94,7 +85,7 @@ export const postRouter = createTRPCRouter({
     getUnpublished: adminProcedure
         .input(PageSchema)
         .query(async ({ input, ctx }) => {
-            return ctx.db.post.findMany({
+            return ctx.db.recommendation.findMany({
                 where: {
                     published: false,
                 },
@@ -111,17 +102,11 @@ export const postRouter = createTRPCRouter({
         }),
 
     create: personnelProcedure
-        .input(PostSchema)
+        .input(RecommendationSchema)
         .mutation(async ({ ctx, input }) => {
-            return ctx.db.post.create({
+            return ctx.db.recommendation.create({
                 data: {
                     ...input,
-                    tags: {
-                        connectOrCreate: input.tags.map((tag) => ({
-                            where: { title: tag },
-                            create: { title: tag },
-                        })),
-                    },
                     author: {
                         connect: { id: ctx.session.user.id },
                     },
@@ -130,18 +115,18 @@ export const postRouter = createTRPCRouter({
         }),
 
     updateMy: personnelProcedure
-        .input(PostUpdateSchema)
+        .input(RecommendationUpdateSchema)
         .mutation(async ({ ctx, input }) => {
-            return ctx.db.post.update({
+            return ctx.db.recommendation.update({
                 where: { id: input.id, authorId: ctx.session.user.id },
                 data: getUpdateData(input),
             });
         }),
 
     update: adminProcedure
-        .input(PostUpdateSchema)
+        .input(RecommendationUpdateSchema)
         .mutation(async ({ ctx, input }) => {
-            return ctx.db.post.update({
+            return ctx.db.recommendation.update({
                 where: { id: input.id },
                 data: getUpdateData(input),
             });
@@ -150,7 +135,7 @@ export const postRouter = createTRPCRouter({
     deleteMy: personnelProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
-            return ctx.db.post.delete({
+            return ctx.db.recommendation.delete({
                 where: { id: input, authorId: ctx.session.user.id },
             });
         }),
@@ -158,6 +143,6 @@ export const postRouter = createTRPCRouter({
     delete: adminProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
-            return ctx.db.post.delete({ where: { id: input } });
+            return ctx.db.recommendation.delete({ where: { id: input } });
         }),
 });
