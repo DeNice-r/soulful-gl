@@ -1,12 +1,13 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 import { signOut, useSession } from 'next-auth/react';
-import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
 import OnlinePredictionIcon from '@mui/icons-material/OnlinePrediction';
 import { IconButton } from '@mui/material';
 import NavLink from './NavLink';
 import { UserRole } from '~/utils/types';
+import Image from 'next/image';
+import Link from 'next/link';
+import { truculenta } from '~/pages/_app';
 
 const Header: React.FC = () => {
     const { update: updateSession, data: session, status } = useSession();
@@ -36,71 +37,90 @@ const Header: React.FC = () => {
         }
     };
 
-    const left = (
-        <div className="left">
-            <NavLink href="/">Home</NavLink>
-            {session && session.user.role >= (UserRole.OPERATOR as number) && (
-                <NavLink href="/drafts">My Drafts</NavLink>
-            )}
-            {session && session.user.role === (UserRole.OPERATOR as number) && (
-                <>
-                    <NavLink href="/chat">My chats</NavLink>
-                </>
-            )}
-        </div>
-    );
-
-    const right = (
-        <Box sx={{ marginLeft: 'auto' }}>
-            {session ? (
-                <>
-                    {session.user.role > (UserRole.USER as number) && (
-                        <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={changeStatus}
-                        >
-                            <OnlinePredictionIcon
-                                color={
-                                    session.user.isOnline
-                                        ? 'success'
-                                        : 'warning'
-                                }
-                            />
-                        </IconButton>
-                    )}
-                    <Box component="div" sx={{ display: 'inline' }}>
-                        {session.user.name} ({session.user.email}) /
-                        {session.user.role}/
-                    </Box>
-                    <Button href="/create">New post</Button>
-
-                    <Button onClick={() => signOut()}>Log out</Button>
-                </>
-            ) : (
-                <>
-                    <Button
-                        href="/api/auth/signin"
-                        data-active={isActive('/signup')}
-                    >
-                        Log in
-                    </Button>
-                </>
-            )}
-        </Box>
-    );
-
     return (
-        <nav>
-            {left}
-            {right}
-            <style jsx>{`
-                nav {
-                    display: flex;
-                    padding: 0;
-                    align-items: center;
-                }
-            `}</style>
+        <nav className="flex items-center justify-between p-2 align-middle">
+            <div
+                className={`${truculenta.className} flex basis-1/4 items-center justify-start text-2xl text-cyan-800`}
+            >
+                <Link href={'/'}>Soulful</Link>
+            </div>
+            <div className="flex w-1/4 divide-x-2 divide-slate-200 rounded-lg shadow">
+                <NavLink className="rounded-l-md" href="/">
+                    Home
+                </NavLink>
+                {session &&
+                    session.user.role > (UserRole.OPERATOR as number) && (
+                        <NavLink className="rounded-r-md" href="/drafts">
+                            Чернетки
+                        </NavLink>
+                    )}
+
+                {session &&
+                    session.user.role === (UserRole.OPERATOR as number) && (
+                        <>
+                            <NavLink href="/drafts">Чернетки</NavLink>
+                            <NavLink className="rounded-r-md" href="/chat">
+                                Чати
+                            </NavLink>
+                        </>
+                    )}
+            </div>
+            <div className="flex basis-1/4 justify-end">
+                {session ? (
+                    <>
+                        {session.user.role > (UserRole.USER as number) && (
+                            <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={changeStatus}
+                            >
+                                <OnlinePredictionIcon
+                                    color={
+                                        session.user.isOnline
+                                            ? 'success'
+                                            : 'warning'
+                                    }
+                                />
+                            </IconButton>
+                        )}
+
+                        <div className="flex items-center gap-2">
+                            <Image
+                                src={session.user.image}
+                                alt={`@${session.user.name}'s profile`}
+                                className="hidden rounded-full lg:block"
+                                width={32}
+                                height={32}
+                            />
+                            <p
+                                className="leading-4"
+                                title={`${session.user.email}) /
+                                ${session.user.role}/`}
+                            >{`${session.user.name}`}</p>
+                            <Link href="/create" className="btn-primary">
+                                Новий допис
+                            </Link>
+
+                            <button
+                                className="btn-warning uppercase"
+                                onClick={() => signOut()}
+                            >
+                                Вихід
+                            </button>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <Link
+                            href="/api/auth/signin"
+                            data-active={isActive('/signup')}
+                            className=""
+                        >
+                            Увійти
+                        </Link>
+                    </>
+                )}
+            </div>
         </nav>
     );
 };

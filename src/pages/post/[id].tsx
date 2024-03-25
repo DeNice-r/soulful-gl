@@ -2,7 +2,7 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
-import ConstrainedLayout from '~/components/ConstrainedLayout';
+import Layout from '~/components/Layout';
 import Image from 'next/image';
 import { api } from '~/utils/api';
 import { isAtLeast } from '~/utils/frontend/auth';
@@ -37,7 +37,7 @@ const Post: React.FC = () => {
     };
 
     return (
-        <ConstrainedLayout>
+        <Layout>
             <div>
                 <h2>{post.title}</h2>
                 <p>By {post?.author?.name || 'Unknown author'}</p>
@@ -63,28 +63,7 @@ const Post: React.FC = () => {
                         </button>
                     )}
             </div>
-            <style jsx>{`
-                .page {
-                    background: var(--geist-background);
-                    padding: 2rem;
-                }
-
-                .actions {
-                    margin-top: 2rem;
-                }
-
-                button {
-                    background: #ececec;
-                    border: 0;
-                    border-radius: 0.125rem;
-                    padding: 1rem 2rem;
-                }
-
-                button + button {
-                    margin-left: 1rem;
-                }
-            `}</style>
-        </ConstrainedLayout>
+        </Layout>
     );
 };
 

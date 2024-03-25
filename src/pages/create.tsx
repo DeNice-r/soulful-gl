@@ -1,6 +1,6 @@
 import React, { type ChangeEvent, useState } from 'react';
 import Router from 'next/router';
-import ConstrainedLayout from '../components/ConstrainedLayout';
+import Layout from '~/components/Layout';
 import { uploadImage } from '~/utils/s3/frontend';
 
 const Draft: React.FC = () => {
@@ -46,68 +46,60 @@ const Draft: React.FC = () => {
     };
 
     return (
-        <ConstrainedLayout>
-            <div>
-                <form onSubmit={submitData}>
-                    <h1>New Draft</h1>
-                    <input
-                        autoFocus
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Title"
-                        type="text"
-                        value={title}
-                    />
-                    <textarea
-                        cols={50}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Description"
-                        rows={8}
-                        value={description}
-                    />
-                    <input type="file" onChange={handleFileChange} />
-                    <input
-                        disabled={!description || !title}
-                        type="submit"
-                        value="Create"
-                    />
-                    <a
-                        className="back"
-                        href="#"
-                        onClick={() => Router.push('/')}
-                    >
-                        or Cancel
-                    </a>
+        <Layout>
+            <div className="flex h-full flex-col items-center justify-center gap-4">
+                <p className="text-center text-2xl font-bold">Новий Допис</p>
+                <form
+                    onSubmit={submitData}
+                    className="flex flex-col items-center justify-between gap-4 rounded-lg shadow-lg md:mb-20 md:h-1/2 md:w-4/5 md:bg-slate-100 md:py-8"
+                >
+                    <div className="flex h-2/3 flex-col gap-4 md:w-11/12 md:flex-row">
+                        <div className="flex basis-1/3 items-start">
+                            <div className="aspect-1.91/1 w-full rounded-lg border-2 bg-white shadow-inner">
+                                <input
+                                    type="file"
+                                    onChange={handleFileChange}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex basis-2/3 flex-col gap-4">
+                            <input
+                                autoFocus
+                                onChange={(e) => setTitle(e.target.value)}
+                                placeholder="Заголовок"
+                                type="text"
+                                value={title}
+                                className="mx-0 rounded-lg border-2 border-solid p-2 active:border-slate-800"
+                            />
+                            <textarea
+                                cols={50}
+                                onChange={(e) => setDescription(e.target.value)}
+                                placeholder="Вміст"
+                                rows={8}
+                                value={description}
+                                className="row-span-3 mx-0 flex-grow resize-none rounded-lg border-2 border-solid p-2 active:border-slate-800"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-center gap-4">
+                        <input
+                            disabled={!description || !title}
+                            type="submit"
+                            value="Створити"
+                            className="cursor-pointer rounded-md border-0 bg-sky-600 px-8 py-4 text-slate-50 transition-colors hover:bg-sky-500"
+                            // unactive bg-slate-200
+                        />
+                        <a
+                            className="rounded-md bg-slate-200 px-8 py-4 text-red-500 transition-colors hover:bg-red-600 hover:text-slate-50"
+                            href="#"
+                            onClick={() => Router.push('/')}
+                        >
+                            Відмінити
+                        </a>
+                    </div>
                 </form>
             </div>
-            <style jsx>{`
-                .page {
-                    background: var(--geist-background);
-                    padding: 3rem;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                }
-
-                input[type='text'],
-                textarea {
-                    width: 100%;
-                    padding: 0.5rem;
-                    margin: 0.5rem 0;
-                    border-radius: 0.25rem;
-                    border: 0.125rem solid rgba(0, 0, 0, 0.2);
-                }
-
-                input[type='submit'] {
-                    background: #ececec;
-                    border: 0;
-                    padding: 1rem 2rem;
-                }
-
-                .back {
-                    margin-left: 1rem;
-                }
-            `}</style>
-        </ConstrainedLayout>
+        </Layout>
     );
 };
 

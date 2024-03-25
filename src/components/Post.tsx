@@ -9,8 +9,11 @@ const Post: React.FC<{ post: RouterOutputs['post']['get'][number] }> = ({
 }) => {
     const authorName = post.author ? post.author.name : 'Unknown author';
     return (
-        <div onClick={() => Router.push('/post/[id]', `/post/${post.id}`)}>
-            <h2>{post.title}</h2>
+        <div
+            className="flex flex-col items-center p-8 text-inherit"
+            onClick={() => Router.push('/post/[id]', `/post/${post.id}`)}
+        >
+            <p className="text-xl">{post.title}</p>
             {post.image && (
                 <Image
                     src={post.image}
@@ -21,12 +24,6 @@ const Post: React.FC<{ post: RouterOutputs['post']['get'][number] }> = ({
             )}
             <small>By {authorName}</small>
             <ReactMarkdown>{post.description}</ReactMarkdown>
-            <style jsx>{`
-                div {
-                    color: inherit;
-                    padding: 2rem;
-                }
-            `}</style>
         </div>
     );
 };

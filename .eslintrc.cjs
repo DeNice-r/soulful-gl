@@ -46,7 +46,7 @@ const config = {
             }
         ],
         "@typescript-eslint/no-explicit-any": "warn",
-        "prettier/prettier": "warn",
+        "prettier/prettier": "error",
         "unused-imports/no-unused-imports": "warn",
         "unused-imports/no-unused-vars": [
             "warn",
@@ -60,6 +60,7 @@ const config = {
         "no-undef": "off",
         "@typescript-eslint/no-unsafe-argument": "off",
         "@typescript-eslint/no-unsafe-call": "off",
+        "indent": "off"
     }
 }
 module.exports = config;

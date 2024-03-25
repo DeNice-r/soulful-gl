@@ -2,7 +2,6 @@ import React from 'react';
 import { useSession } from 'next-auth/react';
 import Layout from '~/components/Layout';
 import Post from '../components/Post';
-import ConstrainedLayout from '../components/ConstrainedLayout';
 import { UserRole } from '~/utils/types';
 import { isAtLeast } from '~/utils/frontend/auth';
 import { api } from '~/utils/api';
@@ -22,38 +21,28 @@ const Drafts: React.FC = () => {
 
     if (!drafts) {
         return (
-            <ConstrainedLayout>
+            <Layout>
                 <div>No drafts found so far...</div>
-            </ConstrainedLayout>
+            </Layout>
         );
     }
 
     return (
-        <ConstrainedLayout>
-            <div className="page">
+        <Layout>
+            <div className="flex flex-col items-center justify-center p-3">
                 <h1>My Drafts</h1>
-                <main>
+                <div className="flex flex-col gap-2">
                     {drafts.map((post) => (
-                        <div key={post.id} className="post">
+                        <div
+                            key={post.id}
+                            className="bg-slate-100 transition hover:shadow"
+                        >
                             <Post post={post} />
                         </div>
                     ))}
-                </main>
+                </div>
             </div>
-            <style jsx>{`
-                .post {
-                    transition: box-shadow 0.1s ease-in;
-                }
-
-                .post:hover {
-                    box-shadow: 1px 1px 3px #aaa;
-                }
-
-                .post + .post {
-                    margin-top: 2rem;
-                }
-            `}</style>
-        </ConstrainedLayout>
+        </Layout>
     );
 };
 
