@@ -76,7 +76,7 @@ export const postRouter = createTRPCRouter({
         .query(async ({ input, ctx }) => {
             return ctx.db.post.findMany({
                 where: {
-                    author: { email: ctx.session.user.email },
+                    authorId: ctx.session.user.id,
                     published: false,
                 },
                 include: {
