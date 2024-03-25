@@ -3,8 +3,8 @@ import { type NextApiRequest, type NextApiResponse } from 'next';
 import { db } from '~/server/db';
 
 // POST /api/post
-// Required fields in body: title
-// Optional fields in body: content
+// Required fields in body: title, description
+// Optional fields in body: image
 export default async function handle(
     req: NextApiRequest,
     res: NextApiResponse,
@@ -14,13 +14,13 @@ export default async function handle(
         return;
     }
 
-    if (!req.body.title || !req.body.content) {
+    if (!req.body.title || !req.body.description) {
         res.status(400).end();
         return;
     }
-    const { title, content, image } = req.body as {
+    const { title, description, image } = req.body as {
         title: string;
-        content: string;
+        description: string;
         image: string;
     };
 
@@ -28,7 +28,7 @@ export default async function handle(
     const result = await db.post.create({
         data: {
             title,
-            content,
+            description,
             image,
             author: { connect: { email: session?.user?.email } },
         },

@@ -10,7 +10,7 @@ export type PostProps = {
         name: string;
         email: string;
     } | null;
-    content: string;
+    description: string;
     image: string;
     published: boolean;
 };
@@ -29,7 +29,7 @@ const Post: React.FC<{ post: PostProps }> = ({ post }) => {
                 ></Image>
             )}
             <small>By {authorName}</small>
-            <ReactMarkdown>post.content</ReactMarkdown>
+            <ReactMarkdown>{post.description}</ReactMarkdown>
             <style jsx>{`
                 div {
                     color: inherit;

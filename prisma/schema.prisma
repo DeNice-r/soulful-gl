@@ -130,9 +130,9 @@ model Tag {
 model Post {
   id String @id @default(cuid())
 
-  title   String
-  content String
-  image   String?
+  title       String
+  description String
+  image       String?
 
   published Boolean @default(false)
   author    User?   @relation(fields: [authorId], references: [id])

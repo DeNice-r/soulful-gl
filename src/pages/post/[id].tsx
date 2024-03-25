@@ -67,7 +67,7 @@ const Post: React.FC<PostProps> = (props) => {
                     width={200}
                     height={200}
                 />
-                <ReactMarkdown>props.content</ReactMarkdown>
+                <ReactMarkdown>{props.description}</ReactMarkdown>
                 {!props.published &&
                     userHasValidSession &&
                     postBelongsToUser && (
