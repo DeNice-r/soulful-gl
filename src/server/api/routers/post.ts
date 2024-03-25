@@ -1,7 +1,6 @@
 import {
-    adminProcedure,
     createTRPCRouter,
-    personnelProcedure,
+    permissionProcedure,
     publicProcedure,
 } from '~/server/api/trpc';
 import {
@@ -71,7 +70,7 @@ export const postRouter = createTRPCRouter({
         return null;
     }),
 
-    getMyUnpublished: personnelProcedure
+    getOwnUnpublished: permissionProcedure
         .input(PageSchema)
         .query(async ({ input, ctx }) => {
             return ctx.db.post.findMany({
@@ -91,7 +90,7 @@ export const postRouter = createTRPCRouter({
             });
         }),
 
-    getUnpublished: adminProcedure
+    getAnyUnpublished: permissionProcedure
         .input(PageSchema)
         .query(async ({ input, ctx }) => {
             return ctx.db.post.findMany({
@@ -110,7 +109,7 @@ export const postRouter = createTRPCRouter({
             });
         }),
 
-    create: personnelProcedure
+    create: permissionProcedure
         .input(PostSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.post.create({
@@ -129,7 +128,7 @@ export const postRouter = createTRPCRouter({
             });
         }),
 
-    updateMy: personnelProcedure
+    updateOwn: permissionProcedure
         .input(PostUpdateSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.post.update({
@@ -138,7 +137,7 @@ export const postRouter = createTRPCRouter({
             });
         }),
 
-    update: adminProcedure
+    updateAny: permissionProcedure
         .input(PostUpdateSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.post.update({
@@ -147,7 +146,7 @@ export const postRouter = createTRPCRouter({
             });
         }),
 
-    deleteMy: personnelProcedure
+    deleteOwn: permissionProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.post.delete({
@@ -155,7 +154,7 @@ export const postRouter = createTRPCRouter({
             });
         }),
 
-    delete: adminProcedure
+    deleteAny: permissionProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.post.delete({ where: { id: input } });
