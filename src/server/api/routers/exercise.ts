@@ -50,7 +50,12 @@ export const exerciseRouter = createTRPCRouter({
         .input(ExerciseStepSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.exerciseStep.create({
-                data: input,
+                data: {
+                    ...input,
+                    author: {
+                        connect: { id: ctx.session.user.id },
+                    },
+                },
             });
         }),
 

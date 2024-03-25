@@ -63,6 +63,7 @@ model User {
   recommendations Recommendation[]
   posts           Post[]
   exercises       Exercise[]
+  exerciseSteps   ExerciseStep[]
 
   createdAt                  DateTime @default(now())
   latestStatusConfirmationAt DateTime @default(now())
@@ -195,4 +196,10 @@ model ExerciseStep {
   timeSeconds       Int?
 
   exercises Exercise[]
+
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
