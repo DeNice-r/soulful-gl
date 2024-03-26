@@ -1,5 +1,4 @@
 import {
-    adminProcedure,
     createTRPCRouter,
     permissionProcedure,
     publicProcedure,
@@ -140,7 +139,7 @@ export const recommendationRouter = createTRPCRouter({
             });
         }),
 
-    deleteAny: adminProcedure
+    deleteAny: permissionProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.recommendation.delete({ where: { id: input } });
