@@ -1,5 +1,5 @@
 import {
-    CUIDObjectSchema,
+    CUIDSchema,
     ExerciseSchema,
     ExerciseStepSchema,
     ExerciseUpdateSchema,
@@ -8,7 +8,7 @@ import {
 
 import {
     createTRPCRouter,
-    protectedProcedure,
+    permissionProcedure,
     publicProcedure,
 } from '~/server/api/trpc';
 
@@ -21,7 +21,7 @@ export const exerciseRouter = createTRPCRouter({
         });
     }),
 
-    create: protectedProcedure
+    create: permissionProcedure
         .input(ExerciseSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.exercise.create({
@@ -46,7 +46,7 @@ export const exerciseRouter = createTRPCRouter({
             });
         }),
 
-    createStep: protectedProcedure
+    createStep: permissionProcedure
         .input(ExerciseStepSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.exerciseStep.create({
@@ -59,7 +59,7 @@ export const exerciseRouter = createTRPCRouter({
             });
         }),
 
-    update: protectedProcedure
+    update: permissionProcedure
         .input(ExerciseUpdateSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.exercise.update({
@@ -89,7 +89,16 @@ export const exerciseRouter = createTRPCRouter({
             });
         }),
 
-    updateStep: protectedProcedure
+    updateStepOwn: permissionProcedure
+        .input(ExerciseStepSchema)
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.exerciseStep.update({
+                where: { id: input.id, authorId: ctx.session.user.id },
+                data: input,
+            });
+        }),
+
+    updateStepAny: permissionProcedure
         .input(ExerciseStepSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.exerciseStep.update({
@@ -98,15 +107,36 @@ export const exerciseRouter = createTRPCRouter({
             });
         }),
 
-    delete: protectedProcedure
-        .input(CUIDObjectSchema)
+    deleteOwn: permissionProcedure
+        .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
-            return ctx.db.exercise.delete({ where: { ...input } });
+            return ctx.db.exercise.delete({
+                where: { id: input, authorId: ctx.session.user.id },
+            });
         }),
 
-    deleteStep: protectedProcedure
-        .input(CUIDObjectSchema)
+    deleteAny: permissionProcedure
+        .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
-            return ctx.db.exerciseStep.delete({ where: { ...input } });
+            return ctx.db.exercise.delete({ where: { id: input } });
+        }),
+
+    deleteStepOwn: permissionProcedure
+        .input(CUIDSchema)
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.exerciseStep.delete({
+                where: {
+                    id: input,
+                    authorId: ctx.session.user.id,
+                },
+            });
+        }),
+
+    deleteStepAny: permissionProcedure
+        .input(CUIDSchema)
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.exerciseStep.delete({
+                where: { id: input },
+            });
         }),
 });
