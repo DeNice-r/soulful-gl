@@ -6,16 +6,13 @@
     "license": "MIT",
     "scripts": {
         "dev": "next dev --port 80",
-
         "build": "next build",
         "start": "next start",
-
         "db:push": "prisma db push",
         "db:studio": "prisma studio",
         "postinstall": "prisma generate",
-
+        "db:updatePermissions": "tsx scripts/updatePermissions.ts",
         "lint": "next lint",
-
         "deploy": "vercel deploy --yes",
         "deploy:offline": "vercel build --yes && vercel deploy --prebuilt",
         "deploy:prod": "vercel deploy --prod --yes",
@@ -71,6 +68,7 @@
         "prettier-plugin-tailwindcss": "^0.5.11",
         "prisma": "^5.10.2",
         "tailwindcss": "^3.4.1",
+        "tsx": "^4.7.1",
         "typescript": "^5.4.2"
     },
     "ct3aMetadata": {
