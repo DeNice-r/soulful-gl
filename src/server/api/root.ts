@@ -1,6 +1,7 @@
 import { postRouter } from '~/server/api/routers/post';
 import { exerciseRouter } from '~/server/api/routers/exercise';
 import { createCallerFactory, createTRPCRouter } from '~/server/api/trpc';
+import { recommendationRouter } from '~/server/api/routers/recommendation';
 
 /**
  * This is the primary router for your server.
@@ -8,6 +9,7 @@ import { createCallerFactory, createTRPCRouter } from '~/server/api/trpc';
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
+    recommendation: recommendationRouter,
     post: postRouter,
     exercise: exerciseRouter,
 });
