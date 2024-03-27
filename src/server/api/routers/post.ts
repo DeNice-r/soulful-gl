@@ -10,8 +10,8 @@ import {
     PostUpdateSchema,
 } from '~/utils/schemas';
 import type { z } from 'zod';
-import { isAtLeast } from '~/utils/authAssertions';
-import { UserRole } from '~/utils/types';
+import { isPermitted } from '~/utils/authAssertions';
+import { AccessType } from '~/utils/types';
 
 function getUpdateData(input: z.infer<typeof PostUpdateSchema>) {
     return {
@@ -63,39 +63,24 @@ export const postRouter = createTRPCRouter({
             post.published ||
             (ctx.session &&
                 (ctx.session.user.id === post.authorId ||
-                    isAtLeast(ctx?.session.user?.role, UserRole.ADMIN)))
+                    isPermitted(
+                        ctx.session?.user?.permissions,
+                        ctx.entity,
+                        ctx.action,
+                    ) === AccessType.ALL))
         )
             return post;
 
         return null;
     }),
 
-    getOwnUnpublished: permissionProcedure
-        .input(PageSchema)
-        .query(async ({ input, ctx }) => {
-            return ctx.db.post.findMany({
-                where: {
-                    authorId: ctx.session.user.id,
-                    published: false,
-                },
-                include: {
-                    author: {
-                        select: { name: true },
-                    },
-                },
-
-                orderBy: { createdAt: 'desc' },
-                skip: (input.page - 1) * input.limit,
-                take: input.limit,
-            });
-        }),
-
-    getAnyUnpublished: permissionProcedure
+    getUnpublished: permissionProcedure
         .input(PageSchema)
         .query(async ({ input, ctx }) => {
             return ctx.db.post.findMany({
                 where: {
                     published: false,
+                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
                 },
                 include: {
                     author: {
@@ -128,35 +113,26 @@ export const postRouter = createTRPCRouter({
             });
         }),
 
-    updateOwn: permissionProcedure
+    update: permissionProcedure
         .input(PostUpdateSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.post.update({
-                where: { id: input.id, authorId: ctx.session.user.id },
+                where: {
+                    id: input.id,
+                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
+                },
                 data: getUpdateData(input),
             });
         }),
 
-    updateAny: permissionProcedure
-        .input(PostUpdateSchema)
-        .mutation(async ({ ctx, input }) => {
-            return ctx.db.post.update({
-                where: { id: input.id },
-                data: getUpdateData(input),
-            });
-        }),
-
-    deleteOwn: permissionProcedure
+    delete: permissionProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.post.delete({
-                where: { id: input, authorId: ctx.session.user.id },
+                where: {
+                    id: input,
+                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
+                },
             });
-        }),
-
-    deleteAny: permissionProcedure
-        .input(CUIDSchema)
-        .mutation(async ({ ctx, input }) => {
-            return ctx.db.post.delete({ where: { id: input } });
         }),
 });
