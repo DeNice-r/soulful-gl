@@ -29,12 +29,12 @@ const Blog: React.FC = () => {
                         </p>
                     </div>
                 </div>
-                <div className="flex gap-8 bg-neutral-200 p-8 shadow-inner">
+                <div className="flex flex-col justify-between gap-16 px-40 py-16 shadow-inner md:flex-row md:flex-wrap">
                     {posts.data &&
                         posts.data.map((post) => (
                             <div
                                 key={post.id}
-                                className="flex-1 justify-center bg-emerald-50 transition-shadow duration-100 ease-in hover:shadow"
+                                className="min-w-72 max-w-80 flex-1 justify-center rounded bg-blue-200 transition-shadow duration-100 ease-in hover:cursor-pointer hover:shadow"
                             >
                                 <Post post={post} />
                             </div>

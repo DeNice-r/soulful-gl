@@ -5,8 +5,8 @@ import { uploadImage } from '~/utils/s3/frontend';
 import { api } from '~/utils/api';
 
 const Draft: React.FC = () => {
-    const [title, setTitle] = useState('Title');
-    const [description, setDescription] = useState('Description');
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
     const [file, setFile] = useState<File | null>();
     const createMutation = api.post.create.useMutation();
 
