@@ -9,28 +9,8 @@ import {
     PostSchema,
     PostUpdateSchema,
 } from '~/utils/schemas';
-import type { z } from 'zod';
 import { isPermitted } from '~/utils/authAssertions';
 import { AccessType } from '~/utils/types';
-
-function getUpdateData(input: z.infer<typeof PostUpdateSchema>) {
-    return {
-        title: input.title,
-        description: input.description,
-        image: input.image,
-
-        published: input.published,
-
-        ...(input.tags && {
-            tags: {
-                connectOrCreate: input.tags.map((tag) => ({
-                    where: { title: tag },
-                    create: { title: tag },
-                })),
-            },
-        }),
-    };
-}
 
 export const postRouter = createTRPCRouter({
     get: publicProcedure.input(PageSchema).query(async ({ input, ctx }) => {
@@ -121,7 +101,22 @@ export const postRouter = createTRPCRouter({
                     id: input.id,
                     ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
                 },
-                data: getUpdateData(input),
+                data: {
+                    title: input.title,
+                    description: input.description,
+                    image: input.image,
+
+                    published: input.published,
+
+                    ...(input.tags && {
+                        tags: {
+                            connectOrCreate: input.tags.map((tag) => ({
+                                where: { title: tag },
+                                create: { title: tag },
+                            })),
+                        },
+                    }),
+                },
             });
         }),
 

@@ -11,17 +11,6 @@ import {
 } from '~/utils/schemas';
 import { isPermitted } from '~/utils/authAssertions';
 import { AccessType } from '~/utils/types';
-import { type z } from 'zod';
-
-function getUpdateData(input: z.infer<typeof RecommendationUpdateSchema>) {
-    return {
-        title: input.title,
-        description: input.description,
-        image: input.image,
-
-        published: input.published,
-    };
-}
 
 export const recommendationRouter = createTRPCRouter({
     get: publicProcedure.input(PageSchema).query(async ({ input, ctx }) => {
@@ -106,7 +95,13 @@ export const recommendationRouter = createTRPCRouter({
                     id: input.id,
                     ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
                 },
-                data: getUpdateData(input),
+                data: {
+                    title: input.title,
+                    description: input.description,
+                    image: input.image,
+
+                    published: input.published,
+                },
             });
         }),
 
