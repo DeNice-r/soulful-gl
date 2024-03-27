@@ -63,7 +63,10 @@ export const exerciseRouter = createTRPCRouter({
         .input(ExerciseUpdateSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.exercise.update({
-                where: { id: input.id },
+                where: {
+                    id: input.id,
+                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
+                },
                 data: {
                     title: input.title,
                     description: input.description,
@@ -89,54 +92,41 @@ export const exerciseRouter = createTRPCRouter({
             });
         }),
 
-    updateStepOwn: permissionProcedure
+    updateStep: permissionProcedure
         .input(ExerciseStepSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.exerciseStep.update({
-                where: { id: input.id, authorId: ctx.session.user.id },
-                data: input,
+                where: {
+                    id: input.id,
+                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
+                },
+                data: {
+                    title: input.title,
+                    description: input.description,
+                    image: input.image,
+                },
             });
         }),
 
-    updateStepAny: permissionProcedure
-        .input(ExerciseStepSchema)
-        .mutation(async ({ ctx, input }) => {
-            return ctx.db.exerciseStep.update({
-                where: { id: input.id },
-                data: input,
-            });
-        }),
-
-    deleteOwn: permissionProcedure
+    delete: permissionProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.exercise.delete({
-                where: { id: input, authorId: ctx.session.user.id },
+                where: {
+                    id: input,
+                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
+                },
             });
         }),
 
-    deleteAny: permissionProcedure
-        .input(CUIDSchema)
-        .mutation(async ({ ctx, input }) => {
-            return ctx.db.exercise.delete({ where: { id: input } });
-        }),
-
-    deleteStepOwn: permissionProcedure
+    deleteStep: permissionProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.exerciseStep.delete({
                 where: {
                     id: input,
-                    authorId: ctx.session.user.id,
+                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
                 },
-            });
-        }),
-
-    deleteStepAny: permissionProcedure
-        .input(CUIDSchema)
-        .mutation(async ({ ctx, input }) => {
-            return ctx.db.exerciseStep.delete({
-                where: { id: input },
             });
         }),
 });
