@@ -1,4 +1,4 @@
-import { type RoleAssertionFunction } from '~/utils/types';
+import { AccessType, type RoleAssertionFunction } from '~/utils/types';
 
 export const isAtLeast: RoleAssertionFunction = (userRole, thesholdRole) => {
     return (userRole as number) >= (thesholdRole as number);
@@ -17,11 +17,29 @@ export const isPermitted = (
     entity: string,
     action: string,
 ) => {
-    const fitPermissions = [
-        `${entity}:${action}`,
-        `${entity}:*`,
-        `*:${action}`,
-        '*:*',
-    ];
-    return userPermissions.some((element) => fitPermissions.includes(element));
+    const specificPermission = `${entity}:${action}`;
+    const generalPermission = `${entity}:*`;
+    const actionPermission = `*:${action}`;
+    const allOwnPermission = '*:*';
+    const allPermission = '*:*:*';
+
+    if (
+        userPermissions.includes(`${specificPermission}:*`) ||
+        userPermissions.includes(`${generalPermission}:*`) ||
+        userPermissions.includes(allPermission)
+    ) {
+        return AccessType.ALL;
+    }
+
+    if (
+        userPermissions.includes(specificPermission) ||
+        userPermissions.includes(generalPermission) ||
+        userPermissions.includes(actionPermission) ||
+        userPermissions.includes(allOwnPermission)
+    ) {
+        return AccessType.OWN;
+    }
+
+    // If none of the conditions are met, return NONE
+    return AccessType.NONE;
 };

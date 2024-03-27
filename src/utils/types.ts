@@ -15,6 +15,12 @@ export enum BackgroundPattern {
     F,
 }
 
+export enum AccessType {
+    NONE,
+    OWN,
+    ALL,
+}
+
 export interface ExtendedChat extends Chat {
     messages: Message[];
 }

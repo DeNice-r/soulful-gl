@@ -16,7 +16,7 @@ import { ZodError } from 'zod';
 import { getServerSession } from '~/utils/auth';
 import { db } from '~/server/db';
 import { isAtLeast, isPermitted } from '~/utils/authAssertions';
-import { UserRole } from '~/utils/types';
+import { AccessType, UserRole } from '~/utils/types';
 
 /**
  * 1. CONTEXT
@@ -28,6 +28,9 @@ import { UserRole } from '~/utils/types';
 
 interface CreateContextOptions {
     session: Session | null;
+    entity: string;
+    action: string;
+    isFullAccess?: boolean;
 }
 
 /**
@@ -44,6 +47,8 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
     return {
         session: opts.session,
         db,
+        entity: opts.entity,
+        action: opts.action,
     };
 };
 
@@ -59,20 +64,30 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
     // Get the session from the server using the getServerSession wrapper function
     const session = await getServerSession(req, res);
 
-    if (session && req.query.trpc && typeof req.query.trpc === 'string') {
-        const [entity, action] = req.query.trpc.split('.').splice(0, 2);
+    if (!req.query.trpc || !(typeof req.query.trpc === 'string')) {
+        throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message:
+                'Invalid tRPC query (I thought it was impossible to get here)',
+        });
+    }
 
+    const [entity, action] = req.query.trpc.split('.').slice(0, 2);
+
+    if (session) {
         return createInnerTRPCContext({
             session: {
                 ...session,
-                entity,
-                action,
             },
+            entity,
+            action,
         });
     }
 
     return createInnerTRPCContext({
         session,
+        entity,
+        action,
     });
 };
 
@@ -144,23 +159,25 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
     }
     return next({
         ctx: {
-            // infers the `session` as non-nullable
             session: { ...ctx.session, user: ctx.session.user },
         },
     });
 });
 
 export const permissionProcedure = protectedProcedure.use(({ ctx, next }) => {
-    if (
-        !isPermitted(
-            ctx.session.user.permissions,
-            ctx.session.entity,
-            ctx.session.action,
-        )
-    ) {
+    const accessType = isPermitted(
+        ctx.session.user.permissions,
+        ctx.entity,
+        ctx.action,
+    );
+    if (accessType === AccessType.NONE) {
         throw new TRPCError({ code: 'UNAUTHORIZED' });
     }
-    return next();
+    return next({
+        ctx: {
+            isFullAccess: accessType === AccessType.ALL,
+        },
+    });
 });
 
 export const personnelProcedure = protectedProcedure.use(({ ctx, next }) => {
