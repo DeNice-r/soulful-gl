@@ -1,7 +1,6 @@
 import {
-    adminProcedure,
     createTRPCRouter,
-    personnelProcedure,
+    permissionProcedure,
     publicProcedure,
 } from '~/server/api/trpc';
 import {
@@ -10,19 +9,8 @@ import {
     RecommendationSchema,
     RecommendationUpdateSchema,
 } from '~/utils/schemas';
-import { isAtLeast } from '~/utils/frontend/auth';
-import { UserRole } from '~/utils/types';
-import { type z } from 'zod';
-
-function getUpdateData(input: z.infer<typeof RecommendationUpdateSchema>) {
-    return {
-        title: input.title,
-        description: input.description,
-        image: input.image,
-
-        published: input.published,
-    };
-}
+import { isPermitted } from '~/utils/authAssertions';
+import { AccessType } from '~/utils/types';
 
 export const recommendationRouter = createTRPCRouter({
     get: publicProcedure.input(PageSchema).query(async ({ input, ctx }) => {
@@ -55,20 +43,24 @@ export const recommendationRouter = createTRPCRouter({
             recommendation.published ||
             (ctx.session &&
                 (ctx.session.user.id === recommendation.authorId ||
-                    isAtLeast(ctx?.session.user?.role, UserRole.ADMIN)))
+                    isPermitted(
+                        ctx.session?.user?.permissions,
+                        ctx.entity,
+                        ctx.action,
+                    ) === AccessType.ALL))
         )
             return recommendation;
 
         return null;
     }),
 
-    getMyUnpublished: personnelProcedure
+    getUnpublished: permissionProcedure
         .input(PageSchema)
         .query(async ({ input, ctx }) => {
             return ctx.db.recommendation.findMany({
                 where: {
-                    authorId: ctx.session.user.id,
                     published: false,
+                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
                 },
                 include: {
                     author: {
@@ -82,26 +74,7 @@ export const recommendationRouter = createTRPCRouter({
             });
         }),
 
-    getUnpublished: adminProcedure
-        .input(PageSchema)
-        .query(async ({ input, ctx }) => {
-            return ctx.db.recommendation.findMany({
-                where: {
-                    published: false,
-                },
-                include: {
-                    author: {
-                        select: { name: true },
-                    },
-                },
-
-                orderBy: { createdAt: 'desc' },
-                skip: (input.page - 1) * input.limit,
-                take: input.limit,
-            });
-        }),
-
-    create: personnelProcedure
+    create: permissionProcedure
         .input(RecommendationSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.recommendation.create({
@@ -114,35 +87,32 @@ export const recommendationRouter = createTRPCRouter({
             });
         }),
 
-    updateMy: personnelProcedure
+    update: permissionProcedure
         .input(RecommendationUpdateSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.recommendation.update({
-                where: { id: input.id, authorId: ctx.session.user.id },
-                data: getUpdateData(input),
+                where: {
+                    id: input.id,
+                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
+                },
+                data: {
+                    title: input.title,
+                    description: input.description,
+                    image: input.image,
+
+                    published: input.published,
+                },
             });
         }),
 
-    update: adminProcedure
-        .input(RecommendationUpdateSchema)
-        .mutation(async ({ ctx, input }) => {
-            return ctx.db.recommendation.update({
-                where: { id: input.id },
-                data: getUpdateData(input),
-            });
-        }),
-
-    deleteMy: personnelProcedure
+    delete: permissionProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.recommendation.delete({
-                where: { id: input, authorId: ctx.session.user.id },
+                where: {
+                    id: input,
+                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
+                },
             });
-        }),
-
-    delete: adminProcedure
-        .input(CUIDSchema)
-        .mutation(async ({ ctx, input }) => {
-            return ctx.db.recommendation.delete({ where: { id: input } });
         }),
 });

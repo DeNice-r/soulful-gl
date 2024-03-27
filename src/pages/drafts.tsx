@@ -3,7 +3,7 @@ import { useSession } from 'next-auth/react';
 import Layout from '~/components/Layout';
 import Post from '../components/Post';
 import { UserRole } from '~/utils/types';
-import { isAtLeast } from '~/utils/frontend/auth';
+import { isAtLeast } from '~/utils/authAssertions';
 import { api } from '~/utils/api';
 
 const Drafts: React.FC = () => {
