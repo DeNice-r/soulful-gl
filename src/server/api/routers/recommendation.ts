@@ -9,8 +9,8 @@ import {
     RecommendationSchema,
     RecommendationUpdateSchema,
 } from '~/utils/schemas';
-import { isAtLeast } from '~/utils/authAssertions';
-import { UserRole } from '~/utils/types';
+import { isPermitted } from '~/utils/authAssertions';
+import { AccessType } from '~/utils/types';
 import { type z } from 'zod';
 
 function getUpdateData(input: z.infer<typeof RecommendationUpdateSchema>) {
@@ -54,39 +54,24 @@ export const recommendationRouter = createTRPCRouter({
             recommendation.published ||
             (ctx.session &&
                 (ctx.session.user.id === recommendation.authorId ||
-                    isAtLeast(ctx?.session.user?.role, UserRole.ADMIN)))
+                    isPermitted(
+                        ctx.session?.user?.permissions,
+                        ctx.entity,
+                        ctx.action,
+                    ) === AccessType.ALL))
         )
             return recommendation;
 
         return null;
     }),
 
-    getOwnUnpublished: permissionProcedure
-        .input(PageSchema)
-        .query(async ({ input, ctx }) => {
-            return ctx.db.recommendation.findMany({
-                where: {
-                    authorId: ctx.session.user.id,
-                    published: false,
-                },
-                include: {
-                    author: {
-                        select: { name: true },
-                    },
-                },
-
-                orderBy: { createdAt: 'desc' },
-                skip: (input.page - 1) * input.limit,
-                take: input.limit,
-            });
-        }),
-
-    getAnyUnpublished: permissionProcedure
+    getUnpublished: permissionProcedure
         .input(PageSchema)
         .query(async ({ input, ctx }) => {
             return ctx.db.recommendation.findMany({
                 where: {
                     published: false,
+                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
                 },
                 include: {
                     author: {
@@ -113,35 +98,26 @@ export const recommendationRouter = createTRPCRouter({
             });
         }),
 
-    updateOwn: permissionProcedure
+    update: permissionProcedure
         .input(RecommendationUpdateSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.recommendation.update({
-                where: { id: input.id, authorId: ctx.session.user.id },
+                where: {
+                    id: input.id,
+                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
+                },
                 data: getUpdateData(input),
             });
         }),
 
-    updateAny: permissionProcedure
-        .input(RecommendationUpdateSchema)
-        .mutation(async ({ ctx, input }) => {
-            return ctx.db.recommendation.update({
-                where: { id: input.id },
-                data: getUpdateData(input),
-            });
-        }),
-
-    deleteOwn: permissionProcedure
+    delete: permissionProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.recommendation.delete({
-                where: { id: input, authorId: ctx.session.user.id },
+                where: {
+                    id: input,
+                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
+                },
             });
-        }),
-
-    deleteAny: permissionProcedure
-        .input(CUIDSchema)
-        .mutation(async ({ ctx, input }) => {
-            return ctx.db.recommendation.delete({ where: { id: input } });
         }),
 });
