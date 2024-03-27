@@ -9,7 +9,7 @@ import { api } from '~/utils/api';
 
 const Drafts: React.FC = () => {
     const { data: session } = useSession();
-    const postQuery = api.post.getOwnUnpublished.useQuery();
+    const postQuery = api.post.getUnpublished.useQuery();
     const drafts = postQuery.data;
 
     if (!session || !isAtLeast(session.user.role, UserRole.OPERATOR)) {
