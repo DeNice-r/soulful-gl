@@ -10,30 +10,30 @@ const Post: React.FC<{ post: RouterOutputs['post']['get'][number] }> = ({
     const authorName = post.author ? post.author.name : 'Unknown author';
     return (
         <article
-            className="flex h-full flex-col items-center justify-between p-8 text-center text-inherit text-slate-800 md:text-left 2xl:text-center"
+            className="flex h-full flex-col items-center gap-4 p-8 text-center text-inherit text-slate-800 md:flex-row md:gap-8 md:text-left 2xl:flex-col 2xl:gap-0 2xl:text-center"
             onClick={() => Router.push('/post/[id]', `/post/${post.id}`)}
         >
-            <div className="flex flex-col items-center gap-4 md:flex-row md:items-start md:gap-8 2xl:flex-col 2xl:items-center ">
-                {post.image && (
-                    <Image
-                        src={post.image}
-                        width={1920}
-                        height={1080}
-                        alt={post.title}
-                        className="w-11/12 rounded object-contain md:w-1/3 2xl:w-11/12"
-                    ></Image>
-                )}
-                <div className="divide-stone-700 md:w-2/3 md:divide-y 2xl:w-full">
-                    <p className="text-lg font-bold md:pb-4 md:text-xl 2xl:text-3xl">
+            {post.image && (
+                <Image
+                    src={post.image}
+                    width={1920}
+                    height={1080}
+                    alt={post.title}
+                    className="w-2/3 rounded object-contain md:w-1/3 md:self-start 2xl:w-11/12 2xl:self-auto"
+                ></Image>
+            )}
+            <div className="flex h-full flex-col items-center justify-between gap-2 md:w-3/5 md:items-start md:gap-8 2xl:w-11/12 2xl:flex-col 2xl:items-center 2xl:gap-0 ">
+                <div className="divide-stone-700 md:w-4/5 md:divide-y 2xl:w-full">
+                    <p className="font-bold md:pb-4 md:text-xl 2xl:py-4 2xl:text-3xl">
                         {post.title}
                     </p>
-                    <ReactMarkdown className={'py-2 md:py-4'}>
+                    <ReactMarkdown
+                        className={'py-2 text-sm md:py-4 md:text-base'}
+                    >
                         {post.description}
                     </ReactMarkdown>
                 </div>
-            </div>
-            <div className="self-end rounded bg-stone-700 px-1 md:px-2 md:py-1 2xl:mt-4">
-                <small className="text-xs font-light text-neutral-200">
+                <small className="text-xs md:self-end md:rounded md:bg-stone-700 md:px-2 md:py-1 md:font-light md:text-neutral-200 2xl:mt-4">
                     {authorName}
                 </small>
             </div>
