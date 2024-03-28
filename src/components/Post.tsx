@@ -23,7 +23,7 @@ const Post: React.FC<{ post: RouterOutputs['post']['get'][number] }> = ({
                         className="w-11/12 rounded object-contain md:w-1/3 2xl:w-11/12"
                     ></Image>
                 )}
-                <div className="divide-stone-700 md:w-2/3 md:divide-y">
+                <div className="divide-stone-700 md:w-2/3 md:divide-y 2xl:w-full">
                     <p className="text-lg font-bold md:pb-4 md:text-xl 2xl:text-3xl">
                         {post.title}
                     </p>

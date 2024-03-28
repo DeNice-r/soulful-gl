@@ -38,13 +38,13 @@ const Header: React.FC = () => {
     };
 
     return (
-        <nav className="flex items-center justify-between p-2 align-middle">
+        <header className="flex items-center justify-between p-2 align-middle">
             <div
                 className={`${truculenta.className} flex basis-1/4 items-center justify-start text-2xl text-cyan-800`}
             >
                 <Link href={'/'}>Soulful</Link>
             </div>
-            <div className="flex w-1/4 divide-x-2 divide-slate-200 rounded-lg shadow">
+            <nav className="flex w-1/4 divide-x-2 divide-slate-200 rounded-lg shadow">
                 <NavLink className="rounded-l-md" href="/">
                     Home
                 </NavLink>
@@ -64,7 +64,7 @@ const Header: React.FC = () => {
                             </NavLink>
                         </>
                     )}
-            </div>
+            </nav>
             <div className="flex basis-1/4 justify-end">
                 {session ? (
                     <>
@@ -121,7 +121,7 @@ const Header: React.FC = () => {
                     </>
                 )}
             </div>
-        </nav>
+        </header>
     );
 };
 
