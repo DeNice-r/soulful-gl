@@ -14,8 +14,12 @@ const config = {
                 hostname: 'soulful-images.s3.eu-central-1.amazonaws.com',
                 port: '',
             },
+            {
+                protocol: 'https',
+                hostname: 'avatars.githubusercontent.com',
+                port: '',
+            },
         ],
-        domains: ['avatars.githubusercontent.com'],
     },
     /**
      * If you are using `appDir` then you must comment the below `i18n` config out.
