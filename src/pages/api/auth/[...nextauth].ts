@@ -186,7 +186,7 @@ export function requestWrapper(
                 clientSecret: env.GITHUB_SECRET,
             }),
             EmailProvider({
-                from: env.AWS_FROM_EMAIL,
+                from: env.AWS_SES_FROM_EMAIL,
                 server: {
                     host: env.AWS_SES_HOST,
                     port: env.AWS_SES_PORT,
