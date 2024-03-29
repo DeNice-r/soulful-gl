@@ -4,6 +4,7 @@ import { api } from '~/utils/api';
 import { truculenta } from '~/pages/_app';
 import Header from '~/components/Header';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const Blog: React.FC = () => {
     const posts = api.post.get.useQuery({
@@ -91,6 +92,14 @@ const Blog: React.FC = () => {
                     </div>
                 </div>
             </article>
+            <div className="flex justify-end px-8">
+                <Link
+                    href="https://www.wordpress.com"
+                    className="bg-slate-50 p-5 font-serif font-light text-slate-600 hover:text-slate-400 hover:underline"
+                >
+                    Proudly powered by WordPress 😎
+                </Link>
+            </div>
         </main>
     );
 };
