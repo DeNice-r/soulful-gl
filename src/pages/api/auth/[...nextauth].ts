@@ -85,7 +85,7 @@ export function requestWrapper(
                 if (u?.permissions) {
                     session.user.permissions = u.permissions.map(
                         (permission) => permission.title,
-                    ) as string[];
+                    );
                 }
 
                 const chatList = await db.chat.findMany({
