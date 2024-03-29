@@ -34,6 +34,9 @@ export const env = createEnv({
         GOOGLE_ID: z.string(),
         GOOGLE_SECRET: z.string(),
 
+        FACEBOOK_ID: z.string().refine(validator.isNumeric),
+        FACEBOOK_SECRET: z.string().refine(validator.isHexadecimal),
+
         AWS_REGION: z.string(),
         AWS_ACCESS_KEY_ID: z.string(),
         AWS_SECRET_ACCESS_KEY: z.string(),
@@ -77,6 +80,9 @@ export const env = createEnv({
 
         GOOGLE_ID: process.env.GOOGLE_ID,
         GOOGLE_SECRET: process.env.GOOGLE_SECRET,
+
+        FACEBOOK_ID: process.env.FACEBOOK_ID,
+        FACEBOOK_SECRET: process.env.FACEBOOK_SECRET,
 
         AWS_REGION: process.env.AWS_REGION,
         AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,

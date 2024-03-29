@@ -1,6 +1,7 @@
 import NextAuth, { type DefaultSession, type NextAuthOptions } from 'next-auth';
 import GithubProvider from 'next-auth/providers/github';
 import GoogleProvider from 'next-auth/providers/google';
+import Facebook from "next-auth/providers/facebook";
 import EmailProvider from 'next-auth/providers/email';
 import CredentialProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@auth/prisma-adapter';
@@ -189,6 +190,10 @@ export function requestWrapper(
             GoogleProvider({
                 clientId: env.GOOGLE_ID,
                 clientSecret: env.GOOGLE_SECRET,
+            }),
+            Facebook({
+                clientId: env.FACEBOOK_ID,
+                clientSecret: env.FACEBOOK_SECRET,
             }),
             EmailProvider({
                 from: env.AWS_SES_FROM_EMAIL,
