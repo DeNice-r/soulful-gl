@@ -35,7 +35,16 @@ export const env = createEnv({
         AWS_ACCESS_KEY_ID: z.string(),
         AWS_SECRET_ACCESS_KEY: z.string(),
 
+        AWS_SES_USER: z.string(),
+        AWS_SES_PASSWORD: z.string(),
+        AWS_SES_HOST: z.string(),
+        AWS_SES_PORT: z
+            .string()
+            .transform((value) => Number(value))
+            .refine((value) => !isNaN(value)),
+
         AWS_S3_BUCKET: z.string(),
+        AWS_FROM_EMAIL: z.string().email(),
     },
 
     /**
@@ -67,7 +76,13 @@ export const env = createEnv({
         AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
         AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
 
+        AWS_SES_USER: process.env.AWS_SES_USER,
+        AWS_SES_PASSWORD: process.env.AWS_SES_PASSWORD,
+        AWS_SES_HOST: process.env.AWS_SES_HOST,
+        AWS_SES_PORT: process.env.AWS_SES_PORT,
+
         AWS_S3_BUCKET: process.env.AWS_S3_BUCKET,
+        AWS_FROM_EMAIL: process.env.AWS_FROM_EMAIL,
 
         NEXT_PUBLIC_WSS_ENDPOINT: process.env.NEXT_PUBLIC_WSS_ENDPOINT,
     },

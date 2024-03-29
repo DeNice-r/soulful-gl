@@ -1,5 +1,6 @@
 import NextAuth, { type DefaultSession, type NextAuthOptions } from 'next-auth';
 import GithubProvider from 'next-auth/providers/github';
+import EmailProvider from 'next-auth/providers/email';
 import CredentialProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { type NextApiRequest, type NextApiResponse } from 'next';
@@ -84,7 +85,7 @@ export function requestWrapper(
                 if (u?.permissions) {
                     session.user.permissions = u.permissions.map(
                         (permission) => permission.title,
-                    );
+                    ) as string[];
                 }
 
                 const chatList = await db.chat.findMany({
@@ -184,17 +185,28 @@ export function requestWrapper(
                 clientId: env.GITHUB_ID,
                 clientSecret: env.GITHUB_SECRET,
             }),
+            EmailProvider({
+                from: env.AWS_FROM_EMAIL,
+                server: {
+                    host: env.AWS_SES_HOST,
+                    port: env.AWS_SES_PORT,
+                    auth: {
+                        user: env.AWS_SES_USER,
+                        pass: env.AWS_SES_PASSWORD,
+                    },
+                },
+            }),
             CredentialProvider({
                 name: 'CredentialProvider',
                 credentials: {
                     email: {
-                        label: 'email',
+                        label: 'Електронна пошта',
                         type: 'text',
                         placeholder: 'worldbestoperator@gmail.com',
                         value: 'admin@gmail.com',
                     },
                     password: {
-                        label: 'Password',
+                        label: 'Пароль',
                         type: 'password',
                         placeholder: '*&fhio2)!_3krr-)(#(!@$f;p[e]',
                         value: '*&fhio2)!_3krr-)(#(!@$f;p[e]',
