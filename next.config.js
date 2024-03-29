@@ -14,6 +14,11 @@ const config = {
                 hostname: 'soulful-images.s3.eu-central-1.amazonaws.com',
                 port: '',
             },
+            {
+                protocol: 'https',
+                hostname: 'lh3.googleusercontent.com',
+                port: '',
+            },
         ],
         domains: ['avatars.githubusercontent.com'],
     },

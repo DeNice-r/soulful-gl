@@ -1,5 +1,6 @@
 import NextAuth, { type DefaultSession, type NextAuthOptions } from 'next-auth';
 import GithubProvider from 'next-auth/providers/github';
+import GoogleProvider from 'next-auth/providers/google';
 import EmailProvider from 'next-auth/providers/email';
 import CredentialProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@auth/prisma-adapter';
@@ -184,6 +185,10 @@ export function requestWrapper(
             GithubProvider({
                 clientId: env.GITHUB_ID,
                 clientSecret: env.GITHUB_SECRET,
+            }),
+            GoogleProvider({
+                clientId: env.GOOGLE_ID,
+                clientSecret: env.GOOGLE_SECRET,
             }),
             EmailProvider({
                 from: env.AWS_SES_FROM_EMAIL,
