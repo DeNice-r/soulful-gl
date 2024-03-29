@@ -23,7 +23,7 @@
         "deploy:prod": "vercel deploy --prod --yes",
         "deploy:prod:offline": "vercel build --yes && vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN",
 
-        "prepare": "husky install"
+        "prepare": "husky"
     },
     "dependencies": {
         "@auth/prisma-adapter": "^1.4.0",
