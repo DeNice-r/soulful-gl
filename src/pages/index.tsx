@@ -3,6 +3,7 @@ import Post from '../components/Post';
 import { api } from '~/utils/api';
 import { truculenta } from '~/pages/_app';
 import Header from '~/components/Header';
+import Image from 'next/image';
 
 const Blog: React.FC = () => {
     const posts = api.post.get.useQuery({
@@ -32,7 +33,7 @@ const Blog: React.FC = () => {
                     </section>
                 </div>
             </div>
-            <article className="flex w-full flex-col justify-center gap-8 py-16 shadow-inner md:px-80 2xl:flex-row 2xl:flex-wrap 2xl:gap-32 2xl:px-40">
+            <article className="flex w-full flex-col justify-center gap-8 py-16 shadow-inner md:px-80 2xl:flex-row 2xl:gap-32 2xl:px-40">
                 {posts.data &&
                     posts.data.map((post) => (
                         <div
@@ -62,6 +63,34 @@ const Blog: React.FC = () => {
                     </p>
                 </article>
             </div>
+            <article className="flex justify-center p-10 md:p-36">
+                <div className="flex flex-col gap-8 md:gap-16">
+                    <p
+                        className={`${truculenta.className} text-center text-3xl text-cyan-800 md:text-5xl`}
+                    >
+                        Як ми можемо допомогти
+                    </p>
+                    <div className="flex flex-col gap-8 md:flex-row md:gap-0">
+                        <div className="article-responsive">
+                            <article>Професійні психологи</article>
+                            <article>Чат 24/7</article>
+                        </div>
+                        <div className="flex items-center justify-center md:basis-1/3">
+                            <Image
+                                src="images/question-mark-svgrepo-com.svg"
+                                alt="question mark"
+                                height={400}
+                                width={400}
+                                className="h-52 w-52 md:h-auto md:w-auto"
+                            ></Image>
+                        </div>
+                        <div className="article-responsive text-center md:text-right">
+                            <article>Чат-боти у соціальних мережах</article>
+                            <article>Статті від спеціалістів</article>
+                        </div>
+                    </div>
+                </div>
+            </article>
         </main>
     );
 };
