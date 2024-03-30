@@ -31,9 +31,24 @@ export const env = createEnv({
         GITHUB_ID: z.string().refine(validator.isHexadecimal),
         GITHUB_SECRET: z.string().refine(validator.isHexadecimal),
 
+        GOOGLE_ID: z.string(),
+        GOOGLE_SECRET: z.string(),
+
+        FACEBOOK_ID: z.string().refine(validator.isNumeric),
+        FACEBOOK_SECRET: z.string().refine(validator.isHexadecimal),
+
         AWS_REGION: z.string(),
         AWS_ACCESS_KEY_ID: z.string(),
         AWS_SECRET_ACCESS_KEY: z.string(),
+
+        AWS_SES_FROM_EMAIL: z.string().email(),
+        AWS_SES_USER: z.string(),
+        AWS_SES_PASSWORD: z.string(),
+        AWS_SES_HOST: z.string(),
+        AWS_SES_PORT: z
+            .string()
+            .transform((value) => Number(value))
+            .refine((value) => !isNaN(value)),
 
         AWS_S3_BUCKET: z.string(),
     },
@@ -63,9 +78,21 @@ export const env = createEnv({
         GITHUB_ID: process.env.GITHUB_ID,
         GITHUB_SECRET: process.env.GITHUB_SECRET,
 
+        GOOGLE_ID: process.env.GOOGLE_ID,
+        GOOGLE_SECRET: process.env.GOOGLE_SECRET,
+
+        FACEBOOK_ID: process.env.FACEBOOK_ID,
+        FACEBOOK_SECRET: process.env.FACEBOOK_SECRET,
+
         AWS_REGION: process.env.AWS_REGION,
         AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
         AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+
+        AWS_SES_FROM_EMAIL: process.env.AWS_SES_FROM_EMAIL,
+        AWS_SES_USER: process.env.AWS_SES_USER,
+        AWS_SES_PASSWORD: process.env.AWS_SES_PASSWORD,
+        AWS_SES_HOST: process.env.AWS_SES_HOST,
+        AWS_SES_PORT: process.env.AWS_SES_PORT,
 
         AWS_S3_BUCKET: process.env.AWS_S3_BUCKET,
 
