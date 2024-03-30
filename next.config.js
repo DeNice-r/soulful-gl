@@ -30,7 +30,6 @@ const config = {
                 port: '',
             },
         ],
-        domains: ['avatars.githubusercontent.com'],
     },
     /**
      * If you are using `appDir` then you must comment the below `i18n` config out.
