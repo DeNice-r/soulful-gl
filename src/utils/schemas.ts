@@ -1,6 +1,7 @@
 import { z } from 'zod';
-import { BackgroundPattern } from '~/utils/types';
+import { BackgroundPattern, UserRole } from '~/utils/types';
 import { env } from '~/env';
+import bcrypt from 'bcrypt';
 
 const FirstPage = 1;
 const DefaultLimit = 10;
@@ -13,6 +14,14 @@ export const PageSchema = z
 
 export const CUIDSchema = z.string().cuid();
 export const CUIDObjectSchema = z.object({ id: CUIDSchema });
+
+export const ShortStringSchema = z.string().min(1).max(100);
+
+export const PasswordSchema = z
+    .string()
+    .min(8)
+    .max(100)
+    .transform((v) => bcrypt.hashSync(v, env.SALT_ROUNDS));
 
 export const TitleSchema = z.string().min(1).max(200);
 export const RichTextSchema = z.string().min(1).max(15000);
@@ -33,6 +42,25 @@ export const TDIUpdateSchema = z.object({
     title: TitleSchema.optional(),
     description: RichTextSchema.optional(),
     image: ImageSchema.optional(),
+});
+
+export const CreateUserSchema = z.object({
+    email: z.string().email(),
+    name: ShortStringSchema,
+    image: ImageSchema,
+    description: RichTextSchema,
+    role: z.nativeEnum(UserRole),
+    password: PasswordSchema,
+    notes: z.string().optional(),
+});
+
+export const UpdateUserSchema = z.object({
+    id: CUIDSchema,
+
+    name: ShortStringSchema.optional(),
+    image: ImageSchema.optional(),
+    description: RichTextSchema.optional(),
+    password: PasswordSchema.optional(),
 });
 
 export const RecommendationSchema = TDISchema.extend({
