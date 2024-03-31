@@ -4,69 +4,70 @@ import Link from 'next/link';
 const Footer: React.FC = () => {
     return (
         <footer className="w-full border-t py-12">
-            <div className="container grid gap-12 px-4 text-sm md:gap-16 lg:px-6">
-                <div className="grid gap-2">
-                    <div className="space-y-1.5">
-                        <h3 className="text-base font-semibold">
-                            Зв&aposязатись із нами
-                        </h3>
+            <div className="container flex flex-col flex-wrap gap-12 px-4 text-sm md:gap-16 lg:px-6">
+                <div className="flex flex-col justify-between gap-12 md:flex-row md:gap-16">
+                    <div className="flex flex-col gap-2">
+                        <div className="space-y-1.5">
+                            <h3 className="text-base font-semibold">
+                                Зв&apos;язатись із нами
+                            </h3>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <Link className="font-medium underline" href="#">
+                                customer@support.soulful.pp.ua
+                            </Link>
+                            <p className="font-medium">+380412012345</p>
+                        </div>
                     </div>
-                    <div className="grid gap-1">
-                        <Link className="font-medium underline" href="#">
-                            support-soulful@
-                        </Link>
-                        <p className="font-medium">+380412012345</p>
+                    <div className="flex flex-col gap-4">
+                        <div className="space-y-1.5">
+                            <h3 className="text-base font-semibold">
+                                Навігація
+                            </h3>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <Link className="font-medium underline" href="#">
+                                Головна
+                            </Link>
+                            <Link className="font-medium underline" href="#">
+                                Статті
+                            </Link>
+                            <Link className="font-medium underline" href="#">
+                                Чат
+                            </Link>
+                        </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <h3 className="text-base font-semibold">Почати чат</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Почати спілкування зі спеціалістом
+                        </p>
+                        <div className="flex justify-between">
+                            <Link
+                                className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 shadow-sm hover:shadow dark:bg-gray-800"
+                                href="#"
+                            >
+                                <FacebookIcon className="h-4 w-4" />
+                                <span className="sr-only">Facebook</span>
+                            </Link>
+                            <Link
+                                className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 shadow-sm hover:shadow dark:bg-gray-800"
+                                href="#"
+                            >
+                                <TelegramIcon className="h-6 w-6" />
+                                <span className="sr-only">Twitter</span>
+                            </Link>
+                            <Link
+                                className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 shadow-sm hover:shadow dark:bg-gray-800"
+                                href="#"
+                            >
+                                <ViberIcon className="h-4 w-4" />
+                                <span className="sr-only">Instagram</span>
+                            </Link>
+                        </div>
                     </div>
                 </div>
-                <div className="grid gap-4">
-                    <div className="space-y-1.5">
-                        <h3 className="text-base font-semibold">Навігація</h3>
-                    </div>
-                    <div className="grid gap-1">
-                        <Link className="font-medium underline" href="#">
-                            Головна
-                        </Link>
-                        <Link className="font-medium underline" href="#">
-                            Статті
-                        </Link>
-                        <Link className="font-medium underline" href="#">
-                            Чат
-                        </Link>
-                        <Link className="font-medium underline" href="#">
-                            Contact Us
-                        </Link>
-                    </div>
-                </div>
-                <div className="grid gap-2">
-                    <h3 className="text-base font-semibold">Почати чат</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Почати спілкування зі спеціалістом
-                    </p>
-                    <div className="grid w-2/3 grid-cols-3 md:w-1/4">
-                        <Link
-                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 shadow-sm hover:shadow dark:bg-gray-800"
-                            href="#"
-                        >
-                            <FacebookIcon className="h-4 w-4" />
-                            <span className="sr-only">Facebook</span>
-                        </Link>
-                        <Link
-                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 shadow-sm hover:shadow dark:bg-gray-800"
-                            href="#"
-                        >
-                            <TelegramIcon className="h-6 w-6" />
-                            <span className="sr-only">Twitter</span>
-                        </Link>
-                        <Link
-                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 shadow-sm hover:shadow dark:bg-gray-800"
-                            href="#"
-                        >
-                            <ViberIcon className="h-4 w-4" />
-                            <span className="sr-only">Instagram</span>
-                        </Link>
-                    </div>
-                </div>
-                <span>© 2024 CherKal Inc. All rights reserved.</span>
+                <span>© 2024 Soulful Inc. All rights reserved.</span>
             </div>
         </footer>
     );
