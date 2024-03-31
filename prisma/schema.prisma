@@ -45,6 +45,18 @@ model Permission {
   title String @unique
 
   users User[]
+
+  roles Role[]
+}
+
+model Role {
+  id Int @id @default(autoincrement())
+
+  title String @unique
+
+  permissions Permission[]
+
+  users User[]
 }
 
 model User {
@@ -54,8 +66,7 @@ model User {
   description   String?
   email         String?   @unique
   emailVerified DateTime?
-  image         String?
-  role          Int       @default(0)
+  image         String?   @default("/images/default_avatar.png")
 
   isOnline Boolean @default(false)
   notes    String?
@@ -64,6 +75,7 @@ model User {
   // Auth-related relations
   accounts    Account[]
   sessions    Session[]
+  roles       Role[]
   permissions Permission[]
 
   // Chat-related relations

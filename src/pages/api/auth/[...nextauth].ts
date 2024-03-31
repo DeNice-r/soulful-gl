@@ -24,8 +24,8 @@ declare module 'next-auth' {
             name: string;
             email: string;
             image: string;
-            role: number;
             isOnline: boolean;
+            roles: string[];
             permissions: string[];
         };
         personnel: {
@@ -38,7 +38,6 @@ declare module 'next-auth' {
 
     interface DefaultUser {
         id: string;
-        role: number;
         isOnline: boolean;
     }
 }
@@ -67,8 +66,8 @@ export function requestWrapper(
             async session({ session, user }) {
                 session.user.id = user.id;
                 session.user.name = user.name ?? '';
+                session.user.image = user.image ?? '/image/default_avatar.png';
                 session.user.email = user.email;
-                session.user.role = user.role;
                 session.user.isOnline = user.isOnline;
 
                 const u = await db.user.findUnique({
@@ -81,14 +80,38 @@ export function requestWrapper(
                                 title: true,
                             },
                         },
+                        roles: {
+                            select: {
+                                permissions: {
+                                    select: {
+                                        title: true,
+                                    },
+                                },
+                            },
+                        },
                     },
                 });
 
                 if (u?.permissions) {
-                    session.user.permissions = u.permissions.map(
+                    let permissions = u.permissions.map(
                         (permission) => permission.title,
                     );
+
+                    if (u?.roles) {
+                        permissions = [
+                            ...permissions,
+                            ...u.roles.map((role) =>
+                                role.permissions.map(
+                                    (permission) => permission.title,
+                                ),
+                            ),
+                        ].flat();
+                    }
+
+                    session.user.permissions = permissions;
                 }
+
+                console.log(session.user.permissions);
 
                 const chatList = await db.chat.findMany({
                     where: {
