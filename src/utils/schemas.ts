@@ -12,6 +12,7 @@ export const PageSchema = z
     })
     .default({ page: FirstPage, limit: DefaultLimit });
 
+export const NumberIdSchema = z.number().int().nonnegative();
 export const CUIDSchema = z.string().cuid();
 export const CUIDObjectSchema = z.object({ id: CUIDSchema });
 
@@ -24,6 +25,7 @@ export const PasswordSchema = z
     .transform((v) => bcrypt.hashSync(v, env.SALT_ROUNDS));
 
 export const TitleSchema = z.string().min(1).max(200);
+export const QuerySchema = z.string().min(1).max(200);
 export const RichTextSchema = z.string().min(1).max(15000);
 
 const ImageBucketRegex = new RegExp(
@@ -32,6 +34,10 @@ const ImageBucketRegex = new RegExp(
 export const ImageSchema = z
     .string()
     .refine((value) => ImageBucketRegex.test(value));
+
+export const SearchSchema = z.object({
+    query: QuerySchema,
+});
 
 export const TDISchema = z.object({
     title: TitleSchema,
@@ -63,6 +69,28 @@ export const UpdateUserSchema = z.object({
     password: PasswordSchema.optional(),
 });
 
+export const SinglePermissionUserSchema = z.object({
+    entityId: CUIDSchema,
+
+    title: ShortStringSchema,
+});
+export const SinglePermissionRoleSchema = z.object({
+    entityId: NumberIdSchema,
+
+    title: ShortStringSchema,
+});
+
+export const MultiPermissionUserSchema = z.object({
+    entityId: CUIDSchema,
+
+    titles: ShortStringSchema.array(),
+});
+export const MultiPermissionRoleSchema = z.object({
+    entityId: NumberIdSchema,
+
+    titles: ShortStringSchema.array(),
+});
+
 export const RecommendationSchema = TDISchema.extend({
     published: z.boolean(),
 });
@@ -79,7 +107,7 @@ export const PostSchema = TDISchema.extend({
 });
 
 export const PostSearchSchema = z.object({
-    query: z.string().min(1).max(200).optional(),
+    query: QuerySchema,
     published: z.boolean().optional(),
 });
 

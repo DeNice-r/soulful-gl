@@ -4,7 +4,6 @@ import { signOut, useSession } from 'next-auth/react';
 import OnlinePredictionIcon from '@mui/icons-material/OnlinePrediction';
 import { IconButton } from '@mui/material';
 import NavLink from './NavLink';
-import { UserRole } from '~/utils/types';
 import Image from 'next/image';
 import Link from 'next/link';
 import { truculenta } from '~/pages/_app';
@@ -48,27 +47,26 @@ const Header: React.FC = () => {
                 <NavLink className="rounded-l-md" href="/">
                     Home
                 </NavLink>
-                {session &&
-                    session.user.role > (UserRole.OPERATOR as number) && (
+                {
+                    // session &&
+                    // session.user.role === (UserRole.OPERATOR as number) &&
+                    // todo: new permission system
+                    <>
                         <NavLink className="rounded-r-md" href="/drafts">
                             Чернетки
                         </NavLink>
-                    )}
-
-                {session &&
-                    session.user.role === (UserRole.OPERATOR as number) && (
-                        <>
-                            <NavLink href="/drafts">Чернетки</NavLink>
-                            <NavLink className="rounded-r-md" href="/chat">
-                                Чати
-                            </NavLink>
-                        </>
-                    )}
+                        <NavLink className="rounded-r-md" href="/chat">
+                            Чати
+                        </NavLink>
+                    </>
+                }
             </nav>
             <div className="flex basis-1/4 justify-end">
                 {session ? (
                     <>
-                        {session.user.role > (UserRole.USER as number) && (
+                        {
+                            // session.user.role > (UserRole.USER as number) &&
+                            // todo: new permission system
                             <IconButton
                                 size="small"
                                 color="primary"
@@ -82,7 +80,7 @@ const Header: React.FC = () => {
                                     }
                                 />
                             </IconButton>
-                        )}
+                        }
 
                         <div className="flex items-center gap-2">
                             <Image
@@ -94,8 +92,7 @@ const Header: React.FC = () => {
                             />
                             <p
                                 className="leading-4"
-                                title={`${session.user.email}) /
-                                ${session.user.role}/`}
+                                title={`${session.user.email}`}
                             >{`${session.user.name}`}</p>
                             <Link href="/create" className="btn-primary">
                                 Новий допис
