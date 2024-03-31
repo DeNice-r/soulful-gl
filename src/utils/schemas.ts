@@ -69,6 +69,12 @@ export const UpdateUserSchema = z.object({
     password: PasswordSchema.optional(),
 });
 
+export const SetNotesSchema = z.object({
+    id: CUIDSchema,
+
+    notes: z.string(),
+});
+
 export const SinglePermissionUserSchema = z.object({
     entityId: CUIDSchema,
 

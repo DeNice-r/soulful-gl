@@ -3,6 +3,7 @@ import {
     CreateUserSchema,
     CUIDSchema,
     PageSchema,
+    SetNotesSchema,
     UpdateUserSchema,
 } from '~/utils/schemas';
 
@@ -34,6 +35,19 @@ export const userRouter = createTRPCRouter({
         .mutation(async ({ ctx, input: data }) => {
             return ctx.db.user.create({
                 data,
+            });
+        }),
+
+    setNotes: permissionProcedure
+        .input(SetNotesSchema)
+        .mutation(async ({ ctx, input: { id, notes } }) => {
+            return ctx.db.user.update({
+                where: {
+                    id,
+                },
+                data: {
+                    notes,
+                },
             });
         }),
 
