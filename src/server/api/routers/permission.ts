@@ -7,60 +7,6 @@ import {
     SinglePermissionUserSchema,
 } from '~/utils/schemas';
 
-function getSetArgs<EntityIdType extends number | string>(
-    entityId: EntityIdType,
-    titles: string[],
-) {
-    return {
-        where: {
-            id: entityId,
-        },
-        data: {
-            permissions: {
-                set: titles.map((title) => ({
-                    title,
-                })),
-            },
-        },
-    };
-}
-
-function getAddArgs<EntityIdType extends number | string>(
-    entityId: EntityIdType,
-    title: string,
-) {
-    return {
-        where: {
-            id: entityId,
-        },
-        data: {
-            permissions: {
-                connect: {
-                    title,
-                },
-            },
-        },
-    };
-}
-
-function getRemoveArgs<EntityIdType extends number | string>(
-    entityId: EntityIdType,
-    title: string,
-) {
-    return {
-        where: {
-            id: entityId,
-        },
-        data: {
-            permissions: {
-                disconnect: {
-                    title,
-                },
-            },
-        },
-    };
-}
-
 export const permissionRouter = createTRPCRouter({
     list: permissionProcedure
         .input(SearchSchema)
@@ -118,3 +64,57 @@ export const permissionRouter = createTRPCRouter({
             return ctx.db.role.update(getRemoveArgs(entityId, title));
         }),
 });
+
+function getSetArgs<EntityIdType extends number | string>(
+    entityId: EntityIdType,
+    titles: string[],
+) {
+    return {
+        where: {
+            id: entityId,
+        },
+        data: {
+            permissions: {
+                set: titles.map((title) => ({
+                    title,
+                })),
+            },
+        },
+    };
+}
+
+function getAddArgs<EntityIdType extends number | string>(
+    entityId: EntityIdType,
+    title: string,
+) {
+    return {
+        where: {
+            id: entityId,
+        },
+        data: {
+            permissions: {
+                connect: {
+                    title,
+                },
+            },
+        },
+    };
+}
+
+function getRemoveArgs<EntityIdType extends number | string>(
+    entityId: EntityIdType,
+    title: string,
+) {
+    return {
+        where: {
+            id: entityId,
+        },
+        data: {
+            permissions: {
+                disconnect: {
+                    title,
+                },
+            },
+        },
+    };
+}
