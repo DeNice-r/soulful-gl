@@ -72,6 +72,8 @@ model User {
   notes    String?
   password String?
 
+  suspended Boolean @default(false)
+
   // Auth-related relations
   accounts    Account[]
   sessions    Session[]

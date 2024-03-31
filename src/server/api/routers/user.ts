@@ -63,6 +63,20 @@ export const userRouter = createTRPCRouter({
             });
         }),
 
+    suspend: permissionProcedure
+        .input(CUIDSchema)
+        .mutation(async ({ ctx, input: id }) => {
+            return ctx.db.user.update({
+                where: {
+                    id,
+                    ...(!ctx.isFullAccess && { id: ctx.session.user.id }),
+                },
+                data: {
+                    suspended: true,
+                },
+            });
+        }),
+
     delete: permissionProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input: id }) => {

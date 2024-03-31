@@ -27,6 +27,8 @@ declare module 'next-auth' {
             isOnline: boolean;
             roles: string[];
             permissions: string[];
+
+            // suspended: boolean;
         };
         personnel: {
             chats: Record<number, ExtendedChat>;
@@ -39,6 +41,8 @@ declare module 'next-auth' {
     interface DefaultUser {
         id: string;
         isOnline: boolean;
+
+        suspended: boolean;
     }
 }
 
@@ -64,6 +68,8 @@ export function requestWrapper(
         adapter,
         callbacks: {
             async session({ session, user }) {
+                if (user.suspended) throw new Error('User is suspended');
+
                 session.user.id = user.id;
                 session.user.name = user.name ?? '';
                 session.user.image = user.image ?? '/image/default_avatar.png';
@@ -138,7 +144,13 @@ export function requestWrapper(
                 session.personnel = { chats };
                 return session;
             },
-            async signIn({ user, account, profile, email, credentials }) {
+            async signIn({
+                user,
+                account: _1,
+                profile: _2,
+                email: _3,
+                credentials: _4,
+            }) {
                 if (
                     req.query.nextauth?.includes('callback') &&
                     req.query.nextauth?.includes('credentials') &&
@@ -168,7 +180,7 @@ export function requestWrapper(
                     }
                 }
 
-                return true;
+                return !user.suspended;
             },
         },
         jwt: {
