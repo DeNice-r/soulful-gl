@@ -56,7 +56,7 @@ const Draft: React.FC = () => {
                         <div className="flex basis-1/3 items-start">
                             <label
                                 htmlFor="dropzone-file"
-                                className="flex aspect-1.91/1 w-full cursor-pointer items-center justify-center rounded-lg border-2 bg-white transition hover:bg-slate-50"
+                                className="aspect-1.91/1 flex w-full cursor-pointer items-center justify-center rounded-lg border-2 bg-white transition hover:bg-slate-50"
                             >
                                 <div className="flex flex-col items-center justify-center pb-6 pt-5">
                                     <p className="mb-2 text-sm text-gray-500">

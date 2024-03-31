@@ -13,7 +13,7 @@ const Blog: React.FC = () => {
     });
     return (
         <main className="flex w-full flex-col">
-            <div className="h-svh bg-homepage-cover bg-cover">
+            <div className="bg-homepage-cover h-svh bg-cover">
                 <div className="flex h-full flex-col bg-neutral-200 bg-opacity-75">
                     <Header />
                     <section className="flex h-full flex-col">
@@ -46,7 +46,7 @@ const Blog: React.FC = () => {
                         </div>
                     ))}
             </article>
-            <div className="flex items-center bg-neutral-200 bg-article-cover py-12 text-center drop-shadow-md md:h-auto md:justify-center md:p-32">
+            <div className="bg-article-cover flex items-center bg-neutral-200 py-12 text-center drop-shadow-md md:h-auto md:justify-center md:p-32">
                 <article className="flex flex-col gap-8 bg-neutral-300 bg-opacity-40 p-10 md:w-1/2 md:rounded-xl">
                     <h1 className="text-xl font-bold text-stone-800 md:text-4xl">
                         Чим ми надихались
