@@ -12,7 +12,7 @@
 
         "db:push": "prisma db push",
         "db:studio": "prisma studio",
-        "postinstall": "prisma generate",
+        "postinstall": "prisma generate && pnpm run db:updatePermissions",
 
         "db:updatePermissions": "tsx scripts/updatePermissions.ts",
 

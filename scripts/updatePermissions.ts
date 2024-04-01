@@ -102,6 +102,5 @@ function logWithDivider(...args: any[]) {
 console.log(
     'Warning: renamed permissions are treated as deleted and added again, so any users with the old permissions will lose them.',
 );
-setTimeout(() => {
-    updateDatabasePermissions();
-}, 5000);
+
+updateDatabasePermissions();
