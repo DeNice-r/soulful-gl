@@ -28,7 +28,7 @@ declare module 'next-auth' {
             roles: string[];
             permissions: string[];
 
-            // suspended: boolean;
+            suspended: boolean;
         };
         personnel: {
             chats: Record<number, ExtendedChat>;
@@ -116,8 +116,6 @@ export function requestWrapper(
 
                     session.user.permissions = permissions;
                 }
-
-                console.log(session.user.permissions);
 
                 const chatList = await db.chat.findMany({
                     where: {
@@ -272,7 +270,8 @@ export function requestWrapper(
                         !(await bcrypt.compare(
                             credentials?.password,
                             user.password,
-                        ))
+                        )) ||
+                        user.suspended
                     )
                         return null;
 
