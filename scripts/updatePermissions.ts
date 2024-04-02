@@ -103,4 +103,4 @@ console.log(
     'Warning: renamed permissions are treated as deleted and added again, so any users with the old permissions will lose them.',
 );
 
-updateDatabasePermissions();
+await updateDatabasePermissions();

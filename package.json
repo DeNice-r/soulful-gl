@@ -14,7 +14,7 @@
         "db:studio": "prisma studio",
         "postinstall": "prisma generate && pnpm run db:updatePermissions",
 
-        "db:updatePermissions": "tsx scripts/updatePermissions.ts",
+        "db:updatePermissions": "bun scripts/updatePermissions.ts",
 
         "lint": "next lint",
 
