@@ -12,10 +12,11 @@ import {
     Popover,
 } from '~/components/ui/popover';
 import { useRouter } from 'next/router';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import NavLink from './NavLink';
 import { UserRole } from '~/utils/types';
+import { truculenta } from '~/pages/_app';
 
 const Header: React.FC = () => {
     const { update: updateSession, data: session, status } = useSession();
@@ -48,16 +49,24 @@ const Header: React.FC = () => {
         }
     };
     return (
-        <header className="flex h-16 items-center border-b bg-gray-50 px-4 dark:bg-gray-950 sm:px-6 md:justify-between lg:px-8">
-            <div className="flex items-center gap-4 lg:gap-8">
-                <Link className="hidden lg:flex" href="#">
-                    <MountainIcon className="h-6 w-6" />
-                    <span className="sr-only">Acme Inc</span>
-                </Link>
+        <header className="sticky top-0 z-10 flex items-center border-b bg-gray-50 px-4 dark:bg-gray-950 sm:px-6 md:justify-between lg:px-8">
+            <div
+                className={`${truculenta.className} hidden items-center justify-start text-2xl text-cyan-800 md:flex md:basis-1/4`}
+            >
+                <Link href={'/'}>Soulful</Link>
             </div>
-            <nav className="flex flex-1 justify-center gap-4 lg:gap-8">
-                <NavLink className="rounded-l-md" href="/">
+            <nav className="flex justify-center gap-4 lg:gap-8">
+                <NavLink
+                    className="flex h-16 items-center rounded-l-md"
+                    href="/"
+                >
                     Home
+                </NavLink>
+                <NavLink
+                    className="flex h-16 items-center rounded-r-md"
+                    href="/drafts"
+                >
+                    Чернетки
                 </NavLink>
                 {session &&
                     session.user.role > (UserRole.OPERATOR as number) && (
@@ -76,67 +85,88 @@ const Header: React.FC = () => {
                         </>
                     )}
             </nav>
-            <div className="flex items-center gap-4">
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button
-                            className="h-8 w-8 rounded-full border-2 border-gray-100"
-                            size="icon"
-                            variant="ghost"
-                        >
-                            <Image
-                                alt={`@${name}'s profile`}
-                                className="rounded-full"
-                                height={32}
-                                src={`${image}`}
-                                style={{
-                                    aspectRatio: '32/32',
-                                    objectFit: 'cover',
-                                }}
-                                width={32}
-                            />
-                            <span className="sr-only">Toggle user menu</span>
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="mt-1 flex min-w-56">
-                        <div>
-                            <div className="flex items-center gap-2 p-3">
+            {session ? (
+                <div className="flex items-center justify-end gap-4 md:basis-1/4">
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                className="h-8 w-8 rounded-full border-2 border-gray-100"
+                                size="icon"
+                                variant="ghost"
+                            >
                                 <Image
                                     alt={`@${name}'s profile`}
                                     className="rounded-full"
-                                    height={40}
+                                    height={32}
                                     src={`${image}`}
                                     style={{
-                                        aspectRatio: '40/40',
+                                        aspectRatio: '32/32',
                                         objectFit: 'cover',
                                     }}
-                                    width={40}
+                                    width={32}
                                 />
-                                <div className="flex flex-col gap-1 text-sm">
-                                    <div className="font-medium">{name}</div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                                        {session?.user.email}
+                                <span className="sr-only">
+                                    Toggle user menu
+                                </span>
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="mt-1 flex min-w-56">
+                            <div>
+                                <div className="flex items-center gap-2 p-3">
+                                    <Image
+                                        alt={`@${name}'s profile`}
+                                        className="rounded-full"
+                                        height={40}
+                                        src={`${image}`}
+                                        style={{
+                                            aspectRatio: '40/40',
+                                            objectFit: 'cover',
+                                        }}
+                                        quality={100}
+                                        width={40}
+                                    />
+                                    <div className="flex flex-col gap-1 text-sm">
+                                        <div className="font-medium">
+                                            {name}
+                                        </div>
+                                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                                            {session?.user.email}
+                                        </div>
                                     </div>
                                 </div>
+                                <div className="grid gap-1 p-3">
+                                    <Link
+                                        className="flex items-center gap-2"
+                                        href="#"
+                                    >
+                                        <UserIcon className="h-4 w-4" />
+                                        Профіль
+                                    </Link>
+                                </div>
+                                <div className="p-3">
+                                    <Button
+                                        onClick={() => signOut()}
+                                        size="sm"
+                                        variant="outline"
+                                    >
+                                        Вихід
+                                    </Button>
+                                </div>
                             </div>
-                            <div className="grid gap-1 p-3">
-                                <Link
-                                    className="flex items-center gap-2"
-                                    href="#"
-                                >
-                                    <UserIcon className="h-4 w-4" />
-                                    Профіль
-                                </Link>
-                            </div>
-                            <div className="p-3">
-                                <Button size="sm" variant="outline">
-                                    Вихід
-                                </Button>
-                            </div>
-                        </div>
-                    </PopoverContent>
-                </Popover>
-            </div>
+                        </PopoverContent>
+                    </Popover>
+                </div>
+            ) : (
+                <>
+                    <Link
+                        href="/api/auth/signin"
+                        data-active={isActive('/signup')}
+                        className=""
+                    >
+                        Увійти
+                    </Link>
+                </>
+            )}
         </header>
     );
 };

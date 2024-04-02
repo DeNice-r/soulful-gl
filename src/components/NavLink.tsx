@@ -18,7 +18,7 @@ const MyLink = ({
 
     return (
         <Link
-            className={`${className} ${isActive ? 'font-bold' : 'font-normal'} text-lg`}
+            className={`${className} ${isActive ? 'cursor-default font-bold text-slate-600' : 'font-normal hover:text-slate-600'} text-lg`}
             href={isActive ? '' : href}
             passHref
             {...props}

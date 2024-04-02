@@ -13,9 +13,9 @@ const Blog: React.FC = () => {
     });
     return (
         <main className="flex w-full flex-col">
+            <Header />
             <div className=" flex h-svh flex-col">
-                <Header />
-                <section className="flex h-full flex-col items-center justify-center md:gap-16">
+                <section className="flex h-[calc(100%-16rem)] flex-col items-center justify-center md:gap-16">
                     <h1
                         className={`${truculenta.className} flex items-center justify-center text-3xl text-cyan-800 md:text-6xl`}
                     >
