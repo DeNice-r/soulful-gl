@@ -12,7 +12,7 @@ const Blog: React.FC = () => {
         limit: 4,
     });
     return (
-        <main>
+        <main className="bg-homepage-cover">
             <Header />
             <section className="flex h-[calc(100svh-8rem)] flex-col items-center justify-center md:gap-16">
                 <h1
