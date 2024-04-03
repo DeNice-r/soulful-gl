@@ -15,7 +15,6 @@ import { useRouter } from 'next/router';
 import { signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import NavLink from './NavLink';
-import { UserRole } from '~/utils/types';
 import { truculenta } from '~/pages/_app';
 
 const Header: React.FC = () => {
@@ -68,22 +67,24 @@ const Header: React.FC = () => {
                 >
                     Чернетки
                 </NavLink>
-                {session &&
-                    session.user.role > (UserRole.OPERATOR as number) && (
-                        <NavLink className="rounded-r-md" href="/drafts">
-                            Чернетки
-                        </NavLink>
-                    )}
+                {session && (
+                    // session.user.role > (UserRole.OPERATOR as number) &&
+                    // todo: use permissions
+                    <NavLink className="rounded-r-md" href="/drafts">
+                        Чернетки
+                    </NavLink>
+                )}
 
-                {session &&
-                    session.user.role === (UserRole.OPERATOR as number) && (
-                        <>
-                            <NavLink href="/drafts">Чернетки</NavLink>
-                            <NavLink className="rounded-r-md" href="/chat">
-                                Чати
-                            </NavLink>
-                        </>
-                    )}
+                {session && (
+                    // session.user.role === (UserRole.OPERATOR as number) &&
+                    // todo: use permissions
+                    <>
+                        <NavLink href="/drafts">Чернетки</NavLink>
+                        <NavLink className="rounded-r-md" href="/chat">
+                            Чати
+                        </NavLink>
+                    </>
+                )}
             </nav>
             {session ? (
                 <div className="flex items-center justify-end gap-4 md:basis-1/4">
