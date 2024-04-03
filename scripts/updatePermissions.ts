@@ -86,8 +86,6 @@ function getRelevantPermissions() {
 
             permissions.add(`${entity}:${action}`);
             permissions.add(`${entity}:${action}:*`);
-            permissions.add(`*:${action}`);
-            permissions.add(`*:${action}:*`);
         }
     }
 
