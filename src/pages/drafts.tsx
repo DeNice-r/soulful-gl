@@ -2,8 +2,6 @@ import React from 'react';
 import { useSession } from 'next-auth/react';
 import Layout from '~/components/Layout';
 import Post from '../components/Post';
-import { UserRole } from '~/utils/types';
-import { isAtLeast } from '~/utils/frontend/auth';
 import { api } from '~/utils/api';
 
 const Drafts: React.FC = () => {
@@ -11,7 +9,10 @@ const Drafts: React.FC = () => {
     const postQuery = api.post.getUnpublished.useQuery();
     const drafts = postQuery.data;
 
-    if (!session || !isAtLeast(session.user.role, UserRole.OPERATOR)) {
+    if (
+        !session
+        // || !isAtLeast(session.user.role, UserRole.OPERATOR)
+    ) {
         return (
             <Layout>
                 <div>You are unauthorized to view this page.</div>

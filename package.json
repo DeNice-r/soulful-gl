@@ -6,16 +6,23 @@
     "license": "MIT",
     "scripts": {
         "dev": "next dev --port 80",
+
         "build": "next build",
         "start": "next start",
+
         "db:push": "prisma db push",
         "db:studio": "prisma studio",
-        "postinstall": "prisma generate",
+        "postinstall": "prisma generate && pnpm run db:updatePermissions",
+
+        "db:updatePermissions": "bun scripts/updatePermissions.ts",
         "lint": "next lint",
+
         "deploy": "vercel deploy --yes",
         "deploy:offline": "vercel build --yes && vercel deploy --prebuilt",
         "deploy:prod": "vercel deploy --prod --yes",
-        "deploy:prod:offline": "vercel build --yes && vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN"
+        "deploy:prod:offline": "vercel build --yes && vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN",
+
+        "prepare": "husky"
     },
     "dependencies": {
         "@auth/prisma-adapter": "^1.4.0",
@@ -43,6 +50,7 @@
         "lucide-react": "^0.363.0",
         "next": "^14.1.3",
         "next-auth": "^4.24.6",
+        "nodemailer": "^6.9.13",
         "react": "18.2.0",
         "react-dom": "18.2.0",
         "react-markdown": "9.0.1",
@@ -57,6 +65,7 @@
         "@types/bcrypt": "^5.0.2",
         "@types/eslint": "^8.56.2",
         "@types/node": "^20.11.20",
+        "@types/nodemailer": "^6.4.14",
         "@types/react": "^18.2.57",
         "@types/react-dom": "^18.2.19",
         "@types/validator": "^13.11.9",
@@ -75,6 +84,7 @@
         "prettier-plugin-tailwindcss": "^0.5.11",
         "prisma": "^5.10.2",
         "tailwindcss": "^3.4.1",
+        "tsx": "^4.7.1",
         "typescript": "^5.4.2"
     },
     "ct3aMetadata": {

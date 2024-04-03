@@ -5,8 +5,6 @@ import { useSession } from 'next-auth/react';
 import Layout from '~/components/Layout';
 import Image from 'next/image';
 import { api } from '~/utils/api';
-import { isAtLeast } from '~/utils/frontend/auth';
-import { UserRole } from '~/utils/types';
 
 const Post: React.FC = () => {
     const router = useRouter();
@@ -50,18 +48,20 @@ const Post: React.FC = () => {
                     />
                 )}
                 <ReactMarkdown>{post.description}</ReactMarkdown>
-                {!post.published &&
-                    isAtLeast(session?.user.role, UserRole.OPERATOR) && (
-                        <button onClick={() => handlePublish(post.id)}>
-                            Publish
-                        </button>
-                    )}
-                {userHasValidSession &&
-                    isAtLeast(session?.user.role, UserRole.OPERATOR) && (
-                        <button onClick={() => handleDelete(post.id)}>
-                            Delete
-                        </button>
-                    )}
+                {!post.published && (
+                    // isAtLeast(session?.user.role, UserRole.OPERATOR) &&
+                    // todo: new permission system
+                    <button onClick={() => handlePublish(post.id)}>
+                        Publish
+                    </button>
+                )}
+                {userHasValidSession && (
+                    // isAtLeast(session?.user.role, UserRole.OPERATOR) &&
+                    // todo: new permission system
+                    <button onClick={() => handleDelete(post.id)}>
+                        Delete
+                    </button>
+                )}
             </div>
         </Layout>
     );
