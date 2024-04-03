@@ -48,24 +48,15 @@ const Header: React.FC = () => {
         }
     };
     return (
-        <header className="sticky top-0 z-10 flex items-center border-b bg-gray-50 px-4 dark:bg-gray-950 sm:px-6 md:justify-between lg:px-8">
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-gray-50 px-4 dark:bg-gray-950 sm:px-6 lg:px-8">
             <div
                 className={`${truculenta.className} hidden items-center justify-start text-2xl text-cyan-800 md:flex md:basis-1/4`}
             >
                 <Link href={'/'}>Soulful</Link>
             </div>
             <nav className="flex justify-center gap-4 lg:gap-8">
-                <NavLink
-                    className="flex h-16 items-center rounded-l-md"
-                    href="/"
-                >
+                <NavLink className="rounded-l-md" href="/">
                     Home
-                </NavLink>
-                <NavLink
-                    className="flex h-16 items-center rounded-r-md"
-                    href="/drafts"
-                >
-                    Чернетки
                 </NavLink>
                 {session && (
                     // session.user.role > (UserRole.OPERATOR as number) &&
@@ -162,7 +153,7 @@ const Header: React.FC = () => {
                     <Link
                         href="/api/auth/signin"
                         data-active={isActive('/signup')}
-                        className=""
+                        className="flex basis-1/4 justify-end"
                     >
                         Увійти
                     </Link>
