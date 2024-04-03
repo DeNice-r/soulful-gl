@@ -1,5 +1,8 @@
 import NextAuth, { type DefaultSession, type NextAuthOptions } from 'next-auth';
 import GithubProvider from 'next-auth/providers/github';
+import GoogleProvider from 'next-auth/providers/google';
+import Facebook from 'next-auth/providers/facebook';
+import EmailProvider from 'next-auth/providers/email';
 import CredentialProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { type NextApiRequest, type NextApiResponse } from 'next';
@@ -21,9 +24,11 @@ declare module 'next-auth' {
             name: string;
             email: string;
             image: string;
-            role: number;
             isOnline: boolean;
+            roles: string[];
             permissions: string[];
+
+            suspended: boolean;
         };
         personnel: {
             chats: Record<number, ExtendedChat>;
@@ -35,8 +40,9 @@ declare module 'next-auth' {
 
     interface DefaultUser {
         id: string;
-        role: number;
         isOnline: boolean;
+
+        suspended: boolean;
     }
 }
 
@@ -62,10 +68,12 @@ export function requestWrapper(
         adapter,
         callbacks: {
             async session({ session, user }) {
+                if (user.suspended) throw new Error('User is suspended');
+
                 session.user.id = user.id;
                 session.user.name = user.name ?? '';
+                session.user.image = user.image ?? '/image/default_avatar.png';
                 session.user.email = user.email;
-                session.user.role = user.role;
                 session.user.isOnline = user.isOnline;
 
                 const u = await db.user.findUnique({
@@ -78,13 +86,35 @@ export function requestWrapper(
                                 title: true,
                             },
                         },
+                        roles: {
+                            select: {
+                                permissions: {
+                                    select: {
+                                        title: true,
+                                    },
+                                },
+                            },
+                        },
                     },
                 });
 
                 if (u?.permissions) {
-                    session.user.permissions = u.permissions.map(
+                    let permissions = u.permissions.map(
                         (permission) => permission.title,
                     );
+
+                    if (u?.roles) {
+                        permissions = [
+                            ...permissions,
+                            ...u.roles.map((role) =>
+                                role.permissions.map(
+                                    (permission) => permission.title,
+                                ),
+                            ),
+                        ].flat();
+                    }
+
+                    session.user.permissions = permissions;
                 }
 
                 const chatList = await db.chat.findMany({
@@ -112,7 +142,13 @@ export function requestWrapper(
                 session.personnel = { chats };
                 return session;
             },
-            async signIn({ user, account, profile, email, credentials }) {
+            async signIn({
+                user,
+                account: _1,
+                profile: _2,
+                email: _3,
+                credentials: _4,
+            }) {
                 if (
                     req.query.nextauth?.includes('callback') &&
                     req.query.nextauth?.includes('credentials') &&
@@ -142,7 +178,7 @@ export function requestWrapper(
                     }
                 }
 
-                return true;
+                return !user.suspended;
             },
         },
         jwt: {
@@ -184,17 +220,36 @@ export function requestWrapper(
                 clientId: env.GITHUB_ID,
                 clientSecret: env.GITHUB_SECRET,
             }),
+            GoogleProvider({
+                clientId: env.GOOGLE_ID,
+                clientSecret: env.GOOGLE_SECRET,
+            }),
+            Facebook({
+                clientId: env.FACEBOOK_ID,
+                clientSecret: env.FACEBOOK_SECRET,
+            }),
+            EmailProvider({
+                from: env.AWS_SES_FROM_EMAIL,
+                server: {
+                    host: env.AWS_SES_HOST,
+                    port: env.AWS_SES_PORT,
+                    auth: {
+                        user: env.AWS_SES_USER,
+                        pass: env.AWS_SES_PASSWORD,
+                    },
+                },
+            }),
             CredentialProvider({
                 name: 'CredentialProvider',
                 credentials: {
                     email: {
-                        label: 'email',
+                        label: 'Електронна пошта',
                         type: 'text',
                         placeholder: 'worldbestoperator@gmail.com',
                         value: 'admin@gmail.com',
                     },
                     password: {
-                        label: 'Password',
+                        label: 'Пароль',
                         type: 'password',
                         placeholder: '*&fhio2)!_3krr-)(#(!@$f;p[e]',
                         value: '*&fhio2)!_3krr-)(#(!@$f;p[e]',
@@ -215,7 +270,8 @@ export function requestWrapper(
                         !(await bcrypt.compare(
                             credentials?.password,
                             user.password,
-                        ))
+                        )) ||
+                        user.suspended
                     )
                         return null;
 

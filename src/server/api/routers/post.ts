@@ -96,18 +96,15 @@ export const postRouter = createTRPCRouter({
     update: permissionProcedure
         .input(PostUpdateSchema)
         .mutation(async ({ ctx, input }) => {
+            const { tags, ...noTagsInput } = input;
+
             return ctx.db.post.update({
                 where: {
                     id: input.id,
                     ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
                 },
                 data: {
-                    title: input.title,
-                    description: input.description,
-                    image: input.image,
-
-                    published: input.published,
-
+                    ...noTagsInput,
                     ...(input.tags && {
                         tags: {
                             connectOrCreate: input.tags.map((tag) => ({
