@@ -55,9 +55,6 @@ const Header: React.FC = () => {
                 <Link href={'/'}>Soulful</Link>
             </div>
             <nav className="flex justify-center gap-4 lg:gap-8">
-                <NavLink className="rounded-l-md" href="/">
-                    Home
-                </NavLink>
                 {session && (
                     // session.user.role > (UserRole.OPERATOR as number) &&
                     // todo: use permissions
@@ -133,6 +130,16 @@ const Header: React.FC = () => {
                                     >
                                         <UserIcon className="h-4 w-4" />
                                         Профіль
+                                    </Link>
+                                    <Link
+                                        className="flex items-center gap-2"
+                                        href="/management"
+                                    >
+                                        {
+                                            //add permissions
+                                        }
+                                        <CogIcon className="h-4 w-4" />
+                                        Керування
                                     </Link>
                                 </div>
                                 <div className="p-3">
