@@ -1,11 +1,12 @@
 import React from 'react';
 import Post from '../components/Post';
 import { api } from '~/utils/api';
-import { truculenta } from '~/pages/_app';
+import { truculenta } from './_app';
 import Header from '~/components/Header';
 import Image from 'next/image';
 import Link from 'next/link';
 import Footer from '~/components/Footer';
+import Logo from '~/components/Logo';
 
 const Blog: React.FC = () => {
     const posts = api.post.get.useQuery({
@@ -15,11 +16,7 @@ const Blog: React.FC = () => {
         <main className="bg-homepage-cover">
             <Header />
             <section className="flex h-[calc(100svh-8rem)] flex-col items-center justify-center md:gap-16">
-                <h1
-                    className={`${truculenta.className} flex items-center justify-center text-3xl text-cyan-800 md:text-3xl 2xl:text-6xl`}
-                >
-                    Soulful
-                </h1>
+                <Logo className="flex text-3xl 2xl:text-6xl" />
                 <p className="w-3/4 self-center text-center text-lg font-medium md:w-1/2 md:text-xl 2xl:text-3xl">
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                     Praesent ornare tortor ac elementum ultricies. Donec sit

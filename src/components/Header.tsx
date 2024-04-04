@@ -10,7 +10,7 @@ import { useRouter } from 'next/router';
 import { signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import NavLink from './NavLink';
-import { truculenta } from '~/pages/_app';
+import Logo from './Logo';
 
 const Header: React.FC = () => {
     const { update: updateSession, data: session, status } = useSession();
@@ -44,11 +44,7 @@ const Header: React.FC = () => {
     };
     return (
         <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-gray-50 px-4 dark:bg-gray-950 sm:px-6 lg:px-8">
-            <div
-                className={`${truculenta.className} hidden items-center justify-start text-2xl text-cyan-800 md:flex md:basis-1/4`}
-            >
-                <Link href={'/'}>Soulful</Link>
-            </div>
+            <Logo className="hidden md:basis-1/4" />
             <nav className="flex justify-center gap-4 lg:gap-8">
                 {session && (
                     // session.user.role > (UserRole.OPERATOR as number) &&

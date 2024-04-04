@@ -16,7 +16,7 @@ import {
 } from '~/components/ui/table';
 import Image from 'next/image';
 import { signOut, useSession } from 'next-auth/react';
-import { truculenta } from '~/pages/_app';
+import Logo from '~/components/Logo';
 
 const Management: React.FC = () => {
     const { update: updateSession, data: session, status } = useSession();
@@ -28,11 +28,7 @@ const Management: React.FC = () => {
         <div className="grid min-h-screen w-full overflow-hidden lg:grid-cols-[280px_1fr]">
             <div className="hidden border-r bg-gray-100/40 dark:bg-gray-800/40 lg:block">
                 <div className="flex flex-col gap-2">
-                    <div
-                        className={`${truculenta.className} hidden h-[60px] items-center justify-start px-6 text-3xl text-cyan-800 md:flex`}
-                    >
-                        <Link href={'/'}>Soulful</Link>
-                    </div>
+                    <Logo className="hidden h-[60px] px-6 text-3xl" />
                     <div className="flex-1">
                         <nav className="grid items-start px-4 text-sm font-medium">
                             <Link
