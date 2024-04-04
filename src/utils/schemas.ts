@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { BackgroundPattern, UserRole } from '~/utils/types';
+import { BackgroundPattern } from '~/utils/types';
 import { env } from '~/env';
 import bcrypt from 'bcrypt';
 
@@ -54,8 +54,7 @@ export const CreateUserSchema = z.object({
     email: z.string().email(),
     name: ShortStringSchema,
     image: ImageSchema,
-    description: RichTextSchema,
-    role: z.nativeEnum(UserRole),
+    description: RichTextSchema.optional(),
     password: PasswordSchema,
     notes: z.string().optional(),
 });
