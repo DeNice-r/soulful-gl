@@ -6,18 +6,24 @@
   "license": "MIT",
   "scripts": {
     "dev": "next dev --port 80",
+
     "build": "next build",
     "start": "next start",
+
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "postinstall": "prisma generate && pnpm run db:updatePermissions",
+    "db:seed": "bun scripts/seed.ts",
     "db:updatePermissions": "bun scripts/updatePermissions.ts",
+
     "lint": "next lint",
+
     "deploy": "vercel deploy --yes",
     "deploy:offline": "vercel build --yes && vercel deploy --prebuilt",
     "deploy:prod": "vercel deploy --prod --yes",
     "deploy:prod:offline": "vercel build --yes && vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN",
-    "prepare": "husky"
+
+    "prepare": "husky",
+    "postinstall": "prisma generate && bun run db:seed"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^1.4.0",
