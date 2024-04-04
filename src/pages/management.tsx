@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '~/components/ui/button';
 import {
@@ -16,7 +16,7 @@ import {
 } from '~/components/ui/table';
 import Image from 'next/image';
 import { signOut, useSession } from 'next-auth/react';
-import Logo from '~/components/Logo';
+import Sidebar from '~/components/Sidebar';
 
 const Management: React.FC = () => {
     const { update: updateSession, data: session, status } = useSession();
@@ -24,38 +24,11 @@ const Management: React.FC = () => {
     const image = session?.user?.image ?? 'images/placeholder.svg';
     const name = session?.user?.name ?? 'Користувач';
 
+    const [currentTab, setCurrentTab] = useState('users');
+
     return (
         <div className="grid min-h-screen w-full overflow-hidden lg:grid-cols-[280px_1fr]">
-            <div className="hidden border-r bg-gray-100/40 dark:bg-gray-800/40 lg:block">
-                <div className="flex flex-col gap-2">
-                    <Logo className="hidden h-[60px] px-6 text-3xl" />
-                    <div className="flex-1">
-                        <nav className="grid items-start px-4 text-sm font-medium">
-                            <Link
-                                className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                                href="#"
-                            >
-                                <HomeIcon className="h-4 w-4" />
-                                Головна
-                            </Link>
-                            <Link
-                                className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                                href="#"
-                            >
-                                <UsersIcon className="h-4 w-4" />
-                                Користувачі
-                            </Link>
-                            <Link
-                                className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                                href="#"
-                            >
-                                <LineChartIcon className="h-4 w-4" />
-                                Аналітика
-                            </Link>
-                        </nav>
-                    </div>
-                </div>
-            </div>
+            <Sidebar changeTab={setCurrentTab} />
             <div className="flex flex-col">
                 <header className="flex h-14 items-center gap-4 border-b bg-gray-100/40 px-6 dark:bg-gray-800/40 lg:h-[60px]">
                     <Link className="lg:hidden" href="#">
