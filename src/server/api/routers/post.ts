@@ -86,9 +86,12 @@ export const postRouter = createTRPCRouter({
                             create: { title: tag },
                         })),
                     },
-                    author: {
-                        connect: { id: ctx.session.user.id },
-                    },
+
+                    ...(ctx?.session?.user?.id && {
+                        author: {
+                            connect: { id: ctx.session.user.id },
+                        },
+                    }),
                 },
             });
         }),
