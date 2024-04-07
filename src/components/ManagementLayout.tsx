@@ -3,6 +3,7 @@ import Sidebar from '~/components/Sidebar';
 import ShortHeader from '~/components/ShortHeader';
 import { ManagementPageNames } from '~/utils/types';
 import Users from '~/pages/management/Users';
+import Operators from '~/pages/management/Operators';
 
 const ManagementLayout: React.FC<{ entity?: ManagementPageNames }> = ({
     entity,
@@ -13,7 +14,7 @@ const ManagementLayout: React.FC<{ entity?: ManagementPageNames }> = ({
             mainContent = <Users />;
             break;
         case ManagementPageNames.OPERATORS:
-            mainContent = `<OperatorsComponent />`;
+            mainContent = <Operators />;
             break;
         case ManagementPageNames.STATISTICS:
             mainContent = `<StatisticsComponent />`;

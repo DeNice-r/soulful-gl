@@ -13,11 +13,8 @@ import {
     TableBody,
     Table,
 } from '~/components/ui/table';
-import User from '~/components/User';
-import { api } from '~/utils/api';
 
-const Users: React.FC = () => {
-    const users = api.user.list.useQuery();
+const Operators: React.FC = () => {
     return (
         <Table>
             <TableHeader>
@@ -36,13 +33,8 @@ const Users: React.FC = () => {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {users.data?.map((user) => (
-                    <TableRow key={user.id}>
-                        <User user={user} />
-                    </TableRow>
-                ))}
                 <TableRow>
-                    <TableCell>Lisa Anderson</TableCell>
+                    <TableCell>Антон Чернюк</TableCell>
                     <TableCell className="hidden md:table-cell">
                         Липень 15, 2021
                     </TableCell>
@@ -95,4 +87,4 @@ function MoreHorizontalIcon(
     );
 }
 
-export default Users;
+export default Operators;
