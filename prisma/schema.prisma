@@ -245,6 +245,21 @@ model ExerciseStep {
   updatedAt DateTime @default(now()) @updatedAt
 }
 
+model QandA {
+  id Int @id @default(autoincrement())
+
+  question String
+  answer   String?
+
+  authorEmail String
+  authorName  String
+
+  published Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
 model Document {
   id String @id @default(cuid())
 

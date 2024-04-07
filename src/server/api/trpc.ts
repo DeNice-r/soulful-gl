@@ -89,6 +89,13 @@ export const createCallerFactory = t.createCallerFactory;
 export const createTRPCRouter = t.router;
 
 export const publicProcedure = t.procedure;
+//     .use(({ ctx, next }) => {  // todo: this is how it should be, but it breaks the app
+//     return next({
+//         ctx: {
+//             session: null,
+//         },
+//     });
+// });
 
 export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
     if (!ctx.session || !ctx.session.user) {
