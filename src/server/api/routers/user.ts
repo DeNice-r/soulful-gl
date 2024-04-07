@@ -96,7 +96,6 @@ function getProjection(isFullAccess: boolean) {
         name: true,
         image: true,
         description: true,
-        role: true,
         notes: isFullAccess,
     };
 }

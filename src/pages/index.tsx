@@ -1,37 +1,32 @@
 import React from 'react';
 import Post from '../components/Post';
 import { api } from '~/utils/api';
-import { truculenta } from '~/pages/_app';
+import { truculenta } from './_app';
 import Header from '~/components/Header';
 import Image from 'next/image';
 import Link from 'next/link';
 import Footer from '~/components/Footer';
+import Logo from '~/components/Logo';
 
 const Blog: React.FC = () => {
     const posts = api.post.get.useQuery({
         limit: 4,
     });
     return (
-        <main className="flex w-full flex-col">
+        <main className="bg-homepage-cover">
             <Header />
-            <div className=" flex h-svh flex-col">
-                <section className="flex h-[calc(100%-16rem)] flex-col items-center justify-center md:gap-16">
-                    <h1
-                        className={`${truculenta.className} flex items-center justify-center text-3xl text-cyan-800 md:text-6xl`}
-                    >
-                        Soulful
-                    </h1>
-                    <p className="w-3/4 self-center text-center text-lg font-medium md:w-1/2 md:text-3xl">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                        Praesent ornare tortor ac elementum ultricies. Donec sit
-                        amet tempor est, at placerat tellus. Vestibulum ut risus
-                        placerat, vehicula velit eget, aliquet elit. Phasellus
-                        vel sodales libero. Suspendisse a vestibulum lorem.
-                        Suspendisse libero quam, suscipit sit amet metus
-                        pulvinar, placerat lacinia eros.
-                    </p>
-                </section>
-            </div>
+            <section className="flex h-[calc(100svh-8rem)] flex-col items-center justify-center md:gap-16">
+                <Logo className="flex text-3xl 2xl:text-6xl" />
+                <p className="w-3/4 self-center text-center text-lg font-medium md:w-1/2 md:text-xl 2xl:text-3xl">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    Praesent ornare tortor ac elementum ultricies. Donec sit
+                    amet tempor est, at placerat tellus. Vestibulum ut risus
+                    placerat, vehicula velit eget, aliquet elit. Phasellus vel
+                    sodales libero. Suspendisse a vestibulum lorem. Suspendisse
+                    libero quam, suscipit sit amet metus pulvinar, placerat
+                    lacinia eros.
+                </p>
+            </section>
             <article className="flex w-full flex-col justify-center gap-8 py-16 md:px-80 2xl:flex-row 2xl:gap-32 2xl:px-40">
                 {posts.data &&
                     posts.data.map((post) => (

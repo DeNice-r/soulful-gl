@@ -1,9 +1,4 @@
 import React from 'react';
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/hhhpMWYUCmb
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
 import Link from 'next/link';
 import { Button } from '~/components/ui/button';
 import {
@@ -15,7 +10,7 @@ import { useRouter } from 'next/router';
 import { signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import NavLink from './NavLink';
-import { truculenta } from '~/pages/_app';
+import Logo from './Logo';
 
 const Header: React.FC = () => {
     const { update: updateSession, data: session, status } = useSession();
@@ -48,25 +43,9 @@ const Header: React.FC = () => {
         }
     };
     return (
-        <header className="sticky top-0 z-10 flex items-center border-b bg-gray-50 px-4 dark:bg-gray-950 sm:px-6 md:justify-between lg:px-8">
-            <div
-                className={`${truculenta.className} hidden items-center justify-start text-2xl text-cyan-800 md:flex md:basis-1/4`}
-            >
-                <Link href={'/'}>Soulful</Link>
-            </div>
+        <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-gray-50 px-4 dark:bg-gray-950 sm:px-6 lg:px-8">
+            <Logo className="hidden md:basis-1/4" />
             <nav className="flex justify-center gap-4 lg:gap-8">
-                <NavLink
-                    className="flex h-16 items-center rounded-l-md"
-                    href="/"
-                >
-                    Home
-                </NavLink>
-                <NavLink
-                    className="flex h-16 items-center rounded-r-md"
-                    href="/drafts"
-                >
-                    Чернетки
-                </NavLink>
                 {session && (
                     // session.user.role > (UserRole.OPERATOR as number) &&
                     // todo: use permissions
@@ -137,18 +116,36 @@ const Header: React.FC = () => {
                                 </div>
                                 <div className="grid gap-1 p-3">
                                     <Link
-                                        className="flex items-center gap-2"
+                                        className="flex items-center gap-2 hover:text-slate-600"
                                         href="#"
                                     >
                                         <UserIcon className="h-4 w-4" />
                                         Профіль
+                                    </Link>
+                                    <Link
+                                        className="flex items-center gap-2 hover:text-slate-600"
+                                        href="/management"
+                                    >
+                                        {
+                                            //add permissions
+                                        }
+                                        <CogIcon className="h-4 w-4" />
+                                        Керування
+                                    </Link>
+                                    <Link
+                                        href="/create"
+                                        className="flex items-center gap-2 hover:text-slate-600"
+                                    >
+                                        <PencilIcon className="h-4 w-4" />
+                                        Новий допис
                                     </Link>
                                 </div>
                                 <div className="p-3">
                                     <Button
                                         onClick={() => signOut()}
                                         size="sm"
-                                        variant="outline"
+                                        variant="destructive"
+                                        className="transition-colors hover:bg-red-800"
                                     >
                                         Вихід
                                     </Button>
@@ -162,7 +159,7 @@ const Header: React.FC = () => {
                     <Link
                         href="/api/auth/signin"
                         data-active={isActive('/signup')}
-                        className=""
+                        className="flex basis-1/4 justify-end hover:text-sky-500"
                     >
                         Увійти
                     </Link>
@@ -206,6 +203,27 @@ function CogIcon(
     );
 }
 
+function PencilIcon(
+    props: React.JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>,
+) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+        >
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
+            />
+        </svg>
+    );
+}
+
 function KeyIcon(
     props: React.JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>,
 ) {
@@ -225,27 +243,6 @@ function KeyIcon(
             <circle cx="7.5" cy="15.5" r="5.5" />
             <path d="m21 2-9.6 9.6" />
             <path d="m15.5 7.5 3 3L22 7l-3-3" />
-        </svg>
-    );
-}
-
-function MountainIcon(
-    props: React.JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>,
-) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="m8 3 4 8 5-5 5 15H2L8 3z" />
         </svg>
     );
 }

@@ -33,9 +33,6 @@ declare module 'next-auth' {
         personnel: {
             chats: Record<number, ExtendedChat>;
         };
-
-        entity: string;
-        action: string;
     }
 
     interface DefaultUser {
