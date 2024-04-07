@@ -246,10 +246,13 @@ model ExerciseStep {
 }
 
 model QandA {
-  id String @id @default(cuid())
+  id Int @id @default(autoincrement())
 
   question String
   answer   String?
+
+  authorEmail String
+  authorName  String
 
   published Boolean @default(false)
 

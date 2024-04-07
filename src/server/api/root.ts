@@ -6,6 +6,7 @@ import { userRouter } from '~/server/api/routers/user';
 import { permissionRouter } from '~/server/api/routers/permission';
 import { documentRouter } from '~/server/api/routers/document';
 import { documentFolderRouter } from '~/server/api/routers/documentFolder';
+import { qandaRouter } from '~/server/api/routers/qanda';
 
 export const appRouter = createTRPCRouter({
     // Admin-related routers
@@ -16,6 +17,7 @@ export const appRouter = createTRPCRouter({
     recommendation: recommendationRouter,
     post: postRouter,
     exercise: exerciseRouter,
+    qanda: qandaRouter,
 
     // Private content-related routers
     documentFolder: documentFolderRouter,
