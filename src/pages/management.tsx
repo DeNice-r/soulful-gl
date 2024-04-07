@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { Button } from '~/components/ui/button';
 import {
     Popover,
@@ -14,9 +13,9 @@ import {
     TableBody,
     Table,
 } from '~/components/ui/table';
-import Image from 'next/image';
-import { signOut, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import Sidebar from '~/components/Sidebar';
+import ShortHeader from '~/components/ShortHeader';
 
 const Management: React.FC = () => {
     const { update: updateSession, data: session, status } = useSession();
@@ -30,101 +29,7 @@ const Management: React.FC = () => {
         <div className="grid min-h-screen w-full overflow-hidden lg:grid-cols-[280px_1fr]">
             <Sidebar changeTab={setCurrentTab} />
             <div className="flex flex-col">
-                <header className="flex h-14 items-center gap-4 border-b bg-gray-100/40 px-6 dark:bg-gray-800/40 lg:h-[60px]">
-                    <Link className="lg:hidden" href="#">
-                        <Package2Icon className="h-6 w-6" />
-                        <span className="sr-only">Головна</span>
-                    </Link>
-                    <div className="w-full">
-                        <h1 className="text-lg font-semibold">Користувачі</h1>
-                    </div>
-                    <Popover>
-                        <PopoverTrigger asChild>
-                            <Button
-                                className="h-8 w-8 rounded-full border-2 border-gray-100"
-                                size="icon"
-                                variant="ghost"
-                            >
-                                <Image
-                                    alt={`@${name}'s profile`}
-                                    className="rounded-full"
-                                    height={32}
-                                    src={`${image}`}
-                                    style={{
-                                        aspectRatio: '32/32',
-                                        objectFit: 'cover',
-                                    }}
-                                    width={32}
-                                />
-                                <span className="sr-only">
-                                    Перемикнути користувацьке меню
-                                </span>
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="mt-1 flex min-w-56">
-                            <div>
-                                <div className="flex items-center gap-2 p-3">
-                                    <Image
-                                        alt={`@${name}'s profile`}
-                                        className="rounded-full"
-                                        height={40}
-                                        src={`${image}`}
-                                        style={{
-                                            aspectRatio: '40/40',
-                                            objectFit: 'cover',
-                                        }}
-                                        quality={100}
-                                        width={40}
-                                    />
-                                    <div className="flex flex-col gap-1 text-sm">
-                                        <div className="font-medium">
-                                            {name}
-                                        </div>
-                                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                                            {session?.user.email}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="grid gap-1 p-3">
-                                    <Link
-                                        className="flex items-center gap-2 hover:text-slate-600"
-                                        href="#"
-                                    >
-                                        <UserIcon className="h-4 w-4" />
-                                        Профіль
-                                    </Link>
-                                    <Link
-                                        className="flex items-center gap-2 hover:text-slate-600"
-                                        href="/management"
-                                    >
-                                        {
-                                            //add permissions
-                                        }
-                                        <CogIcon className="h-4 w-4" />
-                                        Керування
-                                    </Link>
-                                    <Link
-                                        href="/create"
-                                        className="flex items-center gap-2 hover:text-slate-600"
-                                    >
-                                        <PencilIcon className="h-4 w-4" />
-                                        Новий допис
-                                    </Link>
-                                </div>
-                                <div className="p-3">
-                                    <Button
-                                        onClick={() => signOut()}
-                                        size="sm"
-                                        variant="destructive"
-                                        className="transition-colors hover:bg-red-800"
-                                    >
-                                        Вихід
-                                    </Button>
-                                </div>
-                            </div>
-                        </PopoverContent>
-                    </Popover>
-                </header>
+                <ShortHeader />
                 <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
                     <div className="rounded-lg border p-2 shadow-sm">
                         <Table>
