@@ -2,11 +2,7 @@ import React from 'react';
 import Logo from './Logo';
 import Link from 'next/link';
 
-interface SidebarProps {
-    changeTab: (tabName: string) => void;
-}
-
-const Sidebar: React.FC<SidebarProps> = ({ changeTab }) => {
+const Sidebar: React.FC = () => {
     return (
         <div className="hidden border-r bg-gray-100/40 dark:bg-gray-800/40 lg:block">
             <div className="flex flex-col gap-2">
@@ -22,21 +18,21 @@ const Sidebar: React.FC<SidebarProps> = ({ changeTab }) => {
                         </Link>
                         <Link
                             className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                            href="/"
+                            href="/management/users"
                         >
                             <UsersIcon className="h-4 w-4" />
                             Користувачі
                         </Link>
                         <Link
                             className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                            href="/"
+                            href="/management/operators"
                         >
                             <UsersIcon className="h-4 w-4" />
                             Оператори
                         </Link>
                         <Link
                             className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                            href="/"
+                            href="/management/statistics"
                         >
                             <LineChartIcon className="h-4 w-4" />
                             Статистика

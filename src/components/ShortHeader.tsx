@@ -4,8 +4,17 @@ import Image from 'next/image';
 import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
 import { Button } from './ui/button';
 import { signOut, useSession } from 'next-auth/react';
+import { ManagementPageNames } from '~/utils/types';
 
-const ShortHeader: React.FC = () => {
+const PageTitleMap = {
+    [ManagementPageNames.USERS]: 'Користувачі',
+    [ManagementPageNames.OPERATORS]: 'Оператори',
+    [ManagementPageNames.STATISTICS]: 'Статистика',
+};
+
+const ShortHeader: React.FC<{ entity?: ManagementPageNames }> = ({
+    entity,
+}) => {
     const { update: updateSession, data: session, status } = useSession();
 
     const image = session?.user?.image ?? 'images/placeholder.svg';
@@ -13,12 +22,14 @@ const ShortHeader: React.FC = () => {
 
     return (
         <header className="flex h-14 items-center gap-4 border-b bg-gray-100/40 px-6 dark:bg-gray-800/40 lg:h-[60px]">
-            <Link className="lg:hidden" href="#">
+            <Link className="lg:hidden" href="/">
                 <Package2Icon className="h-6 w-6" />
                 <span className="sr-only">Головна</span>
             </Link>
             <div className="w-full">
-                <h1 className="text-lg font-semibold">Користувачі</h1>
+                <h1 className="text-lg font-semibold">
+                    {entity ? PageTitleMap[entity] : 'Керування'}
+                </h1>
             </div>
             <Popover>
                 <PopoverTrigger asChild>
