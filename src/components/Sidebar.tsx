@@ -1,7 +1,6 @@
 import React from 'react';
 import Logo from './Logo';
 import Link from 'next/link';
-import { Button } from './ui/button';
 
 interface SidebarProps {
     changeTab: (tabName: string) => void;
@@ -14,43 +13,34 @@ const Sidebar: React.FC<SidebarProps> = ({ changeTab }) => {
                 <Logo className="hidden h-[60px] px-6 text-3xl" />
                 <div className="flex-1">
                     <nav className="grid items-start px-4 text-sm font-medium">
-                        <Button
-                            asChild
-                            variant="ghost"
-                            className="justify-start p-0"
+                        <Link
+                            className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                            href="/"
                         >
-                            <Link
-                                className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                                href="/"
-                            >
-                                <HomeIcon className="h-4 w-4" />
-                                Головна
-                            </Link>
-                        </Button>
-                        <Button
-                            onClick={() => changeTab('users')}
-                            variant="ghost"
-                            className="flex items-center justify-start gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                            <HomeIcon className="h-4 w-4" />
+                            Головна
+                        </Link>
+                        <Link
+                            className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                            href="/"
                         >
                             <UsersIcon className="h-4 w-4" />
                             Користувачі
-                        </Button>
-                        <Button
-                            onClick={() => changeTab('operators')}
-                            variant="ghost"
-                            className="flex items-center justify-start gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                        </Link>
+                        <Link
+                            className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                            href="/"
                         >
                             <UsersIcon className="h-4 w-4" />
                             Оператори
-                        </Button>
-                        <Button
-                            onClick={() => changeTab('statistics')}
-                            variant="ghost"
-                            className="flex items-center justify-start gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                        </Link>
+                        <Link
+                            className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                            href="/"
                         >
                             <LineChartIcon className="h-4 w-4" />
                             Статистика
-                        </Button>
+                        </Link>
                     </nav>
                 </div>
             </div>
