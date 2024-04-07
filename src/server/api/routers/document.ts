@@ -1,9 +1,9 @@
 import { createTRPCRouter, permissionProcedure } from '~/server/api/trpc';
 import {
     CUIDSchema,
+    DocumentSchema,
+    DocumentUpdateSchema,
     PageSchema,
-    PostSchema,
-    PostUpdateSchema,
 } from '~/utils/schemas';
 
 export const documentRouter = createTRPCRouter({
@@ -24,7 +24,7 @@ export const documentRouter = createTRPCRouter({
         }),
 
     get: permissionProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
-        return await ctx.db.post.findUnique({
+        return await ctx.db.document.findUnique({
             where: { id: input },
             include: {
                 author: {
@@ -35,11 +35,17 @@ export const documentRouter = createTRPCRouter({
     }),
 
     create: permissionProcedure
-        .input(PostSchema)
+        .input(DocumentSchema)
         .mutation(async ({ ctx, input }) => {
-            return ctx.db.post.create({
+            const { folderId, ...noFolderInput } = input;
+            return ctx.db.document.create({
                 data: {
-                    ...input,
+                    ...noFolderInput,
+                    ...(folderId && {
+                        folder: {
+                            connect: { id: folderId },
+                        },
+                    }),
                     tags: {
                         connectOrCreate: input.tags.map((tag) => ({
                             where: { title: tag },
@@ -54,11 +60,11 @@ export const documentRouter = createTRPCRouter({
         }),
 
     update: permissionProcedure
-        .input(PostUpdateSchema)
+        .input(DocumentUpdateSchema)
         .mutation(async ({ ctx, input }) => {
             const { tags, ...noTagsInput } = input;
 
-            return ctx.db.post.update({
+            return ctx.db.document.update({
                 where: {
                     id: input.id,
                     ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
@@ -80,7 +86,7 @@ export const documentRouter = createTRPCRouter({
     delete: permissionProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
-            return ctx.db.post.delete({
+            return ctx.db.document.delete({
                 where: {
                     id: input,
                     ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),

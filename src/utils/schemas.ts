@@ -147,3 +147,35 @@ export const ExerciseUpdateSchema = TDIUpdateSchema.extend({
     tags: z.array(z.string()).min(1).max(25).optional(),
     steps: z.array(ExerciseStepSchema).min(1).max(100).optional(),
 });
+
+export const DocumentSchema = TDISchema.extend({
+    folderId: CUIDSchema.optional(),
+
+    tags: z.array(z.string()).min(1).max(25).default([]),
+});
+
+export const DocumentUpdateSchema = TDIUpdateSchema.extend({
+    id: z.string().cuid(),
+
+    folderId: CUIDSchema.optional(),
+
+    tags: z.array(z.string()).min(1).max(25).optional(),
+});
+
+export const DocumentFolderSchema = z.object({
+    parentId: CUIDSchema.optional(),
+
+    title: ShortStringSchema,
+
+    tags: z.array(z.string()).min(1).max(25).default([]),
+});
+
+export const DocumentFolderUpdateSchema = z.object({
+    id: CUIDSchema,
+
+    title: ShortStringSchema.optional(),
+
+    parentId: CUIDSchema.optional(),
+
+    tags: z.array(z.string()).min(1).max(25).optional(),
+});
