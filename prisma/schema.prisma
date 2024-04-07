@@ -93,7 +93,8 @@ model User {
   exerciseSteps   ExerciseStep[]
 
   // Private content
-  documents Document[]
+  documentFolders DocumentFolder[]
+  documents       Document[]
 
   createdAt                  DateTime @default(now())
   latestStatusConfirmationAt DateTime @default(now())
@@ -163,9 +164,10 @@ model Tag {
 
   title String @unique
 
-  posts     Post[]
-  exercises Exercise[]
-  documents Document[]
+  posts           Post[]
+  exercises       Exercise[]
+  documents       Document[]
+  documentFolders DocumentFolder[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -246,11 +248,34 @@ model ExerciseStep {
 model Document {
   id String @id @default(cuid())
 
+  folder   DocumentFolder? @relation(fields: [folderId], references: [id])
+  folderId String?
+
   title       String
   description String
   image       String?
 
   tags Tag[]
+
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model DocumentFolder {
+  id String @id @default(cuid())
+
+  title String
+
+  documents Document[]
+
+  tags Tag[]
+
+  parentId String?
+  parent   DocumentFolder?  @relation("FolderRelation", fields: [parentId], references: [id])
+  folders  DocumentFolder[] @relation("FolderRelation")
 
   author   User?   @relation(fields: [authorId], references: [id])
   authorId String?
