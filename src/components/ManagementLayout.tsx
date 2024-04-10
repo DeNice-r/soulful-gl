@@ -1,22 +1,22 @@
 import React from 'react';
 import Sidebar from '~/components/Sidebar';
 import ShortHeader from '~/components/ShortHeader';
-import { ManagementPageNames } from '~/utils/types';
+import { ManagementPageName } from '~/utils/types';
 import Users from '~/pages/management/Users';
 import Operators from '~/pages/management/Operators';
 
-const ManagementLayout: React.FC<{ entity?: ManagementPageNames }> = ({
+const ManagementLayout: React.FC<{ entity?: ManagementPageName }> = ({
     entity,
 }) => {
     let mainContent;
     switch (entity) {
-        case ManagementPageNames.USERS:
+        case ManagementPageName.USERS:
             mainContent = <Users />;
             break;
-        case ManagementPageNames.OPERATORS:
+        case ManagementPageName.OPERATORS:
             mainContent = <Operators />;
             break;
-        case ManagementPageNames.STATISTICS:
+        case ManagementPageName.STATISTICS:
             mainContent = `<StatisticsComponent />`;
             break;
         default:

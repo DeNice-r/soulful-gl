@@ -4,17 +4,9 @@ import Image from 'next/image';
 import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
 import { Button } from './ui/button';
 import { signOut, useSession } from 'next-auth/react';
-import { ManagementPageNames } from '~/utils/types';
+import { type ManagementPageName, PageTitleMap } from '~/utils/types';
 
-const PageTitleMap = {
-    [ManagementPageNames.USERS]: 'Користувачі',
-    [ManagementPageNames.OPERATORS]: 'Оператори',
-    [ManagementPageNames.STATISTICS]: 'Статистика',
-};
-
-const ShortHeader: React.FC<{ entity?: ManagementPageNames }> = ({
-    entity,
-}) => {
+const ShortHeader: React.FC<{ entity?: ManagementPageName }> = ({ entity }) => {
     const { update: updateSession, data: session, status } = useSession();
 
     const image = session?.user?.image ?? 'images/placeholder.svg';
@@ -107,7 +99,7 @@ const ShortHeader: React.FC<{ entity?: ManagementPageNames }> = ({
                                 onClick={() => signOut()}
                                 size="sm"
                                 variant="destructive"
-                                className="transition-colors hover:bg-red-800"
+                                className="transition-colors"
                             >
                                 Вихід
                             </Button>
