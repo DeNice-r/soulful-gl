@@ -99,5 +99,8 @@ function getProjection(isFullAccess: boolean) {
         image: true,
         description: true,
         notes: isFullAccess,
+        createdAt: true,
+        updatedAt: true,
+        suspended: isFullAccess,
     };
 }

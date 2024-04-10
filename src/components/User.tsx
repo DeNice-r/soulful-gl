@@ -14,20 +14,10 @@ const User: React.FC<{ user: RouterOutputs['user']['list'][number] }> = ({
     return (
         <>
             <TableCell>{user.email}</TableCell>
-            <TableCell>{
-                //TODO: user.createdAt
-                `Лютий 3, 1488`
-            }</TableCell>
-            <TableCell>{
-                //TODO: user.updatedAt
-                `Червень 11, 1488`
-            }</TableCell>
+            <TableCell>{user.createdAt.toString()}</TableCell>
+            <TableCell>{user.updatedAt.toString()}</TableCell>
             <TableCell>
-                {
-                    /*TODO:
-            user.suspended? 'Активний' : 'Деактивований'*/
-                    `Активний`
-                }
+                {user.suspended ? 'Активний' : 'Деактивований'}
             </TableCell>
             <TableCell className="text-right">
                 <Popover>
