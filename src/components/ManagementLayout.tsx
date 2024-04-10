@@ -27,10 +27,8 @@ const ManagementLayout: React.FC<{ entity?: ManagementPageName }> = ({
             <Sidebar />
             <div className="flex flex-col">
                 <ShortHeader {...{ entity }} />
-                <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
-                    <div className="rounded-lg border p-2 shadow-sm">
-                        {mainContent}
-                    </div>
+                <main className="flex flex-1 flex-col gap-4 p-4 md:gap-4 md:p-6">
+                    {mainContent}
                 </main>
             </div>
         </div>

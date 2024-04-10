@@ -37,9 +37,9 @@ const User: React.FC<{ user: RouterOutputs['user']['list'][number] }> = ({
                             <span className="sr-only">Дії</span>
                         </Button>
                     </PopoverTrigger>
-                    <PopoverContent>
-                        <span>Редагувати</span>
-                        <span>Видалити</span>
+                    <PopoverContent className="flex flex-col gap-2 transition-colors">
+                        <Button variant={'secondary'}>Редагувати</Button>
+                        <Button variant={'destructive'}>Видалити</Button>
                     </PopoverContent>
                 </Popover>
             </TableCell>
