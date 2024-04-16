@@ -111,7 +111,9 @@ export function requestWrapper(
                         ].flat();
                     }
 
-                    session.user.permissions = permissions;
+                    session.user.permissions = new Array(
+                        ...new Set(permissions),
+                    );
                 }
 
                 const chatList = await db.chat.findMany({
