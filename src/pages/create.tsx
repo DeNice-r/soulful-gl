@@ -46,7 +46,7 @@ const Draft: React.FC = () => {
 
     return (
         <Layout>
-            <div className="flex h-full flex-col items-center justify-center gap-4">
+            <div className="flex h-full flex-col items-center justify-center gap-4 bg-hero-pattern">
                 <p className="text-center text-2xl font-bold">Новий Допис</p>
                 <form
                     onSubmit={submitData}
