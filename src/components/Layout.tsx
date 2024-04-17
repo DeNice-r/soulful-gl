@@ -1,9 +1,6 @@
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import Header from './Header';
-
-type Props = {
-    children: ReactNode;
-};
+import { type Props } from '~/utils/types';
 
 const Layout: React.FC<Props> = (props) => (
     <div className="flex h-screen flex-col">

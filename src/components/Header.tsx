@@ -46,24 +46,15 @@ const Header: React.FC = () => {
         <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-gray-50 px-4 dark:bg-gray-950 sm:px-6 lg:px-8">
             <Logo className="hidden md:basis-1/4" />
             <nav className="flex justify-center gap-4 lg:gap-8">
-                {session && (
-                    // session.user.role > (UserRole.OPERATOR as number) &&
-                    // todo: use permissions
-                    <NavLink className="rounded-r-md" href="/drafts">
-                        Чернетки
-                    </NavLink>
-                )}
-
-                {session && (
+                {
                     // session.user.role === (UserRole.OPERATOR as number) &&
                     // todo: use permissions
-                    <>
-                        <NavLink href="/drafts">Чернетки</NavLink>
-                        <NavLink className="rounded-r-md" href="/chat">
-                            Чати
-                        </NavLink>
-                    </>
-                )}
+                }
+                <NavLink href="/posts">Дописи</NavLink>
+                <NavLink href="/exercises">Вправи</NavLink>
+                <NavLink href="/knowledge">База знань</NavLink>
+                <NavLink href="/QnA">Запитання та відповіді</NavLink>
+                <NavLink href="/chat">Чати</NavLink>
             </nav>
             {session ? (
                 <div className="flex items-center justify-end gap-4 md:basis-1/4">

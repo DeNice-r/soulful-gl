@@ -19,6 +19,8 @@ export const userRouter = createTRPCRouter({
             });
         }),
 
+    // todo: get users with permission to chat
+
     getById: permissionProcedure
         .input(CUIDSchema)
         .query(async ({ input, ctx }) => {
@@ -97,5 +99,8 @@ function getProjection(isFullAccess: boolean) {
         image: true,
         description: true,
         notes: isFullAccess,
+        createdAt: true,
+        updatedAt: true,
+        suspended: isFullAccess,
     };
 }
