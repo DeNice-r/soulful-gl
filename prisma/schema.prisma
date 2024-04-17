@@ -68,9 +68,14 @@ model User {
   emailVerified DateTime?
   image         String?   @default("/images/default_avatar.png")
 
-  isOnline Boolean @default(false)
-  notes    String?
   password String?
+
+  notes String?
+
+  // Chat availability
+  isOnline                   Boolean  @default(false)
+  latestStatusConfirmationAt DateTime @default(now())
+  perceivedOccupation        Int      @default(0)
 
   suspended Boolean @default(false)
 
@@ -94,8 +99,6 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
-
-  latestStatusConfirmationAt DateTime @default(now())
 }
 
 model VerificationToken {
