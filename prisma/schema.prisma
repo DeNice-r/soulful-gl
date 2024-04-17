@@ -97,8 +97,13 @@ model User {
   exercises       Exercise[]
   exerciseSteps   ExerciseStep[]
 
-  createdAt DateTime @default(now())
+  // Private content
+  documentFolders DocumentFolder[]
+  documents       Document[]
+
+  createdAt                  DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+  latestStatusConfirmationAt DateTime @default(now())
 }
 
 model VerificationToken {
@@ -165,8 +170,10 @@ model Tag {
 
   title String @unique
 
-  posts     Post[]
-  exercises Exercise[]
+  posts           Post[]
+  exercises       Exercise[]
+  documents       Document[]
+  documentFolders DocumentFolder[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -236,6 +243,60 @@ model ExerciseStep {
   timeSeconds       Int?
 
   exercises Exercise[]
+
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model QandA {
+  id Int @id @default(autoincrement())
+
+  question String
+  answer   String?
+
+  authorEmail String
+  authorName  String
+
+  published Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Document {
+  id String @id @default(cuid())
+
+  folder   DocumentFolder? @relation(fields: [folderId], references: [id])
+  folderId String?
+
+  title       String
+  description String
+  image       String?
+
+  tags Tag[]
+
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model DocumentFolder {
+  id String @id @default(cuid())
+
+  title String
+
+  documents Document[]
+
+  tags Tag[]
+
+  parentId String?
+  parent   DocumentFolder?  @relation("FolderRelation", fields: [parentId], references: [id])
+  folders  DocumentFolder[] @relation("FolderRelation")
 
   author   User?   @relation(fields: [authorId], references: [id])
   authorId String?
