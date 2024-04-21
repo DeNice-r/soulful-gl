@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { BackgroundPattern } from '~/utils/types';
-import { env } from '~/env';
-import bcrypt from 'bcrypt';
+// import bcrypt from 'bcrypt';
 
 const FirstPage = 1;
 const DefaultLimit = 10;
@@ -18,11 +17,11 @@ export const CUIDObjectSchema = z.object({ id: CUIDSchema });
 
 export const ShortStringSchema = z.string().min(1).max(100);
 
-export const PasswordSchema = z
-    .string()
-    .min(8)
-    .max(100)
-    .transform((v) => bcrypt.hashSync(v, env.SALT_ROUNDS));
+// export const PasswordSchema = z
+//     .string()
+//     .min(8)
+//     .max(100)
+//     .transform((v) => bcrypt.hashSync(v, env.SALT_ROUNDS));
 
 export const TitleSchema = z.string().min(1).max(200);
 export const QuerySchema = z.string().min(1).max(200);
@@ -55,7 +54,7 @@ export const CreateUserSchema = z.object({
     name: ShortStringSchema,
     image: ImageSchema,
     description: RichTextSchema.optional(),
-    password: PasswordSchema,
+    // password: PasswordSchema,
     notes: z.string().optional(),
 });
 
@@ -65,7 +64,7 @@ export const UpdateUserSchema = z.object({
     name: ShortStringSchema.optional(),
     image: ImageSchema.optional(),
     description: RichTextSchema.optional(),
-    password: PasswordSchema.optional(),
+    // password: PasswordSchema.optional(),
 });
 
 export const SetNotesSchema = z.object({
