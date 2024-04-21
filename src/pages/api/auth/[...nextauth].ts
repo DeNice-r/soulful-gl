@@ -30,9 +30,6 @@ declare module 'next-auth' {
 
             suspended: boolean;
         };
-        personnel: {
-            chats: Record<number, ExtendedChat>;
-        };
     }
 
     interface DefaultUser {
@@ -138,7 +135,6 @@ export function requestWrapper(
                     };
                 }
 
-                session.personnel = { chats };
                 return session;
             },
             async signIn({

@@ -86,17 +86,6 @@ const caller = createCaller({
             roles: [],
             suspended: false,
         },
-        personnel: {
-            chats: {
-                '1': {
-                    messages: [],
-                    id: 1,
-                    personnelId: '1',
-                    userId: '1',
-                    createdAt: new Date(),
-                },
-            },
-        },
         expires: 'no 😎',
     },
     entity: 'world',

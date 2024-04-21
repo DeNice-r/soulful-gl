@@ -15,10 +15,17 @@ import SendIcon from '@mui/icons-material/Send';
 import Layout from '../../components/Layout';
 import ChatItem from '../../components/ChatItem';
 import { useSession } from 'next-auth/react';
+import { api, type RouterOutputs } from '~/utils/api';
 const HEIGHT = '96vh';
 
 const ChatUI = () => {
     const { data: session, status } = useSession();
+
+    const chatQuery = api.chat.listFull.useQuery();
+
+    const [chats, setChats] = React.useState<
+        NonNullable<RouterOutputs['chat']['listFull']>
+    >({});
 
     const [error, setError] = React.useState(false);
     const [currentChat, setCurrentChat] = React.useState(0);
@@ -55,14 +62,12 @@ const ChatUI = () => {
 
         const messageChatIndex = -1;
 
-        if (!(message.chatId in session.personnel.chats)) {
+        if (!(message.chatId in chats)) {
             // loadNewChats(message.chatId);
         }
 
-        session.personnel.chats[message.chatId].messages.push(message);
-        setMessageCount(
-            session.personnel.chats[message.chatId].messages.length,
-        );
+        setChats(chats[message.chatId].messages.push(message));
+        setMessageCount(chats[message.chatId].messages.length);
 
         setTimeout(() => {
             // @ts-expect-error - ref is legacy todo: replace
@@ -76,16 +81,15 @@ const ChatUI = () => {
 
     useEffect(() => {
         scrollToBottom(false);
-    }, []);
+        setChats(chatQuery.data);
+    }, [chatQuery.data]);
 
     useEffect(() => {
         if (status !== 'authenticated') return;
 
-        const chats = Object.values(session.personnel.chats);
+        if (!Object.keys(chats).length) return;
 
-        if (!chats.length || chats.length === 0) return;
-
-        setCurrentChat(chats[0].id);
+        setCurrentChat(Object.keys(chats)[0]);
 
         wsRef.current = new WebSocket(
             `${process.env.NEXT_PUBLIC_WSS_ENDPOINT}/${session?.user?.id}`,
@@ -103,7 +107,7 @@ const ChatUI = () => {
         return () => {
             if (wsRef.current) wsRef.current.close();
         };
-    }, [status]);
+    }, [chats]);
 
     const scrollToBottom = (smooth: boolean = true) => {
         setTimeout(() => {
@@ -128,7 +132,7 @@ const ChatUI = () => {
                 return;
             }
 
-            const chat = session.personnel.chats[currentChat];
+            const chat = chats[currentChat];
             wsRef.current.send(
                 JSON.stringify({
                     text: message,
@@ -170,16 +174,14 @@ const ChatUI = () => {
                         }}
                     >
                         <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
-                            {session &&
-                                Object.values(session.personnel.chats).map(
-                                    (chat, index) => (
-                                        <ChatItem
-                                            key={index}
-                                            chat={chat}
-                                            onClick={() => changeChat(chat.id)}
-                                        />
-                                    ),
-                                )}
+                            {chats &&
+                                Object.values(chats).map((chat, index) => (
+                                    <ChatItem
+                                        key={index}
+                                        chat={chat}
+                                        onClick={() => changeChat(chat.id)}
+                                    />
+                                ))}
                         </Box>
                     </Box>
                 </Grid>
@@ -193,10 +195,8 @@ const ChatUI = () => {
                         }}
                     >
                         <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
-                            {session &&
-                                session.personnel.chats[
-                                    currentChat
-                                ]?.messages?.map((message) => (
+                            {chats &&
+                                chats[currentChat]?.messages?.map((message) => (
                                     <ChatMesssage
                                         key={message.id}
                                         message={message}
