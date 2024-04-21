@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 
@@ -11,9 +11,33 @@ import {
 } from '~/components/ui/table';
 import User from '~/components/User';
 import { api } from '~/utils/api';
+import Modal from 'react-modal';
+import {
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '~/components/ui/form';
+import { CreateUserSchema } from '~/utils/schemas';
+import { type z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 const Users: React.FC = () => {
+    const [isModalOpen, setIsModalOpen] = useState(true);
+    const changeModalState = () => {
+        setIsModalOpen(!isModalOpen);
+    };
     const users = api.user.list.useQuery();
+    const form = useForm<z.infer<typeof CreateUserSchema>>({
+        resolver: zodResolver(CreateUserSchema),
+    });
+    function onSubmit(values: z.infer<typeof CreateUserSchema>) {
+        console.log(values);
+    }
     return (
         <>
             <div className="flex w-full justify-between">
@@ -51,7 +75,108 @@ const Users: React.FC = () => {
                         </Button>
                     </div>
                 </form>
-                <Button>Новий користувач</Button>
+                <Button onClick={changeModalState}>Новий користувач</Button>
+                <Modal
+                    isOpen={isModalOpen}
+                    onRequestClose={changeModalState}
+                    className="flex h-svh w-svw items-center justify-center"
+                >
+                    <Form {...form}>
+                        <form
+                            onSubmit={form.handleSubmit(onSubmit)}
+                            className="flex h-3/4 w-3/4 flex-col items-center justify-center gap-4 rounded-lg bg-gray-300"
+                        >
+                            <div className="flex h-2/3 w-4/5 flex-col gap-4">
+                                <div className="flex flex-col gap-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-xl">
+                                                    Електронна пошта
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        className="max-w-96"
+                                                        placeholder="anton@gmail.com"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="name"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-xl">
+                                                    Ім&apos;я користувача
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        className="max-w-96"
+                                                        placeholder="Антон"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="description"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-xl">
+                                                    Опис
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        className="max-w-96"
+                                                        placeholder="Введіть текст..."
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    Опис нового користувача
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    {/*todo: userRole
+                            
+                                <FormField
+                                    control={form.control}
+                                    name="role"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Username</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="anton@gmail.com"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                This is your public display name.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                /> */}
+                                </div>
+                                <Button className="self-end" type="submit">
+                                    Створити
+                                </Button>
+                            </div>
+                        </form>
+                    </Form>
+                </Modal>
             </div>
             <div className="rounded-lg border bg-neutral-300 p-2 shadow-sm">
                 <Table>
