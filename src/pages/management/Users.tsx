@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
-
 import {
     TableHead,
     TableRow,
@@ -21,10 +20,10 @@ import {
     FormLabel,
     FormMessage,
 } from '~/components/ui/form';
-import { CreateUserSchema } from '~/utils/schemas';
-import { type z } from 'zod';
+import type * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { CreateUserSchema } from '~/utils/schemas';
 
 const Users: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(true);
@@ -32,8 +31,16 @@ const Users: React.FC = () => {
         setIsModalOpen(!isModalOpen);
     };
     const users = api.user.list.useQuery();
+
     const form = useForm<z.infer<typeof CreateUserSchema>>({
         resolver: zodResolver(CreateUserSchema),
+        defaultValues: {
+            name: '',
+            description: '',
+            email: '',
+            image: '',
+            notes: '',
+        },
     });
     function onSubmit(values: z.infer<typeof CreateUserSchema>) {
         console.log(values);
@@ -86,7 +93,7 @@ const Users: React.FC = () => {
                             onSubmit={form.handleSubmit(onSubmit)}
                             className="flex h-3/4 w-3/4 flex-col items-center justify-center gap-4 rounded-lg bg-gray-300"
                         >
-                            <div className="flex h-2/3 w-4/5 flex-col gap-4">
+                            <div className="flex h-3/4 w-4/5 flex-col justify-between gap-4">
                                 <div className="flex flex-col gap-4">
                                     <FormField
                                         control={form.control}
@@ -143,7 +150,27 @@ const Users: React.FC = () => {
                                                 </FormControl>
                                                 <FormDescription>
                                                     Опис нового користувача
+                                                    (видимий для користувача)
                                                 </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="notes"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-xl">
+                                                    Нотатки про користувача
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        className="max-w-96"
+                                                        placeholder="Введіть текст..."
+                                                        {...field}
+                                                    />
+                                                </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
@@ -170,9 +197,20 @@ const Users: React.FC = () => {
                                     )}
                                 /> */}
                                 </div>
-                                <Button className="self-end" type="submit">
-                                    Створити
-                                </Button>
+                                <div className="flex gap-8 self-end">
+                                    <Button
+                                        className=" px-7 py-6"
+                                        type="submit"
+                                    >
+                                        Створити
+                                    </Button>
+                                    <Button
+                                        className="px-7 py-6"
+                                        variant="destructive"
+                                    >
+                                        Відмінити
+                                    </Button>
+                                </div>
                             </div>
                         </form>
                     </Form>
