@@ -212,7 +212,7 @@ export function requestWrapper(
             },
         },
 
-        secret: process.env.NEXTAUTH_SECRET,
+        secret: env.NEXTAUTH_SECRET,
         debug: true,
         providers: [
             GithubProvider({

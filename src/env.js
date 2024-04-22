@@ -60,8 +60,8 @@ export const env = createEnv({
      */
     client: {
         NEXT_PUBLIC_WSS_ENDPOINT: z.string().url(),
-        NEXT_PUBLIC_AWS_REGION: z.string(),
         NEXT_PUBLIC_AWS_S3_BUCKET: z.string(),
+        NEXT_PUBLIC_AWS_REGION: z.string(),
     },
 
     /**
@@ -99,8 +99,8 @@ export const env = createEnv({
         AWS_S3_BUCKET: process.env.AWS_S3_BUCKET,
 
         NEXT_PUBLIC_WSS_ENDPOINT: process.env.NEXT_PUBLIC_WSS_ENDPOINT,
-        NEXT_PUBLIC_AWS_REGION: process.env.NEXT_PUBLIC_AWS_REGION,
         NEXT_PUBLIC_AWS_S3_BUCKET: process.env.NEXT_PUBLIC_AWS_S3_BUCKET,
+        NEXT_PUBLIC_AWS_REGION: process.env.NEXT_PUBLIC_AWS_REGION,
     },
     /**
      * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
