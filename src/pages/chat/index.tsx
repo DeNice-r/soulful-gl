@@ -21,22 +21,22 @@ const HEIGHT = '96vh';
 const ChatUI = () => {
     const { data: session, status } = useSession();
 
-    const chatQuery = api.chat.listFull.useQuery();
+    const { client: apiClient } = api.useContext();
+    const chatListFullQuery = api.chat.listFull.useQuery();
 
-    const [chats, setChats] = React.useState<
-        NonNullable<RouterOutputs['chat']['listFull']>
-    >({});
+    const [chats, setChats] = React.useState<RouterOutputs['chat']['listFull']>(
+        {},
+    );
 
     const [error, setError] = React.useState(false);
-    const [currentChat, setCurrentChat] = React.useState(0);
+    const [currentChat, setCurrentChat] = React.useState<number>(-1);
     const [messageCount, setMessageCount] = React.useState(0);
-    const [chatCount, setChatCount] = React.useState(0);
 
     const inputRef = React.useRef<{ value: string; focus: () => void }>();
     const messageEndRef = React.useRef();
-    const wsRef = React.useRef<WebSocket>();
 
-    const messagesRef = React.useRef({});
+    const wsRef = React.useRef<WebSocket>();
+    const wsReconnectInterval = React.useRef<NodeJS.Timeout>();
 
     // async function loadNewChats(chatId: number) {
     //     if (!session) return;
@@ -57,17 +57,21 @@ const ChatUI = () => {
     //     setChatCount(Object.values(session.personnel.chats).length);
     // }
 
-    function pushMessage(message: Message) {
+    async function pushMessage(message: Message) {
+        console.log('[Router] Pushing message:', message.text);
         if (!session) return;
-
-        const messageChatIndex = -1;
+        console.log('[Router] Session');
 
         if (!(message.chatId in chats)) {
-            // loadNewChats(message.chatId);
+            const newChat = await apiClient.chat.getFull.query(message.chatId);
+            if (!newChat) return;
+
+            chats[message.chatId] = newChat;
+        } else {
+            chats[message.chatId].messages.push(message);
         }
 
-        setChats(chats[message.chatId].messages.push(message));
-        setMessageCount(chats[message.chatId].messages.length);
+        setChats(chats);
 
         setTimeout(() => {
             // @ts-expect-error - ref is legacy todo: replace
@@ -81,33 +85,59 @@ const ChatUI = () => {
 
     useEffect(() => {
         scrollToBottom(false);
-        setChats(chatQuery.data);
-    }, [chatQuery.data]);
+        setChats(chatListFullQuery.data ?? {});
+    }, [chatListFullQuery.data]);
+
+    function wsConnect() {
+        if (!session) return;
+        wsRef.current = new WebSocket(
+            `${process.env.NEXT_PUBLIC_WSS_ENDPOINT}/${session?.user?.id}`,
+        );
+
+        wsRef.current.onopen = wsOnOpen;
+        wsRef.current.onclose = wsOnClose;
+        wsRef.current.onerror = wsOnError;
+        wsRef.current.onmessage = wsOnMessage;
+    }
+
+    function wsReconnect() {
+        if (wsRef.current) wsRef.current.close();
+        clearInterval(wsReconnectInterval.current);
+        wsReconnectInterval.current = setInterval(() => {
+            wsConnect();
+        }, 5000);
+    }
+
+    function wsOnOpen() {
+        clearInterval(wsReconnectInterval.current);
+        console.log('[Router] Connection established');
+    }
+
+    function wsOnClose() {
+        console.log('[Router] Connection closed, reconnecting...');
+        wsReconnect();
+    }
+
+    function wsOnError() {
+        console.log('[Router] Connection error, reconnecting...');
+        wsReconnect();
+    }
+
+    async function wsOnMessage(event: MessageEvent) {
+        const message = JSON.parse(event.data) as Message;
+        console.log('[Router] Message received:', message.text);
+        await pushMessage(message);
+    }
 
     useEffect(() => {
         if (status !== 'authenticated') return;
 
-        if (!Object.keys(chats).length) return;
-
-        setCurrentChat(Object.keys(chats)[0]);
-
-        wsRef.current = new WebSocket(
-            `${process.env.NEXT_PUBLIC_WSS_ENDPOINT}/${session?.user?.id}`,
-        );
-        wsRef.current.onopen = () =>
-            console.log('[Router] Connection established');
-        wsRef.current.onclose = () => console.log('[Router] Connection closed');
-        wsRef.current.onerror = () => console.log('[Router] Connection error');
-
-        wsRef.current.onmessage = (event) => {
-            const message = JSON.parse(event.data as string) as Message;
-            pushMessage(message);
-        };
+        wsConnect();
 
         return () => {
             if (wsRef.current) wsRef.current.close();
         };
-    }, [chats]);
+    }, [status]);
 
     const scrollToBottom = (smooth: boolean = true) => {
         setTimeout(() => {
@@ -131,6 +161,8 @@ const ChatUI = () => {
                 }, 5000);
                 return;
             }
+
+            if (!chats[currentChat]) return;
 
             const chat = chats[currentChat];
             wsRef.current.send(

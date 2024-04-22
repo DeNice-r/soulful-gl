@@ -33,7 +33,7 @@ export const chatRouter = createTRPCRouter({
 
         if (!chatList) return {};
 
-        const chatMap: { number: (typeof chatList)[number] } = {};
+        const chatMap: Record<number, (typeof chatList)[number]> = {};
         for (const chat of chatList) {
             chatMap[chat.id] = chat;
         }
