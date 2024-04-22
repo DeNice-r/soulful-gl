@@ -1,12 +1,12 @@
 import React from 'react';
 import Post from '../components/Post';
-import { api } from '~/utils/api';
 import { truculenta } from './_app';
 import Header from '~/components/Header';
 import Image from 'next/image';
 import Link from 'next/link';
 import Footer from '~/components/Footer';
 import Logo from '~/components/Logo';
+import { api } from '~/utils/api';
 
 const Blog: React.FC = () => {
     const posts = api.post.get.useQuery({
@@ -28,15 +28,14 @@ const Blog: React.FC = () => {
                 </p>
             </section>
             <article className="flex w-full flex-col justify-center gap-8 py-16 md:px-80 2xl:flex-row 2xl:gap-32 2xl:px-40">
-                {posts.data &&
-                    posts.data.map((post) => (
-                        <div
-                            key={post.id}
-                            className="flex-1 justify-center bg-neutral-300 bg-opacity-80 shadow-md outline outline-neutral-400 transition-shadow duration-100 ease-in hover:cursor-pointer hover:shadow-lg md:rounded-md"
-                        >
-                            <Post post={post} />
-                        </div>
-                    ))}
+                {posts?.data?.map((post) => (
+                    <div
+                        key={post.id}
+                        className="flex-1 justify-center bg-neutral-300 bg-opacity-80 shadow-md outline outline-neutral-400 transition-shadow duration-100 ease-in hover:cursor-pointer hover:shadow-lg md:rounded-md"
+                    >
+                        <Post post={post} />
+                    </div>
+                ))}
             </article>
             <div className="flex items-center py-12 text-center md:h-auto md:justify-center md:p-32">
                 <article className="flex flex-col gap-8 bg-neutral-300 bg-opacity-70 p-10 drop-shadow-lg md:w-1/2 md:rounded-xl">
