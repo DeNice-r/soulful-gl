@@ -1,15 +1,19 @@
 import { z } from 'zod';
 import { BackgroundPattern } from '~/utils/types';
+import { env } from '~/env';
 // import bcrypt from 'bcrypt';
 
 const FirstPage = 1;
 const DefaultLimit = 10;
-export const PageSchema = z
-    .object({
-        page: z.number().min(1).default(FirstPage),
-        limit: z.number().min(1).max(100).default(DefaultLimit),
-    })
-    .default({ page: FirstPage, limit: DefaultLimit });
+
+const NoDefaultPageSchema = z.object({
+    page: z.number().min(1).default(FirstPage),
+    limit: z.number().min(1).max(100).default(DefaultLimit),
+});
+export const PageSchema = NoDefaultPageSchema.default({
+    page: FirstPage,
+    limit: DefaultLimit,
+});
 
 export const NumberIdSchema = z.number().int().nonnegative();
 export const CUIDSchema = z.string().cuid();
@@ -28,14 +32,16 @@ export const QuerySchema = z.string().min(1).max(200);
 export const RichTextSchema = z.string().min(1).max(15000);
 
 const ImageBucketRegex = new RegExp(
-    `https://${env.AWS_S3_BUCKET}\\.s3(?:\\.${env.AWS_REGION})?\\.amazonaws\\.com/.+`,
+    `https://${env.NEXT_PUBLIC_AWS_S3_BUCKET}\\.s3(?:\\.${env.NEXT_PUBLIC_AWS_REGION})?\\.amazonaws\\.com/.+`,
 );
 export const ImageSchema = z
     .string()
     .refine((value) => ImageBucketRegex.test(value));
 
-export const SearchSchema = z.object({
-    query: QuerySchema,
+export const SearchSchema = NoDefaultPageSchema.extend({
+    query: QuerySchema.optional(),
+
+    published: z.boolean().optional(),
 });
 
 export const TDISchema = z.object({
@@ -145,4 +151,52 @@ export const ExerciseUpdateSchema = TDIUpdateSchema.extend({
 
     tags: z.array(z.string()).min(1).max(25).optional(),
     steps: z.array(ExerciseStepSchema).min(1).max(100).optional(),
+});
+
+export const QandASchema = z.object({
+    question: RichTextSchema,
+
+    authorEmail: z.string().email(),
+    authorName: ShortStringSchema,
+});
+
+export const QandAUdateSchema = z.object({
+    id: NumberIdSchema,
+
+    question: RichTextSchema.optional(),
+    answer: RichTextSchema.optional(),
+
+    published: z.boolean().optional(),
+});
+
+export const DocumentSchema = TDISchema.extend({
+    folderId: CUIDSchema.optional(),
+
+    tags: z.array(z.string()).min(1).max(25).default([]),
+});
+
+export const DocumentUpdateSchema = TDIUpdateSchema.extend({
+    id: z.string().cuid(),
+
+    folderId: CUIDSchema.optional(),
+
+    tags: z.array(z.string()).min(1).max(25).optional(),
+});
+
+export const DocumentFolderSchema = z.object({
+    parentId: CUIDSchema.optional(),
+
+    title: ShortStringSchema,
+
+    tags: z.array(z.string()).min(1).max(25).default([]),
+});
+
+export const DocumentFolderUpdateSchema = z.object({
+    id: CUIDSchema,
+
+    title: ShortStringSchema.optional(),
+
+    parentId: CUIDSchema.optional(),
+
+    tags: z.array(z.string()).min(1).max(25).optional(),
 });
