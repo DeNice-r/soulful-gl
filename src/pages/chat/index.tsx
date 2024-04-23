@@ -1,22 +1,12 @@
 import * as React from 'react';
 import { useEffect } from 'react';
 import { type Message } from '@prisma/client';
-import {
-    Alert,
-    Box,
-    Fade,
-    Grid,
-    IconButton,
-    Paper,
-    TextField,
-    Typography,
-} from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
+import { Alert, Fade, Grid } from '@mui/material';
 import Layout from '../../components/Layout';
-import ChatItem from '../../components/ChatItem';
 import { useSession } from 'next-auth/react';
 import { api, type RouterOutputs } from '~/utils/api';
-const HEIGHT = '93vh';
+import { ChatBar } from '~/components/chat/ChatBar';
+import { ChatMessageWindow } from '~/components/chat/ChatMessageWindow';
 
 const ChatUI = () => {
     const { data: session, status } = useSession();
@@ -30,32 +20,12 @@ const ChatUI = () => {
 
     const [error, setError] = React.useState(false);
     const [currentChat, setCurrentChat] = React.useState<number>(-1);
-    const [messageCount, setMessageCount] = React.useState(0);
 
     const inputRef = React.useRef<{ value: string; focus: () => void }>();
     const messageEndRef = React.useRef();
 
     const wsRef = React.useRef<WebSocket>();
     const wsReconnectInterval = React.useRef<NodeJS.Timeout>();
-
-    // async function loadNewChats(chatId: number) {
-    //     if (!session) return;
-    //
-    //     const newChat: ExtendedChat = await db.chat.findFirst({
-    //         where: {
-    //             id: chatId,
-    //         },
-    //     });
-    //
-    //     newChat.messages = await db.message.findMany({
-    //         where: {
-    //             chatId: chatId,
-    //         },
-    //     });
-    //
-    //     session.personnel.chats[newChat.id] = newChat;
-    //     setChatCount(Object.values(session.personnel.chats).length);
-    // }
 
     async function pushMessage(message: Message) {
         if (!session) return;
@@ -177,127 +147,35 @@ const ChatUI = () => {
         scrollToBottom();
     };
 
-    const changeChat = async (index: number) => {
+    function changeChat(index: number) {
         setCurrentChat(index);
         scrollToBottom(false);
-    };
+    }
 
     return (
         <Layout>
             <Fade in={error}>
                 <Alert
                     variant="filled"
-                    severity="error"
+                    severity="warning"
                     sx={{ position: 'absolute', 'z-index': 1 }}
                 >
-                    You are not connected to the internet
+                    Establishing connection to the server...
                 </Alert>
             </Fade>
             <Grid container spacing={0}>
-                <Grid item xs={2}>
-                    <Box
-                        sx={{
-                            height: HEIGHT,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            bgcolor: 'grey.300',
-                        }}
-                    >
-                        <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
-                            {chats &&
-                                Object.values(chats).map((chat, index) => (
-                                    <ChatItem
-                                        key={index}
-                                        chat={chat}
-                                        onClick={() => changeChat(chat.id)}
-                                    />
-                                ))}
-                        </Box>
-                    </Box>
-                </Grid>
-                <Grid item xs={10}>
-                    <Box
-                        sx={{
-                            height: HEIGHT,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            bgcolor: 'grey.400',
-                        }}
-                    >
-                        <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
-                            {chats &&
-                                chats[currentChat]?.messages?.map((message) => (
-                                    <ChatMesssage
-                                        key={message.id}
-                                        message={message}
-                                    />
-                                ))}
-                            {/*@ts-expect-error - ref is legacy todo: replace*/}
-                            <div ref={messageEndRef}></div>
-                        </Box>
-                        <Box sx={{ p: 0.5, backgroundColor: 'grey.300' }}>
-                            <Grid container spacing={1}>
-                                <Grid item xs={11.5}>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        placeholder="Type a message"
-                                        variant="outlined"
-                                        inputRef={inputRef}
-                                        onKeyDown={(event) => {
-                                            if (event.key === 'Enter') {
-                                                handleSend();
-                                            }
-                                        }}
-                                    />
-                                </Grid>
-                                <Grid item xs={0.3}>
-                                    <IconButton
-                                        size="small"
-                                        color="primary"
-                                        onClick={handleSend}
-                                    >
-                                        <SendIcon />
-                                    </IconButton>
-                                </Grid>
-                            </Grid>
-                        </Box>
-                    </Box>
-                </Grid>
+                <ChatBar {...{ chats, changeChat }} />
+                <ChatMessageWindow
+                    {...{
+                        chats,
+                        currentChat,
+                        handleSend,
+                        inputRef,
+                        messageEndRef,
+                    }}
+                />
             </Grid>
         </Layout>
-    );
-};
-
-const ChatMesssage = ({ message }: { message: Message }) => {
-    const isRemote = message.isFromUser;
-
-    return (
-        <Box
-            sx={{
-                display: 'flex',
-                justifyContent: isRemote ? 'flex-start' : 'flex-end',
-                mb: 2,
-            }}
-        >
-            <Paper
-                variant="outlined"
-                sx={{
-                    p: 2,
-                    backgroundColor: isRemote
-                        ? 'primary.light'
-                        : 'secondary.light',
-                    color: isRemote
-                        ? 'primary.contrastText'
-                        : 'secondary.contrastText',
-                    borderRadius: isRemote
-                        ? '20px 20px 20px 5px'
-                        : '20px 20px 5px 20px',
-                }}
-            >
-                <Typography variant="body1">{message.text}</Typography>
-            </Paper>
-        </Box>
     );
 };
 
