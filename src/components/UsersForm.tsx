@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type RefObject } from 'react';
 import {
     Form,
     FormControl,
@@ -15,7 +15,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CreateUserSchema } from '~/utils/schemas';
 
-const UsersForm: React.FC<{ id?: string }> = ({ id }) => {
+const UsersForm: React.FC<{
+    id?: string;
+    changeModalState: () => void;
+    formRef: RefObject<HTMLFormElement>;
+}> = ({ id, changeModalState, formRef }) => {
     const form = useForm<z.infer<typeof CreateUserSchema>>({
         resolver: zodResolver(CreateUserSchema),
         defaultValues: {
@@ -32,6 +36,7 @@ const UsersForm: React.FC<{ id?: string }> = ({ id }) => {
     return (
         <Form {...form}>
             <form
+                ref={formRef}
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="flex h-3/4 w-3/4 flex-col items-center justify-center gap-4 rounded-lg bg-gray-300"
             >
@@ -142,7 +147,11 @@ const UsersForm: React.FC<{ id?: string }> = ({ id }) => {
                         <Button className=" px-7 py-6" type="submit">
                             Створити
                         </Button>
-                        <Button className="px-7 py-6" variant="destructive">
+                        <Button
+                            className="px-7 py-6"
+                            variant="destructive"
+                            onClick={changeModalState}
+                        >
                             Відмінити
                         </Button>
                     </div>

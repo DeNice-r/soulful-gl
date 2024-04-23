@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 
@@ -20,6 +20,23 @@ const Users: React.FC = () => {
         setIsModalOpen(!isModalOpen);
     };
     const users = api.user.list.useQuery();
+
+    const ref = useRef<HTMLFormElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                ref.current &&
+                !ref.current.contains(event.target as HTMLFormElement)
+            ) {
+                setIsModalOpen(false);
+            }
+        };
+        document.addEventListener('click', handleClickOutside, true);
+        return () => {
+            document.removeEventListener('click', handleClickOutside, true);
+        };
+    }, [isModalOpen]);
 
     return (
         <>
@@ -64,7 +81,10 @@ const Users: React.FC = () => {
                     onRequestClose={changeModalState}
                     className="flex h-svh w-svw items-center justify-center"
                 >
-                    <UsersForm />
+                    <UsersForm
+                        formRef={ref}
+                        changeModalState={changeModalState}
+                    />
                 </Modal>
             </div>
             <div className="rounded-lg border bg-neutral-300 p-2 shadow-sm">
