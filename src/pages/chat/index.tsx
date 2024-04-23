@@ -124,7 +124,6 @@ const ChatUI = () => {
 
     async function wsOnMessage(event: MessageEvent) {
         const message = JSON.parse(event.data) as Message;
-        console.log('[Router] Message received:', message.text);
         await pushMessage(message);
     }
 
