@@ -14,20 +14,21 @@ import type * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CreateUserSchema } from '~/utils/schemas';
+import { type RouterOutputs } from '~/utils/api';
 
 const UsersForm: React.FC<{
-    id?: string;
+    user?: RouterOutputs['user']['getById'];
     changeModalState: () => void;
     formRef: RefObject<HTMLFormElement>;
-}> = ({ id, changeModalState, formRef }) => {
+}> = ({ user, changeModalState, formRef }) => {
     const form = useForm<z.infer<typeof CreateUserSchema>>({
         resolver: zodResolver(CreateUserSchema),
         defaultValues: {
-            name: '',
-            description: '',
-            email: '',
-            image: '',
-            notes: '',
+            name: user?.name ?? '',
+            description: user?.description ?? '',
+            email: user?.email ?? '',
+            image: user?.image ?? '',
+            notes: user?.notes ?? '',
         },
     });
     function onSubmit(values: z.infer<typeof CreateUserSchema>) {
@@ -145,7 +146,7 @@ const UsersForm: React.FC<{
                     </div>
                     <div className="flex gap-8 self-end">
                         <Button className=" px-7 py-6" type="submit">
-                            Створити
+                            {user ? 'Редагувати' : 'Створити'}
                         </Button>
                         <Button
                             className="px-7 py-6"

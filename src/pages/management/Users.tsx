@@ -10,18 +10,31 @@ import {
     Table,
 } from '~/components/ui/table';
 import User from '~/components/User';
-import { api } from '~/utils/api';
+import { type RouterOutputs, api } from '~/utils/api';
 import Modal from 'react-modal';
 import UsersForm from '~/components/UsersForm';
 
 const Users: React.FC = () => {
+    const users = api.user.list.useQuery();
+    const { client: apiClient } = api.useContext();
+    const ref = useRef<HTMLFormElement>(null);
+
     const [isModalOpen, setIsModalOpen] = useState(true);
     const changeModalState = () => {
         setIsModalOpen(!isModalOpen);
     };
-    const users = api.user.list.useQuery();
+    const [editableUser, setEditableUser] =
+        useState<RouterOutputs['user']['getById']>();
 
-    const ref = useRef<HTMLFormElement>(null);
+    const editUser = async (arg: string) => {
+        setEditableUser(await apiClient.user.getById.query(arg));
+        changeModalState();
+    };
+
+    function createUser() {
+        setEditableUser(null);
+        changeModalState();
+    }
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -75,7 +88,7 @@ const Users: React.FC = () => {
                         </Button>
                     </div>
                 </form>
-                <Button onClick={changeModalState}>Новий користувач</Button>
+                <Button onClick={createUser}>Новий користувач</Button>
                 <Modal
                     isOpen={isModalOpen}
                     onRequestClose={changeModalState}
@@ -84,6 +97,7 @@ const Users: React.FC = () => {
                     <UsersForm
                         formRef={ref}
                         changeModalState={changeModalState}
+                        user={editableUser}
                     />
                 </Modal>
             </div>
@@ -114,7 +128,7 @@ const Users: React.FC = () => {
                                 key={user.id}
                                 className="hover:bg-neutral-100/30"
                             >
-                                <User user={user} />
+                                <User editUser={editUser} user={user} />
                             </TableRow>
                         ))}
                     </TableBody>

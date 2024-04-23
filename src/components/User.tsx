@@ -8,16 +8,17 @@ import {
 } from '~/components/ui/popover';
 import { Button } from './ui/button';
 
-const User: React.FC<{ user: RouterOutputs['user']['list'][number] }> = ({
-    user,
-}) => {
+const User: React.FC<{
+    user: RouterOutputs['user']['list'][number];
+    editUser: (arg: string) => void;
+}> = ({ user, editUser }) => {
     return (
         <>
             <TableCell>{user.email}</TableCell>
             <TableCell>{user.createdAt.toString()}</TableCell>
             <TableCell>{user.updatedAt.toString()}</TableCell>
             <TableCell>
-                {user.suspended ? 'Активний' : 'Деактивований'}
+                {user.suspended ? 'Деактивований' : 'Активний'}
             </TableCell>
             <TableCell className="text-right">
                 <Popover>
@@ -28,7 +29,12 @@ const User: React.FC<{ user: RouterOutputs['user']['list'][number] }> = ({
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className="flex flex-col gap-2 transition-colors">
-                        <Button variant={'secondary'}>Редагувати</Button>
+                        <Button
+                            variant={'secondary'}
+                            onClick={() => editUser(user.id)}
+                        >
+                            Редагувати
+                        </Button>
                         <Button variant={'destructive'}>Видалити</Button>
                     </PopoverContent>
                 </Popover>
