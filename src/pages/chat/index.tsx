@@ -16,7 +16,7 @@ import Layout from '../../components/Layout';
 import ChatItem from '../../components/ChatItem';
 import { useSession } from 'next-auth/react';
 import { api, type RouterOutputs } from '~/utils/api';
-const HEIGHT = '96vh';
+const HEIGHT = '93vh';
 
 const ChatUI = () => {
     const { data: session, status } = useSession();
@@ -58,9 +58,7 @@ const ChatUI = () => {
     // }
 
     async function pushMessage(message: Message) {
-        console.log('[Router] Pushing message:', message.text);
         if (!session) return;
-        console.log('[Router] Session');
 
         if (!(message.chatId in chats)) {
             const newChat = await apiClient.chat.getFull.query(message.chatId);
@@ -71,7 +69,7 @@ const ChatUI = () => {
             chats[message.chatId].messages.push(message);
         }
 
-        setChats(chats);
+        setChats({ ...chats });
 
         setTimeout(() => {
             // @ts-expect-error - ref is legacy todo: replace
@@ -103,6 +101,7 @@ const ChatUI = () => {
     function wsReconnect() {
         if (wsRef.current) wsRef.current.close();
         clearInterval(wsReconnectInterval.current);
+        // todo: actually spams the server with requests, should be fixed
         wsReconnectInterval.current = setInterval(() => {
             wsConnect();
         }, 5000);
