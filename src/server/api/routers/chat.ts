@@ -47,6 +47,7 @@ export const chatRouter = createTRPCRouter({
             return ctx.db.chat.findFirst({
                 where: {
                     id: input,
+                    personnelId: ctx.session.user.id,
                 },
             });
         }),
@@ -57,6 +58,7 @@ export const chatRouter = createTRPCRouter({
             return ctx.db.chat.findFirst({
                 where: {
                     id: input,
+                    personnelId: ctx.session.user.id,
                 },
                 include: {
                     messages: {
