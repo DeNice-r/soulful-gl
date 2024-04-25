@@ -17,7 +17,7 @@ const ChatUI = () => {
 
     const { client: apiClient } = api.useContext();
     const chatListFullQuery = api.chat.listFull.useQuery(undefined, {
-        enabled: true,
+        enabled: false,
     });
 
     const chatsRef = useRef<Chats>({});
