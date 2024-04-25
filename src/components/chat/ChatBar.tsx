@@ -22,14 +22,13 @@ export const ChatBar = ({
             }}
         >
             <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
-                {chats &&
-                    Object.values(chats).map((chat, index) => (
-                        <ChatItem
-                            key={index}
-                            chat={chat}
-                            onClick={() => changeChat(chat.id)}
-                        />
-                    ))}
+                {Object.values(chats).map((chat, index) => (
+                    <ChatItem
+                        key={index}
+                        chat={chat}
+                        onClick={() => changeChat(chat.id)}
+                    />
+                ))}
             </Box>
         </Box>
     </Grid>

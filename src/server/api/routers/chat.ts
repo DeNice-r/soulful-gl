@@ -68,6 +68,51 @@ export const chatRouter = createTRPCRouter({
             });
         }),
 
+    archive: permissionProcedure
+        .input(NumberIdSchema)
+        .mutation(async ({ ctx, input }) => {
+            const chat = await ctx.db.chat.findFirst({
+                where: {
+                    id: input,
+                    personnelId: ctx.session.user.id,
+                },
+                include: {
+                    messages: {
+                        select: {
+                            text: true,
+                            createdAt: true,
+                            isFromUser: true,
+                        },
+                    },
+                },
+            });
+
+            if (!chat) return false;
+
+            await ctx.db.$transaction([
+                ctx.db.archivedChat.create({
+                    data: {
+                        personnelId: chat.personnelId,
+                        userId: chat.userId,
+                        createdAt: chat.createdAt,
+                        messages: {
+                            create: chat.messages,
+                        },
+                    },
+                }),
+                ctx.db.chat.delete({
+                    where: {
+                        id: input,
+                    },
+                    include: {
+                        messages: true,
+                    },
+                }),
+            ]);
+
+            return true;
+        }),
+
     // todo: user starting chat on the site, better use router api instead
     // create: protectedProcedure
     //     .input(MessageSchema)
