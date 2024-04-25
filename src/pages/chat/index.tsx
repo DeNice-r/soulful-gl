@@ -76,11 +76,11 @@ const ChatUI = () => {
         if (status !== 'authenticated') return;
 
         async function connect() {
-            if (!chatListFullQuery.isFetched) chatListFullQuery.refetch();
+            if (!chatListFullQuery.isFetched) void chatListFullQuery.refetch();
             wsConnect();
         }
 
-        connect();
+        void connect();
 
         // return () => {
         //     if (wsRef.current) wsRef.current.close();
@@ -123,7 +123,7 @@ const ChatUI = () => {
         wsReconnect();
     }
 
-    async function wsOnMessage(event: MessageEvent) {
+    async function wsOnMessage(event: MessageEvent<string>) {
         const message = JSON.parse(event.data) as Message;
         await pushMessage(message);
     }

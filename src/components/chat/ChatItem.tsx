@@ -1,5 +1,6 @@
 import { Box, ButtonBase, Typography } from '@mui/material';
 import { type ExtendedChat } from '~/utils/types';
+import React from 'react';
 
 interface ChatItemProps {
     chat: ExtendedChat;

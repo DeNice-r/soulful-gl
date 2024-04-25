@@ -39,17 +39,17 @@ export const documentFolderRouter = createTRPCRouter({
     create: permissionProcedure
         .input(DocumentFolderSchema)
         .mutation(async ({ ctx, input }) => {
-            const { tags, parentId, ...noAmbigousInput } = input;
+            const { tags, parentId, ...noAmbiguousInput } = input;
             return ctx.db.documentFolder.create({
                 data: {
-                    ...noAmbigousInput,
+                    ...noAmbiguousInput,
                     ...(parentId && {
                         parent: {
                             connect: { id: parentId },
                         },
                     }),
                     tags: {
-                        connectOrCreate: input.tags.map((tag) => ({
+                        connectOrCreate: tags.map((tag) => ({
                             where: { title: tag },
                             create: { title: tag },
                         })),
@@ -64,22 +64,22 @@ export const documentFolderRouter = createTRPCRouter({
     update: permissionProcedure
         .input(DocumentFolderUpdateSchema)
         .mutation(async ({ ctx, input }) => {
-            const { tags, parentId, ...noAmbigousInput } = input;
+            const { tags, parentId, ...noAmbiguousInput } = input;
 
             return ctx.db.documentFolder.update({
                 where: {
                     id: input.id,
                 },
                 data: {
-                    ...noAmbigousInput,
+                    ...noAmbiguousInput,
                     ...(parentId && {
                         parent: {
                             connect: { id: parentId },
                         },
                     }),
-                    ...(input.tags && {
+                    ...(tags && {
                         tags: {
-                            connectOrCreate: input.tags.map((tag) => ({
+                            connectOrCreate: tags.map((tag) => ({
                                 where: { title: tag },
                                 create: { title: tag },
                             })),
