@@ -61,11 +61,7 @@ const ChatUI = () => {
     }
 
     useEffect(() => {
-        if (
-            !chatListFullQuery.data ||
-            !Object.keys(chatListFullQuery.data).length
-        )
-            return;
+        if (!chatListFullQuery.data) return;
 
         chatsRef.current = chatListFullQuery.data;
         rerender();
@@ -75,7 +71,6 @@ const ChatUI = () => {
     useEffect(() => {
         if (status !== 'authenticated') return;
 
-        if (!chatListFullQuery.isFetched) void chatListFullQuery.refetch();
         void wsConnect();
     }, [status]);
 
@@ -85,6 +80,7 @@ const ChatUI = () => {
         if (wsRef.current && wsRef.current?.readyState !== WebSocket.CLOSED)
             return;
 
+        if (!chatListFullQuery.isFetched) void chatListFullQuery.refetch();
         const token = await apiClient.user.getAccessToken.query();
 
         wsRef.current = new WebSocket(
