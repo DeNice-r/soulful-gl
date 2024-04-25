@@ -76,16 +76,19 @@ const ChatUI = () => {
         if (status !== 'authenticated') return;
 
         if (!chatListFullQuery.isFetched) void chatListFullQuery.refetch();
-        wsConnect();
+        void wsConnect();
     }, [status]);
 
-    function wsConnect() {
+    async function wsConnect() {
         if (!session) return;
 
-        if (wsRef.current?.readyState === WebSocket.CONNECTING) return;
+        if (wsRef.current && wsRef.current?.readyState !== WebSocket.CLOSED)
+            return;
+
+        const token = await apiClient.user.getAccessToken.query();
 
         wsRef.current = new WebSocket(
-            `${process.env.NEXT_PUBLIC_WSS_ENDPOINT}/${session?.user?.id}`,
+            `${process.env.NEXT_PUBLIC_WSS_ENDPOINT}/${token}`,
         );
 
         wsRef.current.onopen = wsOnOpen;
@@ -101,12 +104,12 @@ const ChatUI = () => {
 
     function wsOnClose() {
         console.log('[Router] Connection closed, reconnecting...');
-        wsConnect();
+        void wsConnect();
     }
 
     function wsOnError() {
         console.log('[Router] Connection error, reconnecting...');
-        wsConnect();
+        void wsConnect();
     }
 
     async function wsOnMessage(event: MessageEvent<string>) {

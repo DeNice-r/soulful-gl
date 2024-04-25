@@ -32,6 +32,22 @@ export const userRouter = createTRPCRouter({
             });
         }),
 
+    getAccessToken: permissionProcedure.query(async ({ ctx }) => {
+        return (
+            await ctx.db.session.findFirst({
+                where: {
+                    userId: ctx.session.user.id,
+                    expires: {
+                        gte: new Date(),
+                    },
+                },
+                select: {
+                    sessionToken: true,
+                },
+            })
+        )?.sessionToken;
+    }),
+
     create: permissionProcedure
         .input(CreateUserSchema)
         .mutation(async ({ ctx, input: data }) => {
