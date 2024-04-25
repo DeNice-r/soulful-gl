@@ -169,6 +169,7 @@ const ChatUI = () => {
     async function closeCurrentChat() {
         await apiClient.chat.archive.mutate(currentChat);
         delete chatsRef.current[currentChat];
+        updateState();
     }
 
     function scrollToBottom(smooth: boolean = true) {
