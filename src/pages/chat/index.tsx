@@ -21,10 +21,10 @@ const ChatUI = () => {
     });
 
     const chatsRef = useRef<Chats>({});
-    const [_, rerender] = React.useState<boolean>(false);
+    const [_, changeState] = React.useState<boolean>(false);
 
-    function updateState() {
-        rerender((prevState) => !prevState);
+    function rerender() {
+        changeState((prevState) => !prevState);
     }
 
     const [error, setError] = React.useState(false);
@@ -48,7 +48,7 @@ const ChatUI = () => {
             chatsRef.current[message.chatId].messages.push(message);
         }
 
-        updateState();
+        rerender();
 
         setTimeout(() => {
             // @ts-expect-error - ref is legacy todo: replace
@@ -68,27 +68,22 @@ const ChatUI = () => {
             return;
 
         chatsRef.current = chatListFullQuery.data;
-        updateState();
+        rerender();
         scrollToBottom(false);
     }, [chatListFullQuery.data]);
 
     useEffect(() => {
         if (status !== 'authenticated') return;
 
-        async function connect() {
-            if (!chatListFullQuery.isFetched) void chatListFullQuery.refetch();
-            wsConnect();
-        }
-
-        void connect();
-
-        // return () => {
-        //     if (wsRef.current) wsRef.current.close();
-        // };
+        if (!chatListFullQuery.isFetched) void chatListFullQuery.refetch();
+        wsConnect();
     }, [status]);
 
     function wsConnect() {
         if (!session) return;
+
+        if (wsRef.current?.readyState === WebSocket.CONNECTING) return;
+
         wsRef.current = new WebSocket(
             `${process.env.NEXT_PUBLIC_WSS_ENDPOINT}/${session?.user?.id}`,
         );
@@ -99,15 +94,6 @@ const ChatUI = () => {
         wsRef.current.onmessage = wsOnMessage;
     }
 
-    function wsReconnect() {
-        if (wsRef.current) wsRef.current.close();
-        clearInterval(wsReconnectInterval.current);
-        // todo: actually spams the server with requests, should be fixed
-        wsReconnectInterval.current = setInterval(() => {
-            wsConnect();
-        }, 5000);
-    }
-
     function wsOnOpen() {
         clearInterval(wsReconnectInterval.current);
         console.log('[Router] Connection established');
@@ -115,12 +101,12 @@ const ChatUI = () => {
 
     function wsOnClose() {
         console.log('[Router] Connection closed, reconnecting...');
-        wsReconnect();
+        wsConnect();
     }
 
     function wsOnError() {
         console.log('[Router] Connection error, reconnecting...');
-        wsReconnect();
+        wsConnect();
     }
 
     async function wsOnMessage(event: MessageEvent<string>) {
@@ -167,9 +153,10 @@ const ChatUI = () => {
     }
 
     async function closeCurrentChat() {
+        setCurrentChat(-1);
         await apiClient.chat.archive.mutate(currentChat);
         delete chatsRef.current[currentChat];
-        updateState();
+        rerender();
     }
 
     function scrollToBottom(smooth: boolean = true) {
@@ -196,15 +183,17 @@ const ChatUI = () => {
                     Establishing connection to the server...
                 </Alert>
             </Fade>
-            <Button
-                variant="contained"
-                className="top-15 absolute right-0 z-20"
-                hidden={currentChat === -1}
-                color="error"
-                onClick={closeCurrentChat}
-            >
-                <Cross1Icon />
-            </Button>
+            {currentChat !== -1 && (
+                <Button
+                    variant="contained"
+                    className="top-15 absolute right-0 z-20"
+                    hidden={currentChat === -1}
+                    color="error"
+                    onClick={closeCurrentChat}
+                >
+                    <Cross1Icon />
+                </Button>
+            )}
             <Grid container spacing={0}>
                 <ChatBar chats={chatsRef.current} changeChat={changeChat} />
                 <ChatMessageWindow
