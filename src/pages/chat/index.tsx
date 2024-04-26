@@ -179,7 +179,7 @@ const ChatUI = () => {
                     severity="warning"
                     sx={{ position: 'absolute', 'z-index': 1 }}
                 >
-                    Establishing connection to the server...
+                    Встановлення з&apos;єднання з сервером...
                 </Alert>
             </Fade>
             {currentChat !== -1 && (

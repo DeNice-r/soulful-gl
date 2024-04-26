@@ -19,7 +19,7 @@ const ChatItem: React.FC<ChatItemProps> = ({ onClick, chat }) => {
                     gutterBottom
                     sx={{ textAlign: 'left' }}
                 >
-                    Chat #{chat.id}
+                    Чат #{chat.id}
                 </Typography>
                 <Typography
                     variant="body1"

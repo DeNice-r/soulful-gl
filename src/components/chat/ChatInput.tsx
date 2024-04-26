@@ -15,7 +15,7 @@ export const ChatInput = ({
                 <TextField
                     fullWidth
                     size="small"
-                    placeholder="Type a message"
+                    placeholder="Введіть повідомлення..."
                     variant="outlined"
                     inputRef={inputRef}
                     onKeyDown={(event) => {

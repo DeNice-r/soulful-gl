@@ -85,7 +85,7 @@ export const createCallerFactory = t.createCallerFactory;
 export const createTRPCRouter = t.router;
 
 export const publicProcedure = t.procedure;
-//     .use(({ ctx, next }) => {  // todo: this is how it should be, but it breaks the app
+//     .use(({ ctx, next }) => {  // todo: this is how it should be, but it breaks the app. P.S. it is just for type safety, so nothing critical
 //     return next({
 //         ctx: {
 //             session: null,
