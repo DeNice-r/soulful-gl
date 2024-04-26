@@ -9,22 +9,30 @@ import { ChatBar } from '~/components/chat/ChatBar';
 import { ChatMessageWindow } from '~/components/chat/ChatMessageWindow';
 import { Cross1Icon } from '@radix-ui/react-icons';
 import { Button } from '@mui/material';
+import { LoaderIcon } from 'lucide-react';
 
-type Chats = NonNullable<RouterOutputs['chat']['listFull']>;
+type FullChats = NonNullable<RouterOutputs['chat']['listFull']>;
 
 const ChatUI = () => {
     const { data: session, status } = useSession();
 
-    const { client: apiClient } = api.useContext();
+    const { client: apiClient } = api.useUtils();
     const chatListFullQuery = api.chat.listFull.useQuery(undefined, {
         enabled: false,
     });
+    const unassignedChatsQuery = api.chat.listUnassigned.useQuery(undefined, {
+        enabled: false,
+    });
 
-    const chatsRef = useRef<Chats>({});
-    const [_, changeState] = React.useState<boolean>(false);
+    const chatsRef = useRef<FullChats>({});
+    const [_, changeState] = React.useState<number>(0);
+
+    const unassignedChatsRef = useRef<
+        NonNullable<RouterOutputs['chat']['listUnassigned']>
+    >([]);
 
     function rerender() {
-        changeState((prevState) => !prevState);
+        changeState((prevState) => prevState + 1);
     }
 
     const [error, setError] = React.useState(false);
@@ -35,6 +43,42 @@ const ChatUI = () => {
 
     const wsRef = React.useRef<WebSocket>();
     const wsReconnectInterval = React.useRef<NodeJS.Timeout>();
+
+    useEffect(() => {
+        if (status !== 'authenticated') return;
+
+        void wsConnect();
+
+        void unassignedChatsQuery.refetch();
+        setInterval(() => {
+            void unassignedChatsQuery.refetch();
+        }, 60_000);
+    }, [status]);
+
+    useEffect(() => {
+        if (!chatListFullQuery.data) return;
+
+        chatsRef.current = chatListFullQuery.data;
+        console.log(chatsRef.current);
+        rerender();
+    }, [chatListFullQuery.data]);
+
+    useEffect(() => {
+        if (!unassignedChatsQuery.data) return;
+
+        unassignedChatsRef.current = unassignedChatsQuery.data;
+        console.log(chatsRef.current);
+        rerender();
+    }, [unassignedChatsQuery.data]);
+
+    async function takeUnassignedChat(chatId: number) {
+        if (!unassignedChatsRef.current.length) return;
+
+        const chat = await apiClient.chat.getFull.query(chatId);
+        chatsRef.current[chat.id] = chat;
+        unassignedChatsRef.current = [];
+        rerender();
+    }
 
     async function pushMessage(message: Message) {
         if (!session) return;
@@ -59,20 +103,6 @@ const ChatUI = () => {
             });
         }, 0);
     }
-
-    useEffect(() => {
-        if (!chatListFullQuery.data) return;
-
-        chatsRef.current = chatListFullQuery.data;
-        rerender();
-        scrollToBottom(false);
-    }, [chatListFullQuery.data]);
-
-    useEffect(() => {
-        if (status !== 'authenticated') return;
-
-        void wsConnect();
-    }, [status]);
 
     async function wsConnect() {
         if (!session) return;
@@ -152,8 +182,8 @@ const ChatUI = () => {
     }
 
     async function closeCurrentChat() {
-        setCurrentChat(-1);
         await apiClient.chat.archive.mutate(currentChat);
+        setCurrentChat(-1);
         delete chatsRef.current[currentChat];
         rerender();
     }
@@ -191,6 +221,18 @@ const ChatUI = () => {
                     onClick={closeCurrentChat}
                 >
                     <Cross1Icon />
+                </Button>
+            )}
+            {unassignedChatsRef.current.length > 0 && (
+                <Button
+                    variant="contained"
+                    className="top-15 absolute left-0 z-20"
+                    color="success"
+                    onClick={() =>
+                        takeUnassignedChat(unassignedChatsRef.current[0].id)
+                    }
+                >
+                    <LoaderIcon />
                 </Button>
             )}
             <Grid container spacing={0}>

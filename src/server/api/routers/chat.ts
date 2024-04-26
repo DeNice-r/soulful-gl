@@ -53,9 +53,20 @@ export const chatRouter = createTRPCRouter({
     getFull: spaProcedure
         .input(NumberIdSchema)
         .query(async ({ ctx, input }) => {
-            return ctx.db.chat.findFirst({
+            return ctx.db.chat.update({
                 where: {
                     id: input,
+                    OR: [
+                        {
+                            personnelId: ctx.session.user.id,
+                        },
+
+                        {
+                            personnelId: null,
+                        },
+                    ],
+                },
+                data: {
                     personnelId: ctx.session.user.id,
                 },
                 include: {
@@ -112,6 +123,15 @@ export const chatRouter = createTRPCRouter({
 
             return true;
         }),
+
+    listUnassigned: spaProcedure.query(async ({ ctx }) => {
+        return ctx.db.chat.findMany({
+            where: {
+                personnelId: null,
+            },
+            orderBy: { createdAt: 'asc' },
+        });
+    }),
 
     // todo: user starting chat on the site, better use router api instead
     // create: protectedProcedure
