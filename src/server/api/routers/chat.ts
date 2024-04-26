@@ -1,8 +1,8 @@
-import { createTRPCRouter, permissionProcedure } from '~/server/api/trpc';
+import { createTRPCRouter, spaProcedure } from '~/server/api/trpc';
 import { NumberIdSchema } from '~/utils/schemas';
 
 export const chatRouter = createTRPCRouter({
-    list: permissionProcedure.query(async ({ ctx }) => {
+    list: spaProcedure.query(async ({ ctx }) => {
         const chats = await ctx.db.chat.findMany({
             where: {
                 personnelId: ctx.session.user.id,
@@ -16,7 +16,7 @@ export const chatRouter = createTRPCRouter({
         }));
     }),
 
-    listFull: permissionProcedure.query(async ({ ctx }) => {
+    listFull: spaProcedure.query(async ({ ctx }) => {
         const chatList = await ctx.db.chat.findMany({
             where: {
                 personnelId: ctx.session.user.id,
@@ -41,18 +41,16 @@ export const chatRouter = createTRPCRouter({
         return chatMap;
     }),
 
-    get: permissionProcedure
-        .input(NumberIdSchema)
-        .query(async ({ ctx, input }) => {
-            return ctx.db.chat.findFirst({
-                where: {
-                    id: input,
-                    personnelId: ctx.session.user.id,
-                },
-            });
-        }),
+    get: spaProcedure.input(NumberIdSchema).query(async ({ ctx, input }) => {
+        return ctx.db.chat.findFirst({
+            where: {
+                id: input,
+                personnelId: ctx.session.user.id,
+            },
+        });
+    }),
 
-    getFull: permissionProcedure
+    getFull: spaProcedure
         .input(NumberIdSchema)
         .query(async ({ ctx, input }) => {
             return ctx.db.chat.findFirst({
@@ -70,7 +68,7 @@ export const chatRouter = createTRPCRouter({
             });
         }),
 
-    archive: permissionProcedure
+    archive: spaProcedure
         .input(NumberIdSchema)
         .mutation(async ({ ctx, input }) => {
             const chat = await ctx.db.chat.findFirst({

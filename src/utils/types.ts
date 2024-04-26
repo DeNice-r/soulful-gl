@@ -1,12 +1,6 @@
 import { type Chat, type Message } from '@prisma/client';
 import { type ReactNode } from 'react';
 
-export enum UserRole {
-    USER,
-    OPERATOR,
-    ADMIN,
-}
-
 export enum BackgroundPattern {
     A,
     B,
@@ -14,6 +8,11 @@ export enum BackgroundPattern {
     D,
     E,
     F,
+}
+
+export interface Meta {
+    hasPermissionProtection?: boolean;
+    hasSpaProtection?: boolean;
 }
 
 export enum AccessType {
@@ -25,11 +24,6 @@ export enum AccessType {
 export interface ExtendedChat extends Chat {
     messages: Message[];
 }
-
-export type RoleAssertionFunction = (
-    userRole: UserRole | undefined,
-    thresholdRole: UserRole,
-) => boolean;
 
 export type Props = {
     children?: ReactNode;

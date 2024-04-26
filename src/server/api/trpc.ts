@@ -7,7 +7,7 @@ import { ZodError } from 'zod';
 import { getServerSession } from '~/utils/auth';
 import { db } from '~/server/db';
 import { isPermitted } from '~/utils/authAssertions';
-import { AccessType } from '~/utils/types';
+import { AccessType, type Meta } from '~/utils/types';
 
 interface CreateContextOptions {
     session: Session | null;
@@ -58,10 +58,6 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
     });
 };
 
-interface Meta {
-    hasPermissionProtection: boolean;
-}
-
 const t = initTRPC
     .context<typeof createTRPCContext>()
     .meta<Meta>()
@@ -103,7 +99,7 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
     }
     return next({
         ctx: {
-            session: { ...ctx.session, user: ctx.session.user },
+            session: { ...ctx.session },
         },
     });
 });
@@ -127,3 +123,8 @@ export const permissionProcedure = protectedProcedure
     .meta({
         hasPermissionProtection: true,
     });
+
+// Single permission access
+export const spaProcedure = permissionProcedure.meta({
+    hasSpaProtection: true,
+});
