@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from '~/utils/zod';
 import { BackgroundPattern } from '~/utils/types';
 import { env } from '~/env';
 // import bcrypt from 'bcrypt';
