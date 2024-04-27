@@ -1,5 +1,5 @@
 import { createTRPCRouter, spaProcedure } from '~/server/api/trpc';
-import { NumberIdSchema } from '~/utils/schemas';
+import { BusynessSchema, NumberIdSchema } from '~/utils/schemas';
 
 export const chatRouter = createTRPCRouter({
     list: spaProcedure.query(async ({ ctx }) => {
@@ -132,6 +132,19 @@ export const chatRouter = createTRPCRouter({
             orderBy: { createdAt: 'asc' },
         });
     }),
+
+    setBusyness: spaProcedure
+        .input(BusynessSchema)
+        .mutation(async ({ ctx, input: busyness }) => {
+            return ctx.db.user.update({
+                where: {
+                    id: ctx.session.user.id,
+                },
+                data: {
+                    busyness,
+                },
+            });
+        }),
 
     // todo: user starting chat on the site, better use router api instead
     // create: protectedProcedure

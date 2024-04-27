@@ -73,7 +73,7 @@ model User {
   notes String?
 
   // Chat availability
-  isOnline                   Boolean  @default(false)
+  busyness                   Int      @default(0)
   latestStatusConfirmationAt DateTime @default(now())
   perceivedOccupation        Int      @default(0)
 

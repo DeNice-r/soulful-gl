@@ -2,8 +2,7 @@ import type { RouterOutputs } from '~/utils/api';
 import { Box, Grid } from '@mui/material';
 import ChatItem from '~/components/chat/ChatItem';
 import * as React from 'react';
-
-const HEIGHT = '93vh';
+import { Busyness } from '~/components/chat/Busyness';
 
 export const ChatBar = ({
     chats,
@@ -14,13 +13,15 @@ export const ChatBar = ({
 }) => (
     <Grid item xs={2}>
         <Box
+            className="m-0 overflow-auto"
             sx={{
-                height: HEIGHT,
                 display: 'flex',
                 flexDirection: 'column',
                 bgcolor: 'grey.300',
+                height: 'calc(100vh - 4rem)',
             }}
         >
+            <Busyness />
             <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
                 {Object.values(chats).map((chat, index) => (
                     <ChatItem

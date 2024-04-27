@@ -21,6 +21,14 @@ export enum AccessType {
     ALL,
 }
 
+export const BusynessEmoji = {
+    '😴': 0,
+    '😊': 1,
+    '😤': 2,
+    '🤯': 3,
+    '🤬': 4,
+};
+
 export interface ExtendedChat extends Chat {
     messages: Message[];
 }

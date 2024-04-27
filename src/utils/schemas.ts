@@ -22,6 +22,8 @@ export const CUIDObjectSchema = z.object({ id: CUIDSchema });
 export const ShortStringSchema = z.string().min(1).max(100);
 export const MessageTextSchema = z.string().min(1).max(4096);
 
+export const BusynessSchema = z.number().int().min(0).max(4);
+
 export const PasswordSchema = z
     .string()
     .min(8)

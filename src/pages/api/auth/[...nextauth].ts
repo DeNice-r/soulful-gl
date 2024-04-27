@@ -24,7 +24,7 @@ declare module 'next-auth' {
             name: string;
             email: string;
             image: string;
-            isOnline: boolean;
+            busyness: number;
             roles: string[];
             permissions: string[];
 
@@ -34,7 +34,7 @@ declare module 'next-auth' {
 
     interface DefaultUser {
         id: string;
-        isOnline: boolean;
+        busyness: number;
 
         suspended: boolean;
     }
@@ -70,7 +70,7 @@ export function requestWrapper(
                 session.user.name = user.name ?? '';
                 session.user.image = user.image ?? '/image/default_avatar.png';
                 session.user.email = user.email;
-                session.user.isOnline = user.isOnline;
+                session.user.busyness = user.busyness;
 
                 const u = await db.user.findUnique({
                     where: {
