@@ -7,6 +7,7 @@ import {
     PopoverContent,
 } from '~/components/ui/popover';
 import { Button } from './ui/button';
+import { defaultFormatDt } from '~/utils/dates';
 
 const User: React.FC<{
     user: RouterOutputs['user']['list'][number];
@@ -14,9 +15,10 @@ const User: React.FC<{
 }> = ({ user, editUser }) => {
     return (
         <>
+            <TableCell>{user.id}</TableCell>
             <TableCell>{user.email}</TableCell>
-            <TableCell>{user.createdAt.toString()}</TableCell>
-            <TableCell>{user.updatedAt.toString()}</TableCell>
+            <TableCell>{defaultFormatDt(user.createdAt)}</TableCell>
+            <TableCell>{defaultFormatDt(user.updatedAt)}</TableCell>
             <TableCell>
                 {user.suspended ? 'Деактивований' : 'Активний'}
             </TableCell>

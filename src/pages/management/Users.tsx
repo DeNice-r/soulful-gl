@@ -106,7 +106,10 @@ const Users: React.FC = () => {
                     <TableHeader>
                         <TableRow className="hover:bg-neutral-300">
                             <TableHead className="min-w-[150px]">
-                                Користувач
+                                Ідентифікатор
+                            </TableHead>
+                            <TableHead className="min-w-[150px]">
+                                Електронна пошта
                             </TableHead>
                             <TableHead className="hidden md:table-cell">
                                 Дата створення
