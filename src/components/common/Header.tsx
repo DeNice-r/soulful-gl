@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '~/components/ui/button';
 import {
     PopoverTrigger,
@@ -8,11 +9,10 @@ import {
 } from '~/components/ui/popover';
 import { useRouter } from 'next/router';
 import { signOut, useSession } from 'next-auth/react';
-import Image from 'next/image';
-import NavLink from './NavLink';
-import Logo from './Logo';
+import { NavLink } from '../NavLink';
+import { Logo } from './Logo';
 
-const Header: React.FC = () => {
+export const Header: React.FC = () => {
     const { update: updateSession, data: session, status } = useSession();
 
     const image = session?.user?.image ?? 'images/placeholder.svg';
@@ -259,5 +259,3 @@ function UserIcon(
         </svg>
     );
 }
-
-export default Header;

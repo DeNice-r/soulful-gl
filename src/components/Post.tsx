@@ -6,7 +6,7 @@ import { type RouterOutputs } from '~/utils/api';
 import { truncateString } from '~/utils';
 import { MAX_DESCRIPTION_LENGTH } from '~/utils/constants';
 
-const Post: React.FC<{ post: RouterOutputs['post']['get'][number] }> = ({
+export const Post: React.FC<{ post: RouterOutputs['post']['get'][number] }> = ({
     post,
 }) => {
     const authorName = post.author ? post.author.name : 'Unknown author';
@@ -45,5 +45,3 @@ const Post: React.FC<{ post: RouterOutputs['post']['get'][number] }> = ({
         </article>
     );
 };
-
-export default Post;

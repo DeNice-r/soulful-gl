@@ -1,11 +1,11 @@
 import React from 'react';
-import Post from '../components/Post';
-import { truculenta } from './_app';
-import Header from '~/components/Header';
 import Image from 'next/image';
 import Link from 'next/link';
-import Footer from '~/components/Footer';
-import Logo from '~/components/Logo';
+import { truculenta } from './_app';
+import { Header } from '~/components/common/Header';
+import { Footer } from '~/components/common/Footer';
+import { Logo } from '~/components/common/Logo';
+import { Post } from '~/components/Post';
 import { api } from '~/utils/api';
 
 const Blog: React.FC = () => {

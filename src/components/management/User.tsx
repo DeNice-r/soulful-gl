@@ -1,27 +1,33 @@
-import type React from 'react';
-import { type RouterOutputs } from '~/utils/api';
-import { TableCell } from './ui/table';
+import React from 'react';
+import { api, type RouterOutputs } from '~/utils/api';
+import { TableCell } from '../ui/table';
 import {
     Popover,
     PopoverTrigger,
     PopoverContent,
 } from '~/components/ui/popover';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import { defaultFormatDt } from '~/utils/dates';
 
-const User: React.FC<{
+export const User: React.FC<{
     user: RouterOutputs['user']['list'][number];
     editUser: (arg: string) => void;
-}> = ({ user, editUser }) => {
+    refetch: () => void;
+}> = ({ user, editUser, refetch }) => {
+    const suspendUserMutation = api.user.suspend.useMutation();
+
+    async function suspendUser(id: string) {
+        await suspendUserMutation.mutateAsync({ id, value: !user.suspended });
+        void refetch();
+    }
+
     return (
         <>
             <TableCell>{user.id}</TableCell>
             <TableCell>{user.email}</TableCell>
             <TableCell>{defaultFormatDt(user.createdAt)}</TableCell>
             <TableCell>{defaultFormatDt(user.updatedAt)}</TableCell>
-            <TableCell>
-                {user.suspended ? 'Деактивований' : 'Активний'}
-            </TableCell>
+            <TableCell>{user.suspended ? '⛔' : '✅'}</TableCell>
             <TableCell className="text-right">
                 <Popover>
                     <PopoverTrigger asChild>
@@ -31,11 +37,14 @@ const User: React.FC<{
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className="flex flex-col gap-2 transition-colors">
-                        <Button
-                            variant={'secondary'}
-                            onClick={() => editUser(user.id)}
-                        >
+                        <Button onClick={() => editUser(user.id)}>
                             Редагувати
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => suspendUser(user.id)}
+                        >
+                            {user.suspended ? 'Увімкнути' : 'Відключити'} запис
                         </Button>
                         <Button variant={'destructive'}>Видалити</Button>
                     </PopoverContent>
@@ -67,5 +76,3 @@ function MoreHorizontalIcon(
         </svg>
     );
 }
-
-export default User;

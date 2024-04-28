@@ -12,7 +12,7 @@ import {
     Typography,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
-import Layout from '../../components/Layout';
+import { Layout } from '~/components/common/Layout';
 import ChatItem from '../../components/ChatItem';
 import { useSession } from 'next-auth/react';
 const HEIGHT = '96vh';

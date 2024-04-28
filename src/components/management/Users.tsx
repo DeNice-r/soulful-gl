@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
-
 import {
     TableHead,
     TableRow,
@@ -9,17 +8,21 @@ import {
     TableBody,
     Table,
 } from '~/components/ui/table';
-import User from '~/components/User';
 import { type RouterOutputs, api } from '~/utils/api';
 import Modal from 'react-modal';
-import UsersForm from '~/components/UsersForm';
+import { UsersForm } from '~/components/management/UsersForm';
+import { Spinner } from '~/components/ui/spinner';
+import { TableCell } from '@mui/material';
+import { User } from '~/components/management/User';
 
-const Users: React.FC = () => {
+export const Users: React.FC = () => {
+    const [_, setState] = useState(0);
+
     const users = api.user.list.useQuery();
     const { client: apiClient } = api.useContext();
     const ref = useRef<HTMLFormElement>(null);
 
-    const [isModalOpen, setIsModalOpen] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const changeModalState = () => {
         setIsModalOpen(!isModalOpen);
     };
@@ -35,6 +38,18 @@ const Users: React.FC = () => {
         setEditableUser(null);
         changeModalState();
     }
+
+    function rerender() {
+        setState((prev) => prev + 1);
+    }
+
+    async function refetch() {
+        await users.refetch();
+    }
+
+    useEffect(() => {
+        if (users.data) rerender();
+    }, [users.data]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -131,14 +146,23 @@ const Users: React.FC = () => {
                                 key={user.id}
                                 className="hover:bg-neutral-100/30"
                             >
-                                <User editUser={editUser} user={user} />
+                                <User
+                                    editUser={editUser}
+                                    user={user}
+                                    refetch={refetch}
+                                />
                             </TableRow>
                         ))}
+                        {!users.data && (
+                            <TableRow>
+                                <TableCell colSpan={10}>
+                                    <Spinner size="large" />
+                                </TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
             </div>
         </>
     );
 };
-
-export default Users;

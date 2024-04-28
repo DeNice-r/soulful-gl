@@ -73,6 +73,12 @@ export const UpdateUserSchema = z.object({
     // password: PasswordSchema.optional(),
 });
 
+export const SetSuspendedSchema = z.object({
+    id: CUIDSchema,
+
+    value: z.boolean(),
+});
+
 export const SetNotesSchema = z.object({
     id: CUIDSchema,
 

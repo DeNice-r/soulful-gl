@@ -14,7 +14,7 @@ import {
     Table,
 } from '~/components/ui/table';
 
-const Operators: React.FC = () => {
+export const Operators: React.FC = () => {
     return (
         <div className="rounded-lg border bg-neutral-300 p-2 shadow-sm">
             <Table>
@@ -90,5 +90,3 @@ function MoreHorizontalIcon(
         </svg>
     );
 }
-
-export default Operators;

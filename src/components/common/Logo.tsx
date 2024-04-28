@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { truculenta } from '~/pages/_app';
 
-const Logo = ({
+export const Logo = ({
     className,
     ...props
 }: {
@@ -18,5 +18,3 @@ const Logo = ({
         </div>
     );
 };
-
-export default Logo;

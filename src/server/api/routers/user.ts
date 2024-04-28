@@ -4,6 +4,7 @@ import {
     CUIDSchema,
     PageSchema,
     SetNotesSchema,
+    SetSuspendedSchema,
     UpdateUserSchema,
 } from '~/utils/schemas';
 
@@ -66,15 +67,18 @@ export const userRouter = createTRPCRouter({
         }),
 
     suspend: permissionProcedure
-        .input(CUIDSchema)
-        .mutation(async ({ ctx, input: id }) => {
+        .input(SetSuspendedSchema)
+        .mutation(async ({ ctx, input: { id, value } }) => {
+            if (ctx.session.user.id === id) {
+                throw new Error('You cannot suspend yourself');
+            }
             return ctx.db.user.update({
                 where: {
                     id,
                     ...(!ctx.isFullAccess && { id: ctx.session.user.id }),
                 },
                 data: {
-                    suspended: true,
+                    suspended: value,
                 },
             });
         }),

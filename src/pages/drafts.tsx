@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSession } from 'next-auth/react';
-import Layout from '~/components/Layout';
-import Post from '../components/Post';
+import { Layout } from '~/components/common/Layout';
+import { Post } from '~/components/Post';
 import { api } from '~/utils/api';
 
 const Drafts: React.FC = () => {

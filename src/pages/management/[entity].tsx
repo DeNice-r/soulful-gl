@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
-import ManagementLayout from '~/components/ManagementLayout';
+import { Layout } from '~/components/management/Layout';
 import { type ManagementPageName } from '~/utils/types';
 
 const Management: React.FC = () => {
@@ -15,7 +15,7 @@ const Management: React.FC = () => {
     const entity = router.query.entity as ManagementPageName;
 
     if (typeof entity !== 'string') return;
-    return <ManagementLayout {...{ entity }} />;
+    return <Layout {...{ entity }} />;
 };
 
 export default Management;

@@ -16,7 +16,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { CreateUserSchema } from '~/utils/schemas';
 import { type RouterOutputs } from '~/utils/api';
 
-const UsersForm: React.FC<{
+export const UsersForm: React.FC<{
     user?: RouterOutputs['user']['getById'];
     changeModalState: () => void;
     formRef: RefObject<HTMLFormElement>;
@@ -161,5 +161,3 @@ const UsersForm: React.FC<{
         </Form>
     );
 };
-
-export default UsersForm;
