@@ -12,12 +12,20 @@ export const userRouter = createTRPCRouter({
     list: permissionProcedure
         .input(PageSchema)
         .query(async ({ input, ctx }) => {
-            return ctx.db.user.findMany({
-                select: getProjection(ctx.isFullAccess),
-                orderBy: { createdAt: 'desc' },
-                skip: (input.page - 1) * input.limit,
-                take: input.limit,
-            });
+            const [count, values] = await ctx.db.$transaction([
+                ctx.db.user.count(),
+                ctx.db.user.findMany({
+                    select: getProjection(ctx.isFullAccess),
+                    orderBy: { createdAt: 'desc' },
+                    skip: (input.page - 1) * input.limit,
+                    take: input.limit,
+                }),
+            ]);
+
+            return {
+                count,
+                values,
+            };
         }),
 
     // todo: get users with permission to chat

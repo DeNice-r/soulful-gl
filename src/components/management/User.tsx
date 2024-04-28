@@ -11,7 +11,7 @@ import { defaultFormatDt } from '~/utils/dates';
 import { useToast } from '~/components/ui/use-toast';
 
 export const User: React.FC<{
-    user: RouterOutputs['user']['list'][number];
+    user: RouterOutputs['user']['list']['values'][number];
     editUser: (arg: string) => void;
     refetch: () => void;
 }> = ({ user, editUser, refetch }) => {
@@ -41,7 +41,7 @@ export const User: React.FC<{
     return (
         <>
             <TableCell>{user.id}</TableCell>
-            <TableCell>{user.email}</TableCell>
+            <TableCell>{user.email ?? '📲'}</TableCell>
             <TableCell>{defaultFormatDt(user.createdAt)}</TableCell>
             <TableCell>{defaultFormatDt(user.updatedAt)}</TableCell>
             <TableCell>{user.suspended ? '⛔' : '✅'}</TableCell>

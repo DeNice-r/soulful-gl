@@ -38,7 +38,7 @@ export const Sidebar: React.FC = () => {
         );
     }
     return (
-        <div className="hidden border-r bg-gray-100/40 dark:bg-gray-800/40 lg:block">
+        <div className="hidden min-h-screen border-r bg-gray-100/40 dark:bg-gray-800/40 lg:block">
             <div className="flex flex-col gap-2">
                 <Logo className="hidden h-[60px] px-6 text-3xl" />
                 <div className="flex-1">
