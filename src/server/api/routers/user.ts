@@ -69,6 +69,7 @@ export const userRouter = createTRPCRouter({
     suspend: permissionProcedure
         .input(SetSuspendedSchema)
         .mutation(async ({ ctx, input: { id, value } }) => {
+            // todo: archive all user's chats if any upon suspension
             if (ctx.session.user.id === id) {
                 throw new Error('Неможливо змінити статус власного запису');
             }

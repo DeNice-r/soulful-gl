@@ -74,7 +74,7 @@ export const UpdateUserSchema = z.object({
 });
 
 export const SetSuspendedSchema = z.object({
-    id: CUIDSchema,
+    id: z.string(),
 
     value: z.boolean(),
 });
