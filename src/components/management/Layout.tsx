@@ -4,6 +4,7 @@ import { Sidebar } from '~/components/management/Sidebar';
 import { ShortHeader } from '~/components/management/ShortHeader';
 import { Users } from '~/components/management/Users';
 import { Operators } from '~/components/management/Operators';
+import { Toaster } from '~/components/ui/toaster';
 
 const pages = {
     [ManagementPageName.STATISTICS]: `<StatisticsComponent />`,
@@ -29,6 +30,7 @@ export const Layout: React.FC<{ entity?: ManagementPageName }> = ({
                     {entity in pages ? pages[entity] : 'Page not found'}
                 </main>
             </div>
+            <Toaster />
         </div>
     );
 };

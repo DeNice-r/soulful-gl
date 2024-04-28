@@ -8,6 +8,7 @@ import {
 } from '~/components/ui/popover';
 import { Button } from '../ui/button';
 import { defaultFormatDt } from '~/utils/dates';
+import { useToast } from '~/components/ui/use-toast';
 
 export const User: React.FC<{
     user: RouterOutputs['user']['list'][number];
@@ -15,9 +16,25 @@ export const User: React.FC<{
     refetch: () => void;
 }> = ({ user, editUser, refetch }) => {
     const suspendUserMutation = api.user.suspend.useMutation();
+    const { toast } = useToast();
 
     async function suspendUser(id: string) {
-        await suspendUserMutation.mutateAsync({ id, value: !user.suspended });
+        try {
+            await suspendUserMutation.mutateAsync({
+                id,
+                value: !user.suspended,
+            });
+        } catch (e) {
+            console.error(e);
+            toast({
+                title: 'Помилка',
+                description:
+                    typeof e?.message === 'string'
+                        ? (e.message as string)
+                        : 'Невідома помилка',
+                variant: 'destructive',
+            });
+        }
         void refetch();
     }
 

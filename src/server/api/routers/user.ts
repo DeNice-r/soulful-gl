@@ -70,7 +70,7 @@ export const userRouter = createTRPCRouter({
         .input(SetSuspendedSchema)
         .mutation(async ({ ctx, input: { id, value } }) => {
             if (ctx.session.user.id === id) {
-                throw new Error('You cannot suspend yourself');
+                throw new Error('Неможливо змінити статус власного запису');
             }
             return ctx.db.user.update({
                 where: {
