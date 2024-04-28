@@ -158,7 +158,7 @@ model ArchivedMessage {
 
   createdAt  DateTime
   text       String
-  chat       ArchivedChat @relation(fields: [chatId], references: [id])
+  chat       ArchivedChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
   chatId     Int
   isFromUser Boolean
 }
