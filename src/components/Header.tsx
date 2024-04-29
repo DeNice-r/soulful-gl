@@ -13,35 +13,35 @@ import NavLink from './NavLink';
 import Logo from './Logo';
 
 const Header: React.FC = () => {
-    const { update: updateSession, data: session, status } = useSession();
+    const { data: session } = useSession();
 
     const image = session?.user?.image ?? 'images/placeholder.svg';
     const name = session?.user?.name ?? 'Користувач';
 
     const router = useRouter();
-    const [currentStatus, setCurrentStatus] = React.useState(
-        session?.user?.isOnline || false,
-    );
+    // const [currentStatus, setCurrentStatus] = React.useState(
+    //     session?.user?.isOnline || false,
+    // );
     const isActive: (pathname: string) => boolean = (pathname) =>
         router.pathname === pathname;
 
-    const changeStatus = async () => {
-        if (!session) return;
-
-        try {
-            const response = await fetch('/api/chat/status', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ isOnline: !session.user.isOnline }),
-            });
-            await updateSession({
-                ...session,
-                ...(await response.json()),
-            });
-        } catch (error) {
-            console.error(error);
-        }
-    };
+    // const changeStatus = async () => {
+    //     if (!session) return;
+    //
+    //     try {
+    //         const response = await fetch('/api/chat/status', {
+    //             method: 'POST',
+    //             headers: { 'Content-Type': 'application/json' },
+    //             body: JSON.stringify({ isOnline: !session.user.isOnline }),
+    //         });
+    //         await updateSession({
+    //             ...session,
+    //             ...(await response.json()),
+    //         });
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // };
     return (
         <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-gray-50 px-4 dark:bg-gray-950 sm:px-6 lg:px-8">
             <Logo className="hidden md:basis-1/4" />
@@ -211,29 +211,6 @@ function PencilIcon(
                 strokeLinejoin="round"
                 d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
             />
-        </svg>
-    );
-}
-
-function KeyIcon(
-    props: React.JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>,
-) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <circle cx="7.5" cy="15.5" r="5.5" />
-            <path d="m21 2-9.6 9.6" />
-            <path d="m15.5 7.5 3 3L22 7l-3-3" />
         </svg>
     );
 }

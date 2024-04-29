@@ -14,28 +14,21 @@ const config = {
     "extends": [
         "next/core-web-vitals",
         "plugin:@typescript-eslint/recommended-type-checked",
-        // "plugin:@typescript-eslint/stylistic-type-checked",
         "plugin:@typescript-eslint/recommended",
         "eslint:recommended",
         "prettier",
         "plugin:prettier/recommended"
     ],
     "rules": {
-        "@typescript-eslint/array-type": "off",
-        "@typescript-eslint/consistent-type-definitions": "off",
+        "react-hooks/exhaustive-deps": "off",
+
         "@typescript-eslint/consistent-type-imports": [
-            "warn",
+            "error",
             {
                 "prefer": "type-imports",
                 "fixStyle": "inline-type-imports"
             }
         ],
-        "no-unused-vars": "off",
-        "@typescript-eslint/no-unsafe-return": "off",
-        "@typescript-eslint/no-unsafe-member-access": "off",
-        "@typescript-eslint/no-unused-vars": "off",
-        "@typescript-eslint/no-unsafe": "off",
-        "@typescript-eslint/no-floating-promises": "off",
         "@typescript-eslint/require-await": "off",
         "@typescript-eslint/no-misused-promises": [
             "error",
@@ -45,9 +38,10 @@ const config = {
                 }
             }
         ],
-        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/no-explicit-any": "error",
         "prettier/prettier": "error",
-        "unused-imports/no-unused-imports": "warn",
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": "off",
         "unused-imports/no-unused-vars": [
             "warn",
             {
@@ -57,9 +51,7 @@ const config = {
                 "argsIgnorePattern": "^_"
             }
         ],
-        "no-undef": "off",
-        "@typescript-eslint/no-unsafe-argument": "off",
-        "@typescript-eslint/no-unsafe-call": "off",
+        "no-undef": "off",  // Recommended to turn off for TypeScript https://typescript-eslint.io/troubleshooting/#i-get-errors-from-the-no-undef-rule-about-global-variables-not-being-defined-even-though-there-are-no-typescript-errors
         "indent": "off"
     }
 }

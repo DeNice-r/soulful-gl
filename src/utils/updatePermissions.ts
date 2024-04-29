@@ -2,6 +2,7 @@ import { appRouter } from '~/server/api/root';
 import { db } from '~/server/db';
 import * as console from 'console';
 import { logWithDivider } from '~/utils/index';
+import { type Meta } from '~/utils/types';
 
 export async function updatePermissions() {
     console.log(
@@ -9,6 +10,8 @@ export async function updatePermissions() {
     );
 
     const relevantPermissions = Array.from(getRelevantPermissions());
+
+    console.log(relevantPermissions);
 
     logWithDivider('Relevant permissions:', relevantPermissions.length);
 
@@ -58,9 +61,7 @@ function getRelevantPermissions() {
         [key: string]: {
             [key: string]: {
                 _def?: {
-                    meta?: {
-                        hasPermissionProtection?: boolean;
-                    };
+                    meta?: Meta;
                 };
             };
         };
@@ -70,15 +71,15 @@ function getRelevantPermissions() {
     for (const entity in typedAppRouter) {
         if (entity.startsWith('_')) continue;
         const actions = [];
+        let hasSpaProtection = false;
         for (const action in typedAppRouter[entity]) {
-            if (
-                typedAppRouter[entity][action]?._def?.meta
-                    ?.hasPermissionProtection
-            ) {
+            const meta = typedAppRouter[entity][action]?._def?.meta;
+            if (meta?.hasSpaProtection) hasSpaProtection = true;
+            else if (meta?.hasPermissionProtection) {
                 actions.push(action);
             }
         }
-        if (actions.length > 0) {
+        if (actions.length > 0 || hasSpaProtection) {
             result[entity] = actions;
         }
     }
