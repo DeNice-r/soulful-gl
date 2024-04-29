@@ -25,7 +25,7 @@ const Post: React.FC = () => {
     const handleDelete = async (id: string) => {
         if (window.confirm('Are you sure you want to delete this post?')) {
             await deleteMutation.mutateAsync(id);
-            router.push('/');
+            await router.push('/');
         }
     };
 

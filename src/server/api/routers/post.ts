@@ -108,9 +108,9 @@ export const postRouter = createTRPCRouter({
                 },
                 data: {
                     ...noTagsInput,
-                    ...(input.tags && {
+                    ...(tags && {
                         tags: {
-                            connectOrCreate: input.tags.map((tag) => ({
+                            connectOrCreate: tags.map((tag) => ({
                                 where: { title: tag },
                                 create: { title: tag },
                             })),

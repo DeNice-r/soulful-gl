@@ -7,11 +7,15 @@ import { permissionRouter } from '~/server/api/routers/permission';
 import { documentRouter } from '~/server/api/routers/document';
 import { documentFolderRouter } from '~/server/api/routers/documentFolder';
 import { qandaRouter } from '~/server/api/routers/qanda';
+import { chatRouter } from '~/server/api/routers/chat';
 
 export const appRouter = createTRPCRouter({
     // Admin-related routers
     user: userRouter,
     permission: permissionRouter,
+
+    // Chat-related routers
+    chat: chatRouter,
 
     // Content-related routers
     recommendation: recommendationRouter,

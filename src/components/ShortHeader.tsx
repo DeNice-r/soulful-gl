@@ -7,7 +7,7 @@ import { signOut, useSession } from 'next-auth/react';
 import { type ManagementPageName, PageTitleMap } from '~/utils/types';
 
 const ShortHeader: React.FC<{ entity?: ManagementPageName }> = ({ entity }) => {
-    const { update: updateSession, data: session, status } = useSession();
+    const { data: session } = useSession();
 
     const image = session?.user?.image ?? 'images/placeholder.svg';
     const name = session?.user?.name ?? 'Користувач';

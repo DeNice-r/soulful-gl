@@ -1,68 +1,99 @@
 import * as React from 'react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { type Message } from '@prisma/client';
-import {
-    Alert,
-    Box,
-    Fade,
-    Grid,
-    IconButton,
-    Paper,
-    TextField,
-    Typography,
-} from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
+import { Alert, Fade, Grid } from '@mui/material';
 import Layout from '../../components/Layout';
-import ChatItem from '../../components/ChatItem';
 import { useSession } from 'next-auth/react';
-const HEIGHT = '96vh';
+import { api, type RouterOutputs } from '~/utils/api';
+import { ChatBar } from '~/components/chat/ChatBar';
+import { ChatMessageWindow } from '~/components/chat/ChatMessageWindow';
+import { Cross1Icon } from '@radix-ui/react-icons';
+import { Button } from '@mui/material';
+import { LoaderIcon } from 'lucide-react';
+import { Busyness } from '~/components/chat/Busyness';
+
+type FullChats = NonNullable<RouterOutputs['chat']['listFull']>;
 
 const ChatUI = () => {
     const { data: session, status } = useSession();
 
+    const { client: apiClient } = api.useUtils();
+    const chatListFullQuery = api.chat.listFull.useQuery(undefined, {
+        enabled: false,
+    });
+    const unassignedChatsQuery = api.chat.listUnassigned.useQuery(undefined, {
+        enabled: false,
+    });
+
+    const chatsRef = useRef<FullChats>({});
+    const [_, changeState] = React.useState<number>(0);
+
+    const unassignedChatsRef = useRef<
+        NonNullable<RouterOutputs['chat']['listUnassigned']>
+    >([]);
+
+    function rerender() {
+        changeState((prevState) => prevState + 1);
+    }
+
     const [error, setError] = React.useState(false);
-    const [currentChat, setCurrentChat] = React.useState(0);
-    const [messageCount, setMessageCount] = React.useState(0);
-    const [chatCount, setChatCount] = React.useState(0);
+    const [currentChat, setCurrentChat] = React.useState<number>(-1);
 
     const inputRef = React.useRef<{ value: string; focus: () => void }>();
     const messageEndRef = React.useRef();
+
     const wsRef = React.useRef<WebSocket>();
+    const wsReconnectInterval = React.useRef<NodeJS.Timeout>();
 
-    const messagesRef = React.useRef({});
+    useEffect(() => {
+        if (status !== 'authenticated') return;
 
-    // async function loadNewChats(chatId: number) {
-    //     if (!session) return;
-    //
-    //     const newChat: ExtendedChat = await db.chat.findFirst({
-    //         where: {
-    //             id: chatId,
-    //         },
-    //     });
-    //
-    //     newChat.messages = await db.message.findMany({
-    //         where: {
-    //             chatId: chatId,
-    //         },
-    //     });
-    //
-    //     session.personnel.chats[newChat.id] = newChat;
-    //     setChatCount(Object.values(session.personnel.chats).length);
-    // }
+        void wsConnect();
 
-    function pushMessage(message: Message) {
+        void unassignedChatsQuery.refetch();
+        setInterval(() => {
+            void unassignedChatsQuery.refetch();
+        }, 60_000);
+    }, [status]);
+
+    useEffect(() => {
+        if (!chatListFullQuery.data) return;
+
+        chatsRef.current = chatListFullQuery.data;
+        console.log(chatsRef.current);
+        rerender();
+    }, [chatListFullQuery.data]);
+
+    useEffect(() => {
+        if (!unassignedChatsQuery.data) return;
+
+        unassignedChatsRef.current = unassignedChatsQuery.data;
+        console.log(chatsRef.current);
+        rerender();
+    }, [unassignedChatsQuery.data]);
+
+    async function takeUnassignedChat(chatId: number) {
+        if (!unassignedChatsRef.current.length) return;
+
+        const chat = await apiClient.chat.getFull.query(chatId);
+        chatsRef.current[chat.id] = chat;
+        unassignedChatsRef.current = [];
+        rerender();
+    }
+
+    async function pushMessage(message: Message) {
         if (!session) return;
 
-        const messageChatIndex = -1;
+        if (!(message.chatId in chatsRef.current)) {
+            const newChat = await apiClient.chat.getFull.query(message.chatId);
+            if (!newChat) return;
 
-        if (!(message.chatId in session.personnel.chats)) {
-            // loadNewChats(message.chatId);
+            chatsRef.current[message.chatId] = newChat;
+        } else {
+            chatsRef.current[message.chatId].messages.push(message);
         }
 
-        session.personnel.chats[message.chatId].messages.push(message);
-        setMessageCount(
-            session.personnel.chats[message.chatId].messages.length,
-        );
+        rerender();
 
         setTimeout(() => {
             // @ts-expect-error - ref is legacy todo: replace
@@ -74,47 +105,44 @@ const ChatUI = () => {
         }, 0);
     }
 
-    useEffect(() => {
-        scrollToBottom(false);
-    }, []);
+    async function wsConnect() {
+        if (!session) return;
 
-    useEffect(() => {
-        if (status !== 'authenticated') return;
+        if (wsRef.current && wsRef.current?.readyState !== WebSocket.CLOSED)
+            return;
 
-        const chats = Object.values(session.personnel.chats);
-
-        if (!chats.length || chats.length === 0) return;
-
-        setCurrentChat(chats[0].id);
+        if (!chatListFullQuery.isFetched) void chatListFullQuery.refetch();
+        const token = await apiClient.user.getAccessToken.query();
 
         wsRef.current = new WebSocket(
-            `${process.env.NEXT_PUBLIC_WSS_ENDPOINT}/${session?.user?.id}`,
+            `${process.env.NEXT_PUBLIC_WSS_ENDPOINT}/${token}`,
         );
-        wsRef.current.onopen = () =>
-            console.log('[Router] Connection established');
-        wsRef.current.onclose = () => console.log('[Router] Connection closed');
-        wsRef.current.onerror = () => console.log('[Router] Connection error');
 
-        wsRef.current.onmessage = (event) => {
-            const message = JSON.parse(event.data as string) as Message;
-            pushMessage(message);
-        };
+        wsRef.current.onopen = wsOnOpen;
+        wsRef.current.onclose = wsOnClose;
+        wsRef.current.onerror = wsOnError;
+        wsRef.current.onmessage = wsOnMessage;
+    }
 
-        return () => {
-            if (wsRef.current) wsRef.current.close();
-        };
-    }, [status]);
+    function wsOnOpen() {
+        clearInterval(wsReconnectInterval.current);
+        console.log('[Router] Connection established');
+    }
 
-    const scrollToBottom = (smooth: boolean = true) => {
-        setTimeout(() => {
-            // @ts-expect-error - ref is legacy todo: replace
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            messageEndRef.current.scrollIntoView({
-                behavior: smooth ? 'smooth' : 'instant',
-                block: 'center',
-            });
-        }, 0);
-    };
+    function wsOnClose() {
+        console.log('[Router] Connection closed, reconnecting...');
+        void wsConnect();
+    }
+
+    function wsOnError() {
+        console.log('[Router] Connection error, reconnecting...');
+        void wsConnect();
+    }
+
+    async function wsOnMessage(event: MessageEvent<string>) {
+        const message = JSON.parse(event.data) as Message;
+        await pushMessage(message);
+    }
 
     const handleSend = () => {
         if (!session || !inputRef.current || !wsRef.current) return;
@@ -128,7 +156,9 @@ const ChatUI = () => {
                 return;
             }
 
-            const chat = session.personnel.chats[currentChat];
+            if (!chatsRef.current[currentChat]) return;
+
+            const chat = chatsRef.current[currentChat];
             wsRef.current.send(
                 JSON.stringify({
                     text: message,
@@ -143,131 +173,82 @@ const ChatUI = () => {
         scrollToBottom();
     };
 
-    const changeChat = async (index: number) => {
-        setCurrentChat(index);
+    function changeChat(index: number) {
+        if (index !== currentChat) setCurrentChat(index);
+
         scrollToBottom(false);
-    };
+
+        if (!inputRef.current) return;
+        inputRef.current.focus();
+    }
+
+    async function closeCurrentChat() {
+        await apiClient.chat.archive.mutate(currentChat);
+        setCurrentChat(-1);
+        delete chatsRef.current[currentChat];
+        rerender();
+    }
+
+    function scrollToBottom(smooth: boolean = true) {
+        setTimeout(() => {
+            if (messageEndRef.current) {
+                // @ts-expect-error - ref is legacy todo: replace
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+                messageEndRef.current.scrollIntoView({
+                    behavior: smooth ? 'smooth' : 'instant',
+                    block: 'center',
+                });
+            }
+        }, 0);
+    }
 
     return (
         <Layout>
             <Fade in={error}>
                 <Alert
                     variant="filled"
-                    severity="error"
+                    severity="warning"
                     sx={{ position: 'absolute', 'z-index': 1 }}
                 >
-                    You are not connected to the internet
+                    Встановлення з&apos;єднання з сервером...
                 </Alert>
             </Fade>
+            {currentChat !== -1 && (
+                <Button
+                    variant="contained"
+                    className="top-15 absolute right-0 z-20"
+                    hidden={currentChat === -1}
+                    color="error"
+                    onClick={closeCurrentChat}
+                >
+                    <Cross1Icon />
+                </Button>
+            )}
+            {unassignedChatsRef.current.length > 0 && (
+                <Button
+                    variant="contained"
+                    className="top-15 absolute left-0 z-20"
+                    color="success"
+                    onClick={() =>
+                        takeUnassignedChat(unassignedChatsRef.current[0].id)
+                    }
+                >
+                    <LoaderIcon />
+                </Button>
+            )}
             <Grid container spacing={0}>
-                <Grid item xs={2}>
-                    <Box
-                        sx={{
-                            height: HEIGHT,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            bgcolor: 'grey.300',
-                        }}
-                    >
-                        <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
-                            {session &&
-                                Object.values(session.personnel.chats).map(
-                                    (chat, index) => (
-                                        <ChatItem
-                                            key={index}
-                                            chat={chat}
-                                            onClick={() => changeChat(chat.id)}
-                                        />
-                                    ),
-                                )}
-                        </Box>
-                    </Box>
-                </Grid>
-                <Grid item xs={10}>
-                    <Box
-                        sx={{
-                            height: HEIGHT,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            bgcolor: 'grey.400',
-                        }}
-                    >
-                        <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
-                            {session &&
-                                session.personnel.chats[
-                                    currentChat
-                                ]?.messages?.map((message) => (
-                                    <ChatMesssage
-                                        key={message.id}
-                                        message={message}
-                                    />
-                                ))}
-                            {/*@ts-expect-error - ref is legacy todo: replace*/}
-                            <div ref={messageEndRef}></div>
-                        </Box>
-                        <Box sx={{ p: 0.5, backgroundColor: 'grey.300' }}>
-                            <Grid container spacing={1}>
-                                <Grid item xs={11.5}>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        placeholder="Type a message"
-                                        variant="outlined"
-                                        inputRef={inputRef}
-                                        onKeyDown={(event) => {
-                                            if (event.key === 'Enter') {
-                                                handleSend();
-                                            }
-                                        }}
-                                    />
-                                </Grid>
-                                <Grid item xs={0.3}>
-                                    <IconButton
-                                        size="small"
-                                        color="primary"
-                                        onClick={handleSend}
-                                    >
-                                        <SendIcon />
-                                    </IconButton>
-                                </Grid>
-                            </Grid>
-                        </Box>
-                    </Box>
-                </Grid>
+                <ChatBar chats={chatsRef.current} changeChat={changeChat} />
+                <ChatMessageWindow
+                    chats={chatsRef.current}
+                    {...{
+                        currentChat,
+                        handleSend,
+                        inputRef,
+                        messageEndRef,
+                    }}
+                />
             </Grid>
         </Layout>
-    );
-};
-
-const ChatMesssage = ({ message }: { message: Message }) => {
-    const isRemote = message.isFromUser;
-
-    return (
-        <Box
-            sx={{
-                display: 'flex',
-                justifyContent: isRemote ? 'flex-start' : 'flex-end',
-                mb: 2,
-            }}
-        >
-            <Paper
-                variant="outlined"
-                sx={{
-                    p: 2,
-                    backgroundColor: isRemote
-                        ? 'primary.light'
-                        : 'secondary.light',
-                    color: isRemote
-                        ? 'primary.contrastText'
-                        : 'secondary.contrastText',
-                    borderRadius: isRemote
-                        ? '20px 20px 20px 5px'
-                        : '20px 20px 5px 20px',
-                }}
-            >
-                <Typography variant="body1">{message.text}</Typography>
-            </Paper>
-        </Box>
     );
 };
 
