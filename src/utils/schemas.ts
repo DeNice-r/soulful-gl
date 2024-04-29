@@ -4,15 +4,16 @@ import { env } from '~/env';
 
 const FirstPage = 1;
 const DefaultLimit = 10;
+const PaginationDefault = { page: FirstPage, limit: DefaultLimit };
 
 const NoDefaultPageSchema = z.object({
     page: z.number().min(1).default(FirstPage),
     limit: z.number().min(1).max(100).default(DefaultLimit),
 });
-export const PageSchema = NoDefaultPageSchema.default({
-    page: FirstPage,
-    limit: DefaultLimit,
-});
+export const PageSchema = NoDefaultPageSchema.default(PaginationDefault);
+export const SearchUsersSchema = NoDefaultPageSchema.extend({
+    permissions: z.array(z.string()).optional(),
+}).default(PaginationDefault);
 
 export const NumberIdSchema = z.number().int().nonnegative();
 export const StringIdSchema = z.string().min(1).max(100);

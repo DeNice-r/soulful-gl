@@ -2,9 +2,9 @@ import React from 'react';
 import { ManagementPageName } from '~/utils/types';
 import { Sidebar } from '~/components/management/Sidebar';
 import { ShortHeader } from '~/components/management/ShortHeader';
-import { Users } from '~/components/management/Users';
 import { Operators } from '~/components/management/Operators';
 import { Toaster } from '~/components/ui/toaster';
+import { Users } from '~/components/management/Users';
 
 const pages = {
     [ManagementPageName.STATISTICS]: `<StatisticsComponent />`,

@@ -7,6 +7,7 @@ import {
     CreateUserSchema,
     CUIDSchema,
     PageSchema,
+    SearchUsersSchema,
     SetNotesSchema,
     SetSuspendedSchema,
     StringIdSchema,
@@ -16,15 +17,47 @@ import { archiveChat } from '~/server/api/routers/common';
 
 export const userRouter = createTRPCRouter({
     list: permissionProcedure
-        .input(PageSchema)
-        .query(async ({ input, ctx }) => {
+        .input(SearchUsersSchema)
+        .query(async ({ input: { page, limit, permissions }, ctx }) => {
+            const p = ['*:*', '*:*:*'];
+            for (const permission of permissions || []) {
+                p.push(permission);
+                p.push(`${permission}:*`);
+            }
+
+            const where = permissions && {
+                where: {
+                    permissions: {
+                        some: {
+                            title: {
+                                in: p,
+                            },
+                        },
+                    },
+                    roles: {
+                        some: {
+                            permissions: {
+                                some: {
+                                    title: {
+                                        in: p,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            };
+
             const [count, values] = await ctx.db.$transaction([
-                ctx.db.user.count(),
+                ctx.db.user.count(where),
                 ctx.db.user.findMany({
+                    where: {
+                        ...where?.where,
+                    },
                     select: getProjection(ctx.isFullAccess),
                     orderBy: { createdAt: 'desc' },
-                    skip: (input.page - 1) * input.limit,
-                    take: input.limit,
+                    skip: (page - 1) * limit,
+                    take: limit,
                 }),
             ]);
 
