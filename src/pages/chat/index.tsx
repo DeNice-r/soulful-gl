@@ -59,7 +59,6 @@ const ChatUI = () => {
         if (!chatListFullQuery.data) return;
 
         chatsRef.current = chatListFullQuery.data;
-        console.log(chatsRef.current);
         rerender();
     }, [chatListFullQuery.data]);
 
@@ -67,7 +66,6 @@ const ChatUI = () => {
         if (!unassignedChatsQuery.data) return;
 
         unassignedChatsRef.current = unassignedChatsQuery.data;
-        console.log(chatsRef.current);
         rerender();
     }, [unassignedChatsQuery.data]);
 
