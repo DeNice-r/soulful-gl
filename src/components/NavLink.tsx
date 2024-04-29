@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -9,7 +9,7 @@ export const NavLink = ({
     ...props
 }: {
     href: string;
-    children: any;
+    children: ReactNode; // | ReactNodeArray;
     className?: string;
     props?: never;
 }) => {

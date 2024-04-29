@@ -24,20 +24,17 @@ declare module 'next-auth' {
             name: string;
             email: string;
             image: string;
-            isOnline: boolean;
+            busyness: number;
             roles: string[];
             permissions: string[];
 
             suspended: boolean;
         };
-        personnel: {
-            chats: Record<number, ExtendedChat>;
-        };
     }
 
     interface DefaultUser {
         id: string;
-        isOnline: boolean;
+        busyness: number;
 
         suspended: boolean;
     }
@@ -45,6 +42,8 @@ declare module 'next-auth' {
 
 export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const data = requestWrapper(req, res);
+    // It is 'any' in the lib code, so there's not much we can do
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return await NextAuth(...data);
 };
 
@@ -71,7 +70,7 @@ export function requestWrapper(
                 session.user.name = user.name ?? '';
                 session.user.image = user.image ?? '/image/default_avatar.png';
                 session.user.email = user.email;
-                session.user.isOnline = user.isOnline;
+                session.user.busyness = user.busyness;
 
                 const u = await db.user.findUnique({
                     where: {
@@ -138,7 +137,6 @@ export function requestWrapper(
                     };
                 }
 
-                session.personnel = { chats };
                 return session;
             },
             async signIn({
@@ -181,16 +179,18 @@ export function requestWrapper(
             },
         },
         jwt: {
-            encode: async ({ token, secret, maxAge }) => {
+            encode: async ({ token, secret, maxAge }): Promise<string> => {
                 if (
                     req.query.nextauth?.includes('callback') &&
                     req.query.nextauth.includes('credentials') &&
                     req.method === 'POST'
                 ) {
+                    // TODO: this function is a type disaster
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
                     const cookies = new Cookies(req, res);
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
                     const cookie = cookies.get('next-auth.session-token');
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                     if (cookie) return cookie;
                     else return '';
                 }
@@ -213,7 +213,6 @@ export function requestWrapper(
         },
 
         secret: env.NEXTAUTH_SECRET,
-        debug: true,
         providers: [
             GithubProvider({
                 clientId: env.GITHUB_ID,
@@ -254,7 +253,7 @@ export function requestWrapper(
                         value: '*&fhio2)!_3krr-)(#(!@$f;p[e]',
                     },
                 },
-                async authorize(credentials, req) {
+                async authorize(credentials, _req) {
                     if (!credentials) return null;
 
                     const user = await db.user.findUnique({

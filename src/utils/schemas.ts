@@ -1,7 +1,6 @@
 import { z } from '~/utils/zod';
 import { BackgroundPattern } from '~/utils/types';
 import { env } from '~/env';
-// import bcrypt from 'bcrypt';
 
 const FirstPage = 1;
 const DefaultLimit = 10;
@@ -20,12 +19,9 @@ export const CUIDSchema = z.string().cuid();
 export const CUIDObjectSchema = z.object({ id: CUIDSchema });
 
 export const ShortStringSchema = z.string().min(1).max(100);
+export const MessageTextSchema = z.string().min(1).max(4096);
 
-// export const PasswordSchema = z
-//     .string()
-//     .min(8)
-//     .max(100)
-//     .transform((v) => bcrypt.hashSync(v, env.SALT_ROUNDS));
+export const BusynessSchema = z.number().int().min(0).max(4);
 
 export const TitleSchema = z.string().min(1).max(200);
 export const QuerySchema = z.string().min(1).max(200);
@@ -60,7 +56,6 @@ export const CreateUserSchema = z.object({
     name: ShortStringSchema,
     image: ImageSchema,
     description: RichTextSchema.optional(),
-    // password: PasswordSchema,
     notes: z.string().optional(),
 });
 
@@ -70,7 +65,6 @@ export const UpdateUserSchema = z.object({
     name: ShortStringSchema.optional(),
     image: ImageSchema.optional(),
     description: RichTextSchema.optional(),
-    // password: PasswordSchema.optional(),
 });
 
 export const SetSuspendedSchema = z.object({
@@ -205,4 +199,8 @@ export const DocumentFolderUpdateSchema = z.object({
     parentId: CUIDSchema.optional(),
 
     tags: z.array(z.string()).min(1).max(25).optional(),
+});
+
+export const MessageSchema = z.object({
+    text: MessageTextSchema,
 });

@@ -4,21 +4,28 @@ import { createCallerFactory, createTRPCRouter } from '~/server/api/trpc';
 import { recommendationRouter } from '~/server/api/routers/recommendation';
 import { userRouter } from '~/server/api/routers/user';
 import { permissionRouter } from '~/server/api/routers/permission';
+import { documentRouter } from '~/server/api/routers/document';
+import { documentFolderRouter } from '~/server/api/routers/documentFolder';
+import { qandaRouter } from '~/server/api/routers/qanda';
+import { chatRouter } from '~/server/api/routers/chat';
 
-/**
- * This is the primary router for your server.
- *
- * All routers added in /api/routers should be manually added here.
- */
 export const appRouter = createTRPCRouter({
     // Admin-related routers
     user: userRouter,
     permission: permissionRouter,
 
+    // Chat-related routers
+    chat: chatRouter,
+
     // Content-related routers
     recommendation: recommendationRouter,
     post: postRouter,
     exercise: exerciseRouter,
+    qanda: qandaRouter,
+
+    // Private content-related routers
+    documentFolder: documentFolderRouter,
+    document: documentRouter,
 });
 
 // export type definition of API

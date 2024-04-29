@@ -82,20 +82,9 @@ const caller = createCaller({
             name: '',
             email: '',
             image: '',
-            isOnline: false,
+            busyness: 0,
             roles: [],
             suspended: false,
-        },
-        personnel: {
-            chats: {
-                '1': {
-                    messages: [],
-                    id: 1,
-                    personnelId: '1',
-                    userId: '1',
-                    createdAt: new Date(),
-                },
-            },
         },
         expires: 'no 😎',
     },
@@ -110,7 +99,7 @@ export default async function seed() {
 async function createUsers() {
     const users = await caller.user.list();
 
-    if (users.length) {
+    if (users.values.length) {
         perfectlyNormalLog('Users already exist');
         return;
     }
@@ -168,7 +157,7 @@ async function createPosts() {
     logWithDivider('Posts created');
 }
 
-function perfectlyNormalLog(...args: any[]) {
+function perfectlyNormalLog(...args: unknown[]) {
     console.log(...args, 'which is perfectly normal.');
 }
 

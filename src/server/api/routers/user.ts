@@ -1,4 +1,8 @@
-import { createTRPCRouter, permissionProcedure } from '~/server/api/trpc';
+import {
+    createTRPCRouter,
+    permissionProcedure,
+    protectedProcedure,
+} from '~/server/api/trpc';
 import {
     CreateUserSchema,
     CUIDSchema,
@@ -40,6 +44,22 @@ export const userRouter = createTRPCRouter({
                 select: getProjection(ctx.isFullAccess),
             });
         }),
+
+    getAccessToken: protectedProcedure.query(async ({ ctx }) => {
+        return (
+            await ctx.db.session.findFirst({
+                where: {
+                    userId: ctx.session.user.id,
+                    expires: {
+                        gte: new Date(),
+                    },
+                },
+                select: {
+                    sessionToken: true,
+                },
+            })
+        )?.sessionToken;
+    }),
 
     create: permissionProcedure
         .input(CreateUserSchema)

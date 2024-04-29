@@ -62,7 +62,7 @@ export const Users: React.FC = () => {
     const goToPage = (page: number) => {
         const currentPath = router.pathname;
         const currentQuery = { ...router.query, page };
-        router.push({
+        void router.push({
             pathname: currentPath,
             query: currentQuery,
         });

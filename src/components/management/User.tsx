@@ -29,9 +29,7 @@ export const User: React.FC<{
             toast({
                 title: 'Помилка',
                 description:
-                    typeof e?.message === 'string'
-                        ? (e.message as string)
-                        : 'Невідома помилка',
+                    e instanceof Error ? e.message : 'Невідома помилка',
                 variant: 'destructive',
             });
         }

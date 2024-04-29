@@ -1,6 +1,6 @@
 import { MAX_TITLE_LENGTH } from '~/utils/constants';
 
-export function logWithDivider(...args: any[]) {
+export function logWithDivider(...args: unknown[]) {
     console.log(...args);
     console.log('-'.repeat(50));
 }

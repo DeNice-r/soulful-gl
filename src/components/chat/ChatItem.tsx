@@ -1,5 +1,6 @@
 import { Box, ButtonBase, Typography } from '@mui/material';
 import { type ExtendedChat } from '~/utils/types';
+import React from 'react';
 
 interface ChatItemProps {
     chat: ExtendedChat;
@@ -18,7 +19,7 @@ const ChatItem: React.FC<ChatItemProps> = ({ onClick, chat }) => {
                     gutterBottom
                     sx={{ textAlign: 'left' }}
                 >
-                    Chat #{chat.id}
+                    Чат #{chat.id}
                 </Typography>
                 <Typography
                     variant="body1"
