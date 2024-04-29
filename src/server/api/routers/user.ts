@@ -9,6 +9,7 @@ import {
     PageSchema,
     SetNotesSchema,
     SetSuspendedSchema,
+    StringIdSchema,
     UpdateUserSchema,
 } from '~/utils/schemas';
 import { archiveChat } from '~/server/api/routers/common';
@@ -137,12 +138,15 @@ export const userRouter = createTRPCRouter({
         }),
 
     delete: permissionProcedure
-        .input(CUIDSchema)
+        .input(StringIdSchema)
         .mutation(async ({ ctx, input: id }) => {
-            return ctx.db.post.delete({
+            if (ctx.session.user.id === id) {
+                throw new Error('Неможливо видалити власний запис');
+            }
+
+            return ctx.db.user.delete({
                 where: {
                     id,
-                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
                 },
             });
         }),

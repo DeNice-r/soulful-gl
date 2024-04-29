@@ -16,6 +16,7 @@ export const User: React.FC<{
     refetch: () => void;
 }> = ({ user, editUser, refetch }) => {
     const suspendUserMutation = api.user.suspend.useMutation();
+    const deleteUserMutation = api.user.delete.useMutation();
     const { toast } = useToast();
 
     async function suspendUser(id: string) {
@@ -24,6 +25,21 @@ export const User: React.FC<{
                 id,
                 value: !user.suspended,
             });
+        } catch (e) {
+            console.error(e);
+            toast({
+                title: 'Помилка',
+                description:
+                    e instanceof Error ? e.message : 'Невідома помилка',
+                variant: 'destructive',
+            });
+        }
+        void refetch();
+    }
+
+    async function deleteUser(id: string) {
+        try {
+            await deleteUserMutation.mutateAsync(id);
         } catch (e) {
             console.error(e);
             toast({
@@ -61,7 +77,12 @@ export const User: React.FC<{
                         >
                             {user.suspended ? 'Увімкнути' : 'Відключити'} запис
                         </Button>
-                        <Button variant={'destructive'}>Видалити</Button>
+                        <Button
+                            variant={'destructive'}
+                            onClick={() => deleteUser(user.id)}
+                        >
+                            Видалити
+                        </Button>
                     </PopoverContent>
                 </Popover>
             </TableCell>

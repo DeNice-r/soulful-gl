@@ -15,6 +15,7 @@ export const PageSchema = NoDefaultPageSchema.default({
 });
 
 export const NumberIdSchema = z.number().int().nonnegative();
+export const StringIdSchema = z.string().min(1).max(100);
 export const CUIDSchema = z.string().cuid();
 export const CUIDObjectSchema = z.object({ id: CUIDSchema });
 
