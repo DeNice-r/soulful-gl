@@ -11,6 +11,7 @@ import {
     SetSuspendedSchema,
     UpdateUserSchema,
 } from '~/utils/schemas';
+import { archiveChat } from '~/server/api/routers/common';
 
 export const userRouter = createTRPCRouter({
     list: permissionProcedure
@@ -101,10 +102,33 @@ export const userRouter = createTRPCRouter({
             if (ctx.session.user.id === id) {
                 throw new Error('Неможливо змінити статус власного запису');
             }
+
+            const chatIds = await ctx.db.chat.findMany({
+                where: {
+                    OR: [
+                        {
+                            personnelId: id,
+                        },
+                        {
+                            userId: id,
+                        },
+                    ],
+                },
+                select: {
+                    id: true,
+                },
+            });
+
+            const promises: Promise<boolean>[] = [];
+            for (const chat of chatIds) {
+                promises.push(archiveChat(chat.id, ctx));
+            }
+
+            await Promise.all(promises);
+
             return ctx.db.user.update({
                 where: {
                     id,
-                    ...(!ctx.isFullAccess && { id: ctx.session.user.id }),
                 },
                 data: {
                     suspended: value,

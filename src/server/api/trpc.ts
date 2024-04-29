@@ -58,6 +58,8 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
     });
 };
 
+export type Context = Awaited<ReturnType<typeof createTRPCContext>>;
+
 const t = initTRPC
     .context<typeof createTRPCContext>()
     .meta<Meta>()
