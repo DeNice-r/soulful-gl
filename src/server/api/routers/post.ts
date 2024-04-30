@@ -13,21 +13,28 @@ import { isPermitted } from '~/utils/authAssertions';
 import { AccessType } from '~/utils/types';
 
 export const postRouter = createTRPCRouter({
-    get: publicProcedure.input(PageSchema).query(async ({ input, ctx }) => {
-        return ctx.db.post.findMany({
-            include: {
-                author: {
-                    select: { name: true },
+    list: publicProcedure.input(PageSchema).query(async ({ input, ctx }) => {
+        const [count, values] = await ctx.db.$transaction([
+            ctx.db.post.count(),
+            ctx.db.post.findMany({
+                include: {
+                    author: {
+                        select: { name: true },
+                    },
                 },
-            },
+                orderBy: { createdAt: 'desc' },
+                skip: (input.page - 1) * input.limit,
+                take: input.limit,
+            }),
+        ]);
 
-            orderBy: { createdAt: 'desc' },
-            skip: (input.page - 1) * input.limit,
-            take: input.limit,
-        });
+        return {
+            count,
+            values,
+        };
     }),
 
-    getById: publicProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
+    get: publicProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
         const post = await ctx.db.post.findUnique({
             where: { id: input },
             include: {

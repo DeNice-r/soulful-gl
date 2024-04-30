@@ -16,7 +16,6 @@ import { DEFAULT_LIMIT } from '~/utils/constants';
 import { Post } from '~/components/management/Post';
 
 export const Posts: React.FC = () => {
-    const posts = api.post.get.useQuery();
     const router = useRouter();
     const [_, setState] = useState(0);
 
@@ -25,9 +24,9 @@ export const Posts: React.FC = () => {
         : DEFAULT_LIMIT;
     const page = router.query.page ? Number(router.query.page) : 1;
 
-    const users = api.user.list.useQuery({ limit, page });
+    const posts = api.post.list.useQuery({ limit, page });
 
-    const total = users.data?.count ? Math.ceil(users.data.count / limit) : 0;
+    const total = posts.data?.count ? Math.ceil(posts.data?.count / limit) : 0;
 
     const editPost = async (arg: string) => {
         // setEditableUser(await apiClient.user.getById.query(arg));
@@ -80,8 +79,8 @@ export const Posts: React.FC = () => {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {posts.data &&
-                        posts.data.map((post) => (
+                    {posts.data?.values &&
+                        posts.data.values.map((post) => (
                             <TableRow
                                 key={post.id}
                                 className="hover:bg-neutral-100/30"
