@@ -139,9 +139,9 @@ async function createUsers() {
 }
 
 async function createPosts() {
-    const posts = await caller.post.get();
+    const posts = await caller.post.list();
 
-    if (posts.length) {
+    if (posts.values.length) {
         perfectlyNormalLog('Posts already exist');
         return;
     }
