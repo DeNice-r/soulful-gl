@@ -9,7 +9,7 @@ import { Post } from '~/components/Post';
 import { api } from '~/utils/api';
 
 const Blog: React.FC = () => {
-    const posts = api.post.get.useQuery({
+    const posts = api.post.list.useQuery({
         limit: 4,
     });
     return (
@@ -28,7 +28,7 @@ const Blog: React.FC = () => {
                 </p>
             </section>
             <article className="flex w-full flex-col justify-center gap-8 py-16 md:px-80 2xl:flex-row 2xl:gap-32 2xl:px-40">
-                {posts?.data?.map((post) => (
+                {posts?.data?.values.map((post) => (
                     <div
                         key={post.id}
                         className="flex-1 justify-center bg-neutral-300 bg-opacity-80 shadow-md outline outline-neutral-400 transition-shadow duration-100 ease-in hover:cursor-pointer hover:shadow-lg md:rounded-md"

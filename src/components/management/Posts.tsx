@@ -9,7 +9,6 @@ import {
 } from '~/components/ui/table';
 import { TableCell } from '@mui/material';
 import { Spinner } from '~/components/ui/spinner';
-import { User } from '~/components/management/User';
 import { CustomPagination } from '~/components/CustomPagination';
 import { useRouter } from 'next/router';
 import { DEFAULT_LIMIT } from '~/utils/constants';
