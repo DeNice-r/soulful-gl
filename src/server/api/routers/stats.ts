@@ -3,33 +3,63 @@ import { DAY_MS } from '~/utils/constants';
 
 export const statsRouter = createTRPCRouter({
     list: spaProcedure.query(async ({ ctx }) => {
-        const [ongoingChats, ongoingMsgCount, recentChats, recentMsgCount] =
-            await Promise.all([
-                ctx.db.chat.findMany({
-                    select: {
-                        createdAt: true,
+        const [
+            messengerUserCount,
+            userCount,
+            operatorCount,
+            ongoingChats,
+            ongoingMsgCount,
+            recentChats,
+            recentMsgCount,
+        ] = await Promise.all([
+            ctx.db.user.count({
+                where: {
+                    email: null,
+                },
+            }),
+            ctx.db.user.count({
+                where: {
+                    NOT: {
+                        email: null,
                     },
-                }),
-                ctx.db.message.count(),
-                ctx.db.archivedChat.findMany({
-                    where: {
-                        createdAt: {
-                            gt: new Date(Date.now() - DAY_MS * 7),
+                },
+            }),
+            ctx.db.user.count({
+                where: {
+                    permissions: {
+                        some: {
+                            title: {
+                                in: ['chat:*', 'chat:*:*', '*:*', '*:*:*'],
+                            },
                         },
                     },
-                    select: {
-                        createdAt: true,
-                        endedAt: true,
+                },
+            }),
+            ctx.db.chat.findMany({
+                select: {
+                    createdAt: true,
+                },
+            }),
+            ctx.db.message.count(),
+            ctx.db.archivedChat.findMany({
+                where: {
+                    createdAt: {
+                        gt: new Date(Date.now() - DAY_MS * 7),
                     },
-                }),
-                ctx.db.archivedMessage.count({
-                    where: {
-                        createdAt: {
-                            gt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
-                        },
+                },
+                select: {
+                    createdAt: true,
+                    endedAt: true,
+                },
+            }),
+            ctx.db.archivedMessage.count({
+                where: {
+                    createdAt: {
+                        gt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
                     },
-                }),
-            ]);
+                },
+            }),
+        ]);
 
         const avgDuration =
             ongoingChats.reduce(
@@ -45,6 +75,9 @@ export const statsRouter = createTRPCRouter({
 
         return {
             numbers: {
+                messengerUserCount,
+                userCount,
+                operatorCount,
                 ongoingCount: ongoingChats.length,
                 ongoingMsgCount,
                 recentCount: recentChats.length,

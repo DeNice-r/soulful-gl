@@ -12,7 +12,7 @@ import { useToast } from '~/components/ui/use-toast';
 import { truncateString } from '~/utils';
 
 export const Post: React.FC<{
-    post: RouterOutputs['post']['get'][number];
+    post: RouterOutputs['post']['list']['values'][number];
     editPost: (arg: string) => void;
     refetch: () => void;
 }> = ({ post, editPost, refetch }) => {

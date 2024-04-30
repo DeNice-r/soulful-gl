@@ -7,6 +7,9 @@ import { defaultFormatDiff } from '~/utils/dates';
 
 const l10n: Record<string, Record<string, string>> = {
     numbers: {
+        messengerUserCount: 'Користувачі з месенджерів',
+        userCount: 'Користувачі платформи',
+        operatorCount: 'З них оператори',
         ongoingCount: 'Активні чати',
         ongoingMsgCount: 'Повідомлення в активних чатах',
         recentCount: 'Чати за останні 24 години',
