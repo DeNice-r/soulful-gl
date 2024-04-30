@@ -3,6 +3,7 @@ import { Box, Grid } from '@mui/material';
 import ChatItem from '~/components/chat/ChatItem';
 import * as React from 'react';
 import { Busyness } from '~/components/chat/Busyness';
+import { Spinner } from '~/components/ui/spinner';
 
 export const ChatBar = ({
     chats,
@@ -30,6 +31,9 @@ export const ChatBar = ({
                         onClick={() => changeChat(chat.id)}
                     />
                 ))}
+                {Object.values(chats).length === 0 && (
+                    <Spinner size="large"></Spinner>
+                )}
             </Box>
         </Box>
     </Grid>
