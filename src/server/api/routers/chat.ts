@@ -53,10 +53,10 @@ export const chatRouter = createTRPCRouter({
 
     getFull: spaProcedure
         .input(NumberIdSchema)
-        .query(async ({ ctx, input }) => {
+        .query(async ({ ctx, input: id }) => {
             return ctx.db.chat.update({
                 where: {
-                    id: input,
+                    id,
                     OR: [
                         {
                             personnelId: ctx.session.user.id,
@@ -107,43 +107,4 @@ export const chatRouter = createTRPCRouter({
                 },
             });
         }),
-
-    // todo: user starting chat on the site, better use router api instead
-    // create: protectedProcedure
-    //     .input(MessageSchema)
-    //     .mutation(async ({ ctx, input }) => {
-    //         return ctx.db.chat.create({
-    //             data: {
-    //                 personnelId: ,
-    //                 messages: {
-    //                     create: input,
-    //                 },
-    //             },
-    //         });
-    //     }),
-
-    // search: permissionProcedure
-    //     .input(SearchSchema)
-    //     .query(async ({ input: { query, limit, page, published }, ctx }) => {
-    //         return ctx.db.qandA.findMany({
-    //             ...(query && {
-    //                 where: {
-    //                     question: {
-    //                         contains: query,
-    //                         mode: 'insensitive',
-    //                     },
-    //                 },
-    //             }),
-    //
-    //             ...(typeof published === 'boolean' && {
-    //                 where: {
-    //                     published,
-    //                 },
-    //             }),
-    //
-    //             orderBy: { createdAt: 'desc' },
-    //             skip: (page - 1) * limit,
-    //             take: limit,
-    //         });
-    //     }),
 });
