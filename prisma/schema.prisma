@@ -122,9 +122,9 @@ model Chat {
   id Int @id @default(autoincrement())
 
   createdAt   DateTime  @default(now())
-  user        User      @relation(name: "userChat", fields: [userId], references: [id])
+  user        User      @relation(name: "userChat", fields: [userId], references: [id], onDelete: Cascade)
   userId      String    @unique
-  personnel   User?     @relation(name: "personnelChats", fields: [personnelId], references: [id])
+  personnel   User?     @relation(name: "personnelChats", fields: [personnelId], references: [id], onDelete: SetNull)
   personnelId String?
   messages    Message[]
 }
@@ -148,9 +148,9 @@ model ArchivedChat {
 
   createdAt   DateTime
   endedAt     DateTime          @default(now())
-  user        User              @relation(name: "userArchivedChat", fields: [userId], references: [id])
+  user        User              @relation(name: "userArchivedChat", fields: [userId], references: [id], onDelete: Cascade)
   userId      String
-  personnel   User?             @relation(name: "personnelArchivedChat", fields: [personnelId], references: [id])
+  personnel   User?             @relation(name: "personnelArchivedChat", fields: [personnelId], references: [id], onDelete: SetNull)
   personnelId String?
   messages    ArchivedMessage[]
 }

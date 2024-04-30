@@ -18,7 +18,7 @@ const l10n: Record<string, Record<string, string>> = {
     },
 };
 
-export const StatisticsComponent: React.FC = () => {
+export const Statistics: React.FC = () => {
     const stats = api.stats.list.useQuery();
 
     return (

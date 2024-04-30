@@ -5,13 +5,14 @@ import { ShortHeader } from '~/components/management/ShortHeader';
 import { Operators } from '~/components/management/Operators';
 import { Toaster } from '~/components/ui/toaster';
 import { Users } from '~/components/management/Users';
-import { StatisticsComponent } from '~/components/management/StatisticsComponent';
+import { Statistics } from '~/components/management/Statistics';
+import { Posts } from '~/components/management/Posts';
 
 const pages = {
-    [ManagementPageName.STATISTICS]: <StatisticsComponent />,
+    [ManagementPageName.STATISTICS]: <Statistics />,
     [ManagementPageName.USERS]: <Users />,
     [ManagementPageName.OPERATORS]: <Operators />,
-    [ManagementPageName.POSTS]: `<PostsComponent />`,
+    [ManagementPageName.POSTS]: <Posts />,
     [ManagementPageName.EXCERCISES]: `<Excercises />`,
     [ManagementPageName.KNOWLEDGE]: `<Knowledge />`,
     [ManagementPageName.ACHIEVEMENTS]: `<Achievements />`,
