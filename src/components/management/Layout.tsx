@@ -5,9 +5,10 @@ import { ShortHeader } from '~/components/management/ShortHeader';
 import { Operators } from '~/components/management/Operators';
 import { Toaster } from '~/components/ui/toaster';
 import { Users } from '~/components/management/Users';
+import { StatisticsComponent } from '~/components/management/StatisticsComponent';
 
 const pages = {
-    [ManagementPageName.STATISTICS]: `<StatisticsComponent />`,
+    [ManagementPageName.STATISTICS]: <StatisticsComponent />,
     [ManagementPageName.USERS]: <Users />,
     [ManagementPageName.OPERATORS]: <Operators />,
     [ManagementPageName.POSTS]: `<PostsComponent />`,
