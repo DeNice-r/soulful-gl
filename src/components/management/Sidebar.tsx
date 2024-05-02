@@ -33,7 +33,7 @@ export const Sidebar: React.FC<Props & { entity: ManagementPageName }> = ({
     const [isOpen, setIsOpen] = useState(true);
     const links = [];
     const cls =
-        'flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 dark:text-gray-400';
+        'flex items-center rounded-lg px-3 py-2 text-gray-500 dark:text-gray-400';
     for (const page of Object.values(ManagementPageName)) {
         const text = isOpen ? PageTitleMap[page] : '';
         const inner = (
@@ -47,6 +47,7 @@ export const Sidebar: React.FC<Props & { entity: ManagementPageName }> = ({
                 <Link
                     className={cn(
                         cls,
+                        isOpen ? 'gap-3' : '',
                         'hover:text-gray-900 hover:dark:text-gray-50',
                     )}
                     href={`/management/${page}`}
@@ -58,6 +59,7 @@ export const Sidebar: React.FC<Props & { entity: ManagementPageName }> = ({
                 <div
                     className={cn(
                         cls,
+                        isOpen ? 'gap-3' : '',
                         'text-gray-900 hover:cursor-default dark:text-gray-50',
                     )}
                     key={page}
@@ -72,35 +74,33 @@ export const Sidebar: React.FC<Props & { entity: ManagementPageName }> = ({
         // todo: @Anton fix adaptive
         <div
             className={cn(
-                'hidden min-h-screen overflow-hidden text-nowrap border-r bg-gray-100/40 transition-all duration-1000 ease-in-out dark:bg-gray-800/40 sm:block',
-                isOpen ? 'w-64' : 'w-[80px]',
+                'hidden min-h-screen overflow-hidden text-nowrap bg-gray-100/40 transition-all duration-1000 ease-in-out dark:bg-gray-800/40 sm:flex sm:flex-shrink-0 sm:flex-col sm:gap-2',
+                isOpen ? 'w-64' : 'w-20',
                 className,
             )}
         >
-            <div className="flex flex-col gap-2">
-                <div
-                    className={cn(
-                        'flex',
-                        isOpen ? 'justify-between' : 'w-full justify-end',
-                    )}
+            <div
+                className={cn(
+                    'flex',
+                    isOpen ? 'justify-between' : 'w-full justify-between',
+                )}
+            >
+                {isOpen && <Logo className="h-12 flex-grow px-6" />}
+                <button
+                    onClick={() => setIsOpen((prev) => !prev)}
+                    className="flex h-12 flex-grow items-center justify-center justify-self-end text-gray-500 dark:text-gray-400"
                 >
-                    {isOpen && <Logo className="px-6" />}
-                    <button
-                        onClick={() => setIsOpen((prev) => !prev)}
-                        className="flex h-12 w-12 items-center justify-center px-[2.45rem] text-gray-500 dark:text-gray-400"
-                    >
-                        {isOpen ? (
-                            <Icon d="M6 18L18 6M6 6l12 12" />
-                        ) : (
-                            <Icon d="M4 6h16M4 12h16m-16 6h16M" />
-                        )}
-                    </button>
-                </div>
-                <div className="flex-1">
-                    <nav className="grid items-start px-4 text-sm font-medium">
-                        {...links}
-                    </nav>
-                </div>
+                    {isOpen ? (
+                        <Icon d="M6 18L18 6M6 6l12 12" />
+                    ) : (
+                        <Icon d="M4 6h16M4 12h16m-16 6h16M" />
+                    )}
+                </button>
+            </div>
+            <div className="flex-1">
+                <nav className="grid items-start px-4 text-sm font-medium">
+                    {...links}
+                </nav>
             </div>
         </div>
     );
