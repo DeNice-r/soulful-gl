@@ -33,13 +33,20 @@ export const Sidebar: React.FC<Props & { entity: ManagementPageName }> = ({
     const [isOpen, setIsOpen] = useState(true);
     const links = [];
     const cls =
-        'flex items-center rounded-lg px-3 py-2 text-gray-500 dark:text-gray-400';
+        'flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 dark:text-gray-400';
     for (const page of Object.values(ManagementPageName)) {
-        const text = isOpen ? PageTitleMap[page] : '';
+        const text = PageTitleMap[page];
         const inner = (
             <>
                 <Icon d={SvgIcon[page]} />
-                <span className="">{text}</span>
+                <span
+                    className={cn(
+                        'transition-opacity delay-300',
+                        isOpen ? 'opacity-100' : 'opacity-0',
+                    )}
+                >
+                    {text}
+                </span>
             </>
         );
         links.push(
@@ -47,7 +54,6 @@ export const Sidebar: React.FC<Props & { entity: ManagementPageName }> = ({
                 <Link
                     className={cn(
                         cls,
-                        isOpen ? 'gap-3' : '',
                         'hover:text-gray-900 hover:dark:text-gray-50',
                     )}
                     href={`/management/${page}`}
@@ -59,7 +65,6 @@ export const Sidebar: React.FC<Props & { entity: ManagementPageName }> = ({
                 <div
                     className={cn(
                         cls,
-                        isOpen ? 'gap-3' : '',
                         'text-gray-900 hover:cursor-default dark:text-gray-50',
                     )}
                     key={page}
@@ -79,16 +84,18 @@ export const Sidebar: React.FC<Props & { entity: ManagementPageName }> = ({
                 className,
             )}
         >
-            <div
-                className={cn(
-                    'flex',
-                    isOpen ? 'justify-between' : 'w-full justify-between',
-                )}
-            >
-                {isOpen && <Logo className="h-12 flex-grow px-6" />}
+            <div className="flex justify-end">
+                <Logo
+                    className={cn(
+                        'h-12 flex-grow px-6 transition-opacity delay-300',
+                        isOpen ? 'opacity-100' : 'opacity-0',
+                    )}
+                />
                 <button
                     onClick={() => setIsOpen((prev) => !prev)}
-                    className="flex h-12 flex-grow items-center justify-center justify-self-end text-gray-500 dark:text-gray-400"
+                    className={cn(
+                        'absolute flex h-12 w-20 items-center justify-center justify-self-end text-gray-500 dark:text-gray-400',
+                    )}
                 >
                     {isOpen ? (
                         <Icon d="M6 18L18 6M6 6l12 12" />
