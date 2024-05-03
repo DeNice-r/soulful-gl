@@ -29,7 +29,7 @@ export const UsersView: React.FC<{
     router: ReturnType<typeof useRouter>;
 }> = ({ usersQuery, page, total, router }) => {
     const [_, setState] = useState(0);
-
+    useEffect(() => Modal.setAppElement('body'));
     const { client: apiClient } = api.useContext();
     const ref = useRef<HTMLFormElement>(null);
 
