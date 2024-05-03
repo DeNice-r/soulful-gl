@@ -32,9 +32,8 @@ export const RichTextSchema = z.string().min(1).max(15000);
 const ImageBucketRegex = new RegExp(
     `https://${env.NEXT_PUBLIC_AWS_S3_BUCKET}\\.s3(?:\\.${env.NEXT_PUBLIC_AWS_REGION})?\\.amazonaws\\.com/.+`,
 );
-export const ImageSchema = z
-    .string()
-    .refine((value) => ImageBucketRegex.test(value));
+export const ImageSchema = z.string();
+// .refine((value) => ImageBucketRegex.test(value));
 
 export const SearchSchema = NoDefaultPageSchema.extend({
     query: QuerySchema.optional(),
@@ -56,7 +55,7 @@ export const TDIUpdateSchema = z.object({
 export const CreateUserSchema = z.object({
     email: z.string().email(),
     name: ShortStringSchema,
-    image: ImageSchema,
+    image: ImageSchema.optional(),
     description: RichTextSchema.optional(),
     notes: z.string().optional(),
 });
