@@ -27,7 +27,7 @@ export const BusynessSchema = z.number().int().min(0).max(4);
 
 export const TitleSchema = z.string().min(1).max(200);
 export const QuerySchema = z.string().min(1).max(200);
-export const RichTextSchema = z.string().min(1).max(15000);
+export const RichTextSchema = z.string().max(15000);
 
 const ImageBucketRegex = new RegExp(
     `https://${env.NEXT_PUBLIC_AWS_S3_BUCKET}\\.s3(?:\\.${env.NEXT_PUBLIC_AWS_REGION})?\\.amazonaws\\.com/.+`,

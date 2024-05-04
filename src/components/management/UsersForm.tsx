@@ -14,7 +14,7 @@ import type * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CreateUserSchema } from '~/utils/schemas';
-import { type RouterOutputs } from '~/utils/api';
+import { api, type RouterOutputs } from '~/utils/api';
 import { uploadImage } from '~/utils/s3/frontend';
 
 declare module 'react' {
@@ -28,6 +28,7 @@ export const UsersForm: React.FC<{
     changeModalState: () => void;
     formRef: RefObject<HTMLFormElement>;
 }> = ({ user, changeModalState, formRef }) => {
+    const createUser = api.user.create.useMutation();
     const form = useForm<z.infer<typeof CreateUserSchema>>({
         resolver: zodResolver(CreateUserSchema),
         defaultValues: {
@@ -39,7 +40,7 @@ export const UsersForm: React.FC<{
         },
     });
     function onSubmit(values: z.infer<typeof CreateUserSchema>) {
-        console.log(values);
+        createUser.mutate(values);
     }
     async function upload(e: ChangeEvent<HTMLInputElement>) {
         e.preventDefault();

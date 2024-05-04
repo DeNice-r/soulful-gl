@@ -6,7 +6,6 @@ import {
 import {
     CreateUserSchema,
     CUIDSchema,
-    PageSchema,
     SearchUsersSchema,
     SetNotesSchema,
     SetSuspendedSchema,
@@ -14,6 +13,10 @@ import {
     UpdateUserSchema,
 } from '~/utils/schemas';
 import { archiveChat } from '~/server/api/routers/common';
+import { randomUUID } from 'crypto';
+import bcrypt from 'bcrypt';
+import { env } from '~/env';
+import { sendRegEmail } from '~/utils/email';
 
 export const userRouter = createTRPCRouter({
     list: permissionProcedure
@@ -99,9 +102,16 @@ export const userRouter = createTRPCRouter({
     create: permissionProcedure
         .input(CreateUserSchema)
         .mutation(async ({ ctx, input: data }) => {
-            return ctx.db.user.create({
-                data,
+            const password = randomUUID();
+
+            await ctx.db.user.create({
+                data: {
+                    ...data,
+                    password: await bcrypt.hash(password, env.SALT_ROUNDS),
+                },
             });
+
+            await sendRegEmail(data.email, data.name, password, ctx.host);
         }),
 
     setNotes: permissionProcedure
