@@ -90,6 +90,7 @@ const caller = createCaller({
     },
     entity: 'world',
     action: '6 days of creation 😈',
+    host: 'localhost',
 });
 
 export default async function seed() {

@@ -104,7 +104,7 @@ export const userRouter = createTRPCRouter({
         .mutation(async ({ ctx, input: data }) => {
             const password = randomUUID();
 
-            await ctx.db.user.create({
+            const user = await ctx.db.user.create({
                 data: {
                     ...data,
                     password: await bcrypt.hash(password, env.SALT_ROUNDS),
@@ -112,6 +112,8 @@ export const userRouter = createTRPCRouter({
             });
 
             await sendRegEmail(data.email, data.name, password, ctx.host);
+
+            return user;
         }),
 
     setNotes: permissionProcedure
