@@ -9,7 +9,7 @@ import { ChatBar } from '~/components/chat/ChatBar';
 import { ChatMessageWindow } from '~/components/chat/ChatMessageWindow';
 import { Cross1Icon } from '@radix-ui/react-icons';
 import { Button } from '@mui/material';
-import { LoaderIcon } from 'lucide-react';
+import { LoaderIcon, Trash2Icon } from 'lucide-react';
 
 type FullChats = NonNullable<RouterOutputs['chat']['listFull']>;
 
@@ -186,6 +186,13 @@ const ChatUI = () => {
         rerender();
     }
 
+    async function closeCurrentChatAndReport() {
+        await apiClient.chat.report.mutate(currentChat);
+        setCurrentChat(-1);
+        delete chatsRef.current[currentChat];
+        rerender();
+    }
+
     function scrollToBottom(smooth: boolean = true) {
         setTimeout(() => {
             if (messageEndRef.current) {
@@ -211,15 +218,25 @@ const ChatUI = () => {
                 </Alert>
             </Fade>
             {currentChat !== -1 && (
-                <Button
-                    variant="contained"
-                    className="top-15 absolute right-0 z-20"
-                    hidden={currentChat === -1}
-                    color="error"
-                    onClick={closeCurrentChat}
-                >
-                    <Cross1Icon />
-                </Button>
+                <>
+                    <Button
+                        variant="contained"
+                        className="top-15 absolute right-0 z-20"
+                        color="error"
+                        onClick={closeCurrentChat}
+                    >
+                        <Cross1Icon />
+                    </Button>
+                    <Button
+                        variant="contained"
+                        className="absolute bottom-0 left-0 z-20"
+                        color="error"
+                        onClick={closeCurrentChatAndReport}
+                    >
+                        {/*<Trash2Icon />*/}
+                        Report
+                    </Button>
+                </>
             )}
             {unassignedChatsRef.current.length > 0 && (
                 <Button

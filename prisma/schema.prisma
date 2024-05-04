@@ -92,6 +92,7 @@ model User {
   personnelChats         Chat[]         @relation(name: "personnelChats")
   userArchivedChats      ArchivedChat[] @relation(name: "userArchivedChat")
   personnelArchivedChats ArchivedChat[] @relation(name: "personnelArchivedChat")
+  reportCount            Int            @default(0)
 
   // Content-related relations
   recommendations Recommendation[]

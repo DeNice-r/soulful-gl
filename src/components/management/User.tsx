@@ -56,8 +56,10 @@ export const User: React.FC<{
         <>
             <TableCell>{user.id}</TableCell>
             <TableCell>{user.email ?? '📲'}</TableCell>
+            <TableCell>{user.name ?? '👤'}</TableCell>
             <TableCell>{defaultFormatDt(user.createdAt)}</TableCell>
             <TableCell>{defaultFormatDt(user.updatedAt)}</TableCell>
+            <TableCell>{user.reportCount}</TableCell>
             <TableCell>{user.suspended ? '⛔' : '✅'}</TableCell>
             <TableCell className="text-right">
                 <Popover>

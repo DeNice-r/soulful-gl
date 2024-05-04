@@ -146,11 +146,17 @@ export const UsersView: React.FC<{
                             <TableHead className="min-w-[150px]">
                                 Електронна пошта
                             </TableHead>
+                            <TableHead className="min-w-[150px]">
+                                Ім&apos;я
+                            </TableHead>
                             <TableHead className="hidden md:table-cell">
                                 Дата створення
                             </TableHead>
                             <TableHead className="hidden md:table-cell">
                                 Дата оновлення
+                            </TableHead>
+                            <TableHead className="hidden md:table-cell">
+                                Скарги
                             </TableHead>
                             <TableHead className="hidden sm:table-cell">
                                 Статус

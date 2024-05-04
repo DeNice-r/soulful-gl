@@ -205,6 +205,7 @@ function getProjection(isFullAccess: boolean) {
         notes: isFullAccess,
         createdAt: true,
         updatedAt: true,
+        reportCount: true,
         suspended: isFullAccess,
     };
 }
