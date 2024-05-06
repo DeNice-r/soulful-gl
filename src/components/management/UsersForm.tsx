@@ -16,6 +16,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { CreateUserSchema } from '~/utils/schemas';
 import { api, type RouterOutputs } from '~/utils/api';
 import { uploadImage } from '~/utils/s3/frontend';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import type { EventInfo } from '@ckeditor/ckeditor5-utils';
 
 declare module 'react' {
     interface CSSProperties {
@@ -40,7 +43,8 @@ export const UsersForm: React.FC<{
         },
     });
     function onSubmit(values: z.infer<typeof CreateUserSchema>) {
-        createUser.mutate(values);
+        console.log(values);
+        // createUser.mutate(values);
     }
     async function upload(e: ChangeEvent<HTMLInputElement>) {
         e.preventDefault();
@@ -51,6 +55,16 @@ export const UsersForm: React.FC<{
             }
         }
     }
+    function createSetDescription(
+        field: keyof z.infer<typeof CreateUserSchema>,
+    ) {
+        return async function setDescription(
+            e: EventInfo<string, unknown>,
+            editor: ClassicEditor,
+        ) {
+            form.setValue(field, editor.getData());
+        };
+    }
     return (
         <Form {...form}>
             <form
@@ -58,7 +72,7 @@ export const UsersForm: React.FC<{
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="flex h-[90%] w-3/4 flex-col items-center justify-center gap-4 rounded-lg bg-gray-300 outline outline-neutral-400"
             >
-                <div className="flex h-5/6 w-4/5 flex-col items-center justify-between gap-4">
+                <div className="flex h-[90%] w-4/5 flex-col items-center justify-between gap-4">
                     <FormField
                         control={form.control}
                         name="image"
@@ -96,14 +110,14 @@ export const UsersForm: React.FC<{
                             </FormItem>
                         )}
                     />
-                    <div className="flex h-3/5 w-full gap-12">
+                    <div className="flex h-2/3 w-full gap-12">
                         <div className="flex flex-1 flex-col gap-4">
-                            <div className="w flex justify-between gap-4">
+                            <div className="flex w-full justify-between gap-4">
                                 <FormField
                                     control={form.control}
                                     name="email"
                                     render={({ field }) => (
-                                        <FormItem className="flex-grow">
+                                        <FormItem className="basis-1/2">
                                             <FormLabel className="text-xl">
                                                 Електронна пошта
                                             </FormLabel>
@@ -122,7 +136,7 @@ export const UsersForm: React.FC<{
                                     control={form.control}
                                     name="name"
                                     render={({ field }) => (
-                                        <FormItem className="flex-grow">
+                                        <FormItem className="basis-1/2">
                                             <FormLabel className="text-xl">
                                                 Ім&apos;я користувача
                                             </FormLabel>
@@ -146,10 +160,23 @@ export const UsersForm: React.FC<{
                                         <FormLabel className="text-xl">
                                             Опис
                                         </FormLabel>
+                                        <CKEditor
+                                            editor={ClassicEditor}
+                                            data={user?.description ?? ''}
+                                            onChange={createSetDescription(
+                                                'description',
+                                            )}
+                                            id="description"
+                                        />
+                                        <style>
+                                            {`
+                                            .ck-editor__editable {
+                                                max-height: 100px;
+                                            }`}
+                                        </style>
                                         <FormControl>
                                             <Input
-                                                className="flex-grow  outline outline-1 outline-neutral-400"
-                                                placeholder="Введіть текст..."
+                                                className="hidden"
                                                 {...field}
                                             />
                                         </FormControl>
@@ -169,10 +196,16 @@ export const UsersForm: React.FC<{
                                         <FormLabel className="text-xl">
                                             Нотатки про користувача
                                         </FormLabel>
+                                        <CKEditor
+                                            editor={ClassicEditor}
+                                            data={user?.description ?? ''}
+                                            onChange={createSetDescription(
+                                                'notes',
+                                            )}
+                                        />
                                         <FormControl>
                                             <Input
-                                                className="flex-grow  outline outline-1 outline-neutral-400"
-                                                placeholder="Введіть текст..."
+                                                className="hidden"
                                                 {...field}
                                             />
                                         </FormControl>
