@@ -1,4 +1,4 @@
-import React, { type RefObject, type ChangeEvent } from 'react';
+import React, { type RefObject, type ChangeEvent, useState } from 'react';
 import {
     Form,
     FormControl,
@@ -16,9 +16,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { CreateUserSchema } from '~/utils/schemas';
 import { api, type RouterOutputs } from '~/utils/api';
 import { uploadImage } from '~/utils/s3/frontend';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import type { EventInfo } from '@ckeditor/ckeditor5-utils';
+import { Editor } from './Editor';
 
 declare module 'react' {
     interface CSSProperties {
@@ -58,11 +56,8 @@ export const UsersForm: React.FC<{
     function createSetDescription(
         field: keyof z.infer<typeof CreateUserSchema>,
     ) {
-        return async function setDescription(
-            e: EventInfo<string, unknown>,
-            editor: ClassicEditor,
-        ) {
-            form.setValue(field, editor.getData());
+        return async function setDescription(value: string) {
+            form.setValue(field, value);
         };
     }
     return (
@@ -160,17 +155,17 @@ export const UsersForm: React.FC<{
                                         <FormLabel className="text-xl">
                                             Опис
                                         </FormLabel>
-                                        <CKEditor
-                                            editor={ClassicEditor}
-                                            data={user?.description ?? ''}
+                                        <Editor
+                                            defaultValue={
+                                                user?.description ?? ''
+                                            }
                                             onChange={createSetDescription(
                                                 'description',
                                             )}
-                                            id="description"
                                         />
                                         <style>
                                             {`
-                                            .ck-editor__editable {
+                                            .ql-editor {
                                                 max-height: 100px;
                                             }`}
                                         </style>
@@ -196,9 +191,8 @@ export const UsersForm: React.FC<{
                                         <FormLabel className="text-xl">
                                             Нотатки про користувача
                                         </FormLabel>
-                                        <CKEditor
-                                            editor={ClassicEditor}
-                                            data={user?.description ?? ''}
+                                        <Editor
+                                            defaultValue={user?.notes ?? ''}
                                             onChange={createSetDescription(
                                                 'notes',
                                             )}
