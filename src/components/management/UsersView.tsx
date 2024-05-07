@@ -29,6 +29,7 @@ export const UsersView: React.FC<{
     router: ReturnType<typeof useRouter>;
 }> = ({ usersQuery, page, total, router }) => {
     const [_, setState] = useState(0);
+    const [isMouseDown, setIsMouseDown] = useState(false);
     useEffect(() => Modal.setAppElement('body'));
     const { client: apiClient } = api.useContext();
     const ref = useRef<HTMLFormElement>(null);
@@ -72,20 +73,31 @@ export const UsersView: React.FC<{
     }, [usersQuery.data]);
 
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
+        const handleMouseDown = (event: MouseEvent) => {
+            if (ref.current && !ref.current.contains(event.target as Node)) {
+                setIsMouseDown(true);
+            }
+        };
+
+        const handleMouseUp = (event: MouseEvent) => {
             if (
+                isMouseDown &&
                 ref.current &&
-                !ref.current.contains(event.target as HTMLFormElement)
+                !ref.current.contains(event.target as Node)
             ) {
                 setIsModalOpen(false);
             }
+            setIsMouseDown(false);
         };
-        document.addEventListener('click', handleClickOutside, true);
-        return () => {
-            document.removeEventListener('click', handleClickOutside, true);
-        };
-    }, [isModalOpen]);
 
+        document.addEventListener('mousedown', handleMouseDown);
+        document.addEventListener('mouseup', handleMouseUp);
+
+        return () => {
+            document.removeEventListener('mousedown', handleMouseDown);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isModalOpen, isMouseDown]);
     return (
         <>
             <div className="flex w-full justify-between">
