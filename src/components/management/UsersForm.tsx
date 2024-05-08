@@ -17,6 +17,11 @@ import { CreateUserSchema } from '~/utils/schemas';
 import { api, type RouterOutputs } from '~/utils/api';
 import { uploadImage } from '~/utils/s3/frontend';
 import { Editor } from './Editor';
+import Modal from 'react-modal';
+import getCroppedImg from '../utils/cropImage';
+import Cropper, { type Area, type Point } from 'react-easy-crop';
+import { cn } from '~/lib/utils';
+import { randomUUID } from 'crypto';
 
 declare module 'react' {
     interface CSSProperties {
@@ -30,6 +35,14 @@ export const UsersForm: React.FC<{
     formRef: RefObject<HTMLFormElement>;
 }> = ({ user, changeModalState, formRef }) => {
     const createUser = api.user.create.useMutation();
+
+    const [imageSrc, setImageSrc] = useState<string | null>(null);
+    const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
+    const [zoom, setZoom] = useState(1);
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(
+        null,
+    );
+
     const form = useForm<z.infer<typeof CreateUserSchema>>({
         resolver: zodResolver(CreateUserSchema),
         defaultValues: {
@@ -44,15 +57,19 @@ export const UsersForm: React.FC<{
         console.log(values);
         // createUser.mutate(values);
     }
-    async function upload(e: ChangeEvent<HTMLInputElement>) {
-        e.preventDefault();
-        if (e?.target?.files?.[0]) {
-            const imageUrl = await uploadImage(e.target.files[0]);
-            if (imageUrl) {
-                form.setValue('image', imageUrl);
-            }
-        }
-    }
+
+    // old upoader
+
+    // async function upload(e: ChangeEvent<HTMLInputElement>) {
+    //     e.preventDefault();
+    //     if (e?.target?.files?.[0]) {
+    //         const imageUrl = await uploadImage(e.target.files[0]);
+    //         if (imageUrl) {
+    //             form.setValue('image', imageUrl);
+    //         }
+    //     }
+    // }
+
     function createSetDescription(
         field: keyof z.infer<typeof CreateUserSchema>,
     ) {
@@ -60,12 +77,47 @@ export const UsersForm: React.FC<{
             form.setValue(field, value);
         };
     }
+
+    const onCropComplete = (croppedArea: Area, croppedAreaPixels: Area) => {
+        setCroppedAreaPixels(croppedAreaPixels);
+    };
+    const uploadCroppedImage = async () => {
+        if (!imageSrc || !croppedAreaPixels) {
+            return;
+        }
+        try {
+            const croppedImage = await getCroppedImg(
+                imageSrc,
+                croppedAreaPixels,
+            );
+            const imageUrl = await uploadImage(croppedImage);
+            if (imageUrl) {
+                form.setValue('image', imageUrl);
+            }
+            setImageSrc(null);
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const onClose = () => {
+        setImageSrc(null);
+    };
+
+    const onFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const file = e.target.files[0];
+            const imageDataUrl = await readFile(file);
+            e.target.value = '';
+            setImageSrc(imageDataUrl?.toString() ?? '');
+        }
+    };
     return (
         <Form {...form}>
             <form
                 ref={formRef}
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="flex h-[90%] w-3/4 flex-col items-center justify-center gap-4 rounded-lg bg-gray-300 outline outline-neutral-400"
+                className="flex h-[90%] w-3/4 items-center justify-center rounded-lg bg-gray-300 outline outline-neutral-400"
             >
                 <div className="flex h-[90%] w-4/5 flex-col items-center justify-between gap-4">
                     <FormField
@@ -90,9 +142,62 @@ export const UsersForm: React.FC<{
                                         id="image-upload"
                                         className="sr-only"
                                         type="file"
-                                        onInput={upload}
+                                        onInput={onFileChange}
                                     />
                                 </label>
+                                <Modal
+                                    isOpen={!!imageSrc}
+                                    className="flex h-svh w-svw items-center justify-center"
+                                >
+                                    <div className="flex h-3/5 w-2/5 flex-col items-center gap-10 rounded-lg bg-gray-300 outline outline-neutral-400">
+                                        <div className="flex h-10 w-full items-center justify-between border-b-2 border-gray-500 bg-gray-400">
+                                            <span className="px-5">
+                                                Обріжте новий аватар для
+                                                користувача
+                                            </span>
+                                            <button
+                                                onClick={onClose}
+                                                className="flex items-center justify-center px-5  dark:text-gray-400"
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    strokeWidth="2"
+                                                    stroke="currentColor"
+                                                    className="max-h-[24px] min-h-[24px] min-w-[24px] max-w-[24px]"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        d="M6 18L18 6M6 6l12 12"
+                                                    />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div className="flex h-4/5 w-4/5 flex-col justify-between">
+                                            <div className="relative h-96 w-full">
+                                                <Cropper
+                                                    image={imageSrc ?? ''}
+                                                    crop={crop}
+                                                    zoom={zoom}
+                                                    aspect={1 / 1}
+                                                    cropShape="round"
+                                                    onCropChange={setCrop}
+                                                    onCropComplete={
+                                                        onCropComplete
+                                                    }
+                                                    onZoomChange={setZoom}
+                                                />
+                                            </div>
+                                            <Button
+                                                onClick={uploadCroppedImage}
+                                            >
+                                                Зберегти
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </Modal>
                                 <FormControl>
                                     <Input
                                         accept="text"
@@ -250,6 +355,14 @@ export const UsersForm: React.FC<{
         </Form>
     );
 };
+
+function readFile(file: Blob) {
+    return new Promise<string | ArrayBuffer | null>((resolve) => {
+        const reader = new FileReader();
+        reader.addEventListener('load', () => resolve(reader.result), false);
+        reader.readAsDataURL(file);
+    });
+}
 
 function UploadIcon({ className }: { className?: string }) {
     return (
