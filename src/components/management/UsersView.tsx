@@ -74,7 +74,12 @@ export const UsersView: React.FC<{
 
     useEffect(() => {
         const handleMouseDown = (event: MouseEvent) => {
-            if (ref.current && !ref.current.contains(event.target as Node)) {
+            if (
+                ref.current &&
+                ref.current.parentElement &&
+                ref.current.parentElement.contains(event.target as Node) &&
+                !ref.current.contains(event.target as Node)
+            ) {
                 setIsMouseDown(true);
             }
         };
@@ -83,6 +88,8 @@ export const UsersView: React.FC<{
             if (
                 isMouseDown &&
                 ref.current &&
+                ref.current.parentElement &&
+                ref.current.parentElement.contains(event.target as Node) &&
                 !ref.current.contains(event.target as Node)
             ) {
                 setIsModalOpen(false);
