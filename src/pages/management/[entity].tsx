@@ -1,15 +1,20 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import ManagementLayout from '~/components/ManagementLayout';
 import { ManagementPageName } from '~/utils/types';
+import { Layout } from '~/components/management/Layout';
 
 const Management: React.FC = () => {
     const router = useRouter();
 
     const entity = router.query.entity as ManagementPageName;
 
-    if (!(entity in ManagementPageName)) return;
-    return <ManagementLayout {...{ entity }} />;
+    return (
+        <Layout
+            {...(Object.values(ManagementPageName).includes(entity) && {
+                entity,
+            })}
+        />
+    );
 };
 
 export default Management;

@@ -2,7 +2,7 @@ import React, { type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const MyLink = ({
+export const NavLink = ({
     href,
     children,
     className,
@@ -27,5 +27,3 @@ const MyLink = ({
         </Link>
     );
 };
-
-export default MyLink;

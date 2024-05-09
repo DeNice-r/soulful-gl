@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 
-const Footer: React.FC = () => {
+export const Footer: React.FC = () => {
     return (
         <footer className="w-full py-12">
             <div className="container flex flex-col flex-wrap gap-12 px-4 text-sm md:gap-16 lg:px-6">
@@ -129,5 +129,3 @@ function TelegramIcon(
         </svg>
     );
 }
-
-export default Footer;

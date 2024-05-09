@@ -16,6 +16,7 @@ import type { Adapter } from 'next-auth/adapters';
 // @ts-expect-error TS7016
 import Cookies from 'cookies'; // todo: replace with a better library
 import { env } from '~/env';
+import { getFromEmail } from '~/utils/email';
 
 declare module 'next-auth' {
     interface Session extends DefaultSession {
@@ -212,7 +213,7 @@ export function requestWrapper(
             },
         },
 
-        secret: process.env.NEXTAUTH_SECRET,
+        secret: env.NEXTAUTH_SECRET,
         providers: [
             GithubProvider({
                 clientId: env.GITHUB_ID,
@@ -227,7 +228,9 @@ export function requestWrapper(
                 clientSecret: env.FACEBOOK_SECRET,
             }),
             EmailProvider({
-                from: env.AWS_SES_FROM_EMAIL,
+                from: getFromEmail({
+                    local: 'magic',
+                }),
                 server: {
                     host: env.AWS_SES_HOST,
                     port: env.AWS_SES_PORT,

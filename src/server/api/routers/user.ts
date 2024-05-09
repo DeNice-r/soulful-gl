@@ -6,21 +6,68 @@ import {
 import {
     CreateUserSchema,
     CUIDSchema,
-    PageSchema,
+    SearchUsersSchema,
     SetNotesSchema,
+    SetSuspendedSchema,
+    StringIdSchema,
     UpdateUserSchema,
 } from '~/utils/schemas';
+import { archiveChat } from '~/server/api/routers/common';
+import { randomUUID } from 'crypto';
+import bcrypt from 'bcrypt';
+import { env } from '~/env';
+import { sendRegEmail } from '~/utils/email';
 
 export const userRouter = createTRPCRouter({
     list: permissionProcedure
-        .input(PageSchema)
-        .query(async ({ input, ctx }) => {
-            return ctx.db.user.findMany({
-                select: getProjection(ctx.isFullAccess),
-                orderBy: { createdAt: 'desc' },
-                skip: (input.page - 1) * input.limit,
-                take: input.limit,
-            });
+        .input(SearchUsersSchema)
+        .query(async ({ input: { page, limit, permissions }, ctx }) => {
+            const p = ['*:*', '*:*:*'];
+            for (const permission of permissions || []) {
+                p.push(permission);
+                p.push(`${permission}:*`);
+            }
+
+            const where = permissions && {
+                where: {
+                    permissions: {
+                        some: {
+                            title: {
+                                in: p,
+                            },
+                        },
+                    },
+                    roles: {
+                        some: {
+                            permissions: {
+                                some: {
+                                    title: {
+                                        in: p,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            };
+
+            const [count, values] = await ctx.db.$transaction([
+                ctx.db.user.count(where),
+                ctx.db.user.findMany({
+                    where: {
+                        ...where?.where,
+                    },
+                    select: getProjection(ctx.isFullAccess),
+                    orderBy: { createdAt: 'desc' },
+                    skip: (page - 1) * limit,
+                    take: limit,
+                }),
+            ]);
+
+            return {
+                count,
+                values,
+            };
         }),
 
     // todo: get users with permission to chat
@@ -55,9 +102,18 @@ export const userRouter = createTRPCRouter({
     create: permissionProcedure
         .input(CreateUserSchema)
         .mutation(async ({ ctx, input: data }) => {
-            return ctx.db.user.create({
-                data,
+            const password = randomUUID();
+
+            const user = await ctx.db.user.create({
+                data: {
+                    ...data,
+                    password: await bcrypt.hash(password, env.SALT_ROUNDS),
+                },
             });
+
+            await sendRegEmail(data.email, data.name, password, ctx.host);
+
+            return user;
         }),
 
     setNotes: permissionProcedure
@@ -86,26 +142,56 @@ export const userRouter = createTRPCRouter({
         }),
 
     suspend: permissionProcedure
-        .input(CUIDSchema)
-        .mutation(async ({ ctx, input: id }) => {
+        .input(SetSuspendedSchema)
+        .mutation(async ({ ctx, input: { id, value } }) => {
+            // todo: archive all user's chats if any upon suspension
+            if (ctx.session.user.id === id) {
+                throw new Error('Неможливо змінити статус власного запису');
+            }
+
+            const chatIds = await ctx.db.chat.findMany({
+                where: {
+                    OR: [
+                        {
+                            personnelId: id,
+                        },
+                        {
+                            userId: id,
+                        },
+                    ],
+                },
+                select: {
+                    id: true,
+                },
+            });
+
+            const promises: Promise<boolean>[] = [];
+            for (const chat of chatIds) {
+                promises.push(archiveChat(chat.id, ctx));
+            }
+
+            await Promise.all(promises);
+
             return ctx.db.user.update({
                 where: {
                     id,
-                    ...(!ctx.isFullAccess && { id: ctx.session.user.id }),
                 },
                 data: {
-                    suspended: true,
+                    suspended: value,
                 },
             });
         }),
 
     delete: permissionProcedure
-        .input(CUIDSchema)
+        .input(StringIdSchema)
         .mutation(async ({ ctx, input: id }) => {
-            return ctx.db.post.delete({
+            if (ctx.session.user.id === id) {
+                throw new Error('Неможливо видалити власний запис');
+            }
+
+            return ctx.db.user.delete({
                 where: {
                     id,
-                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
                 },
             });
         }),
@@ -121,6 +207,7 @@ function getProjection(isFullAccess: boolean) {
         notes: isFullAccess,
         createdAt: true,
         updatedAt: true,
+        reportCount: true,
         suspended: isFullAccess,
     };
 }

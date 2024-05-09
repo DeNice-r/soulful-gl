@@ -1,21 +1,22 @@
-import { z } from 'zod';
+import { z } from '~/utils/zod';
 import { BackgroundPattern } from '~/utils/types';
 import { env } from '~/env';
-import bcrypt from 'bcrypt';
 
 const FirstPage = 1;
 const DefaultLimit = 10;
+const PaginationDefault = { page: FirstPage, limit: DefaultLimit };
 
 const NoDefaultPageSchema = z.object({
     page: z.number().min(1).default(FirstPage),
     limit: z.number().min(1).max(100).default(DefaultLimit),
 });
-export const PageSchema = NoDefaultPageSchema.default({
-    page: FirstPage,
-    limit: DefaultLimit,
-});
+export const PageSchema = NoDefaultPageSchema.default(PaginationDefault);
+export const SearchUsersSchema = NoDefaultPageSchema.extend({
+    permissions: z.array(z.string()).optional(),
+}).default(PaginationDefault);
 
 export const NumberIdSchema = z.number().int().nonnegative();
+export const StringIdSchema = z.string().min(1).max(100);
 export const CUIDSchema = z.string().cuid();
 export const CUIDObjectSchema = z.object({ id: CUIDSchema });
 
@@ -24,22 +25,15 @@ export const MessageTextSchema = z.string().min(1).max(4096);
 
 export const BusynessSchema = z.number().int().min(0).max(4);
 
-export const PasswordSchema = z
-    .string()
-    .min(8)
-    .max(100)
-    .transform((v) => bcrypt.hashSync(v, env.SALT_ROUNDS));
-
 export const TitleSchema = z.string().min(1).max(200);
 export const QuerySchema = z.string().min(1).max(200);
-export const RichTextSchema = z.string().min(1).max(15000);
+export const RichTextSchema = z.string().max(15000);
 
 const ImageBucketRegex = new RegExp(
-    `https://${env.AWS_S3_BUCKET}\\.s3(?:\\.${env.AWS_REGION})?\\.amazonaws\\.com/.+`,
+    `https://${env.NEXT_PUBLIC_AWS_S3_BUCKET}\\.s3(?:\\.${env.NEXT_PUBLIC_AWS_REGION})?\\.amazonaws\\.com/.+`,
 );
-export const ImageSchema = z
-    .string()
-    .refine((value) => ImageBucketRegex.test(value));
+export const ImageSchema = z.string();
+// .refine((value) => ImageBucketRegex.test(value));
 
 export const SearchSchema = NoDefaultPageSchema.extend({
     query: QuerySchema.optional(),
@@ -61,9 +55,8 @@ export const TDIUpdateSchema = z.object({
 export const CreateUserSchema = z.object({
     email: z.string().email(),
     name: ShortStringSchema,
-    image: ImageSchema,
+    image: ImageSchema.optional(),
     description: RichTextSchema.optional(),
-    password: PasswordSchema,
     notes: z.string().optional(),
 });
 
@@ -73,7 +66,12 @@ export const UpdateUserSchema = z.object({
     name: ShortStringSchema.optional(),
     image: ImageSchema.optional(),
     description: RichTextSchema.optional(),
-    password: PasswordSchema.optional(),
+});
+
+export const SetSuspendedSchema = z.object({
+    id: z.string(),
+
+    value: z.boolean(),
 });
 
 export const SetNotesSchema = z.object({

@@ -1,6 +1,6 @@
 import React, { type ChangeEvent, useState } from 'react';
 import Router from 'next/router';
-import Layout from '~/components/Layout';
+import { Layout } from '~/components/common/Layout';
 import { uploadImage } from '~/utils/s3/frontend';
 import { api } from '~/utils/api';
 

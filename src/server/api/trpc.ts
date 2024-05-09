@@ -13,6 +13,7 @@ interface CreateContextOptions {
     session: Session | null;
     entity: string;
     action: string;
+    host: string;
     isFullAccess?: boolean;
 }
 
@@ -22,6 +23,7 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
         db,
         entity: opts.entity,
         action: opts.action,
+        host: opts.host,
     };
 };
 
@@ -40,23 +42,28 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
     }
 
     const [entity, action] = req.query.trpc.split('.').slice(0, 2);
+    const commonContext = {
+        entity,
+        action,
+        host: req.headers.host ?? '',
+    };
 
     if (session) {
         return createInnerTRPCContext({
             session: {
                 ...session,
             },
-            entity,
-            action,
+            ...commonContext,
         });
     }
 
     return createInnerTRPCContext({
         session,
-        entity,
-        action,
+        ...commonContext,
     });
 };
+
+export type Context = Awaited<ReturnType<typeof createTRPCContext>>;
 
 const t = initTRPC
     .context<typeof createTRPCContext>()
@@ -85,13 +92,6 @@ export const createCallerFactory = t.createCallerFactory;
 export const createTRPCRouter = t.router;
 
 export const publicProcedure = t.procedure;
-//     .use(({ ctx, next }) => {  // todo: this is how it should be, but it breaks the app. P.S. it is just for type safety, so nothing critical
-//     return next({
-//         ctx: {
-//             session: null,
-//         },
-//     });
-// });
 
 export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
     if (!ctx.session || !ctx.session.user) {

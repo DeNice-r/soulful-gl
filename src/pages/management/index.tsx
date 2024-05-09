@@ -1,8 +1,8 @@
 import React from 'react';
-import ManagementLayout from '~/components/ManagementLayout';
+import { Layout } from '~/components/management/Layout';
 
 const Management: React.FC = () => {
-    return <ManagementLayout />;
+    return <Layout />;
 };
 
 export default Management;

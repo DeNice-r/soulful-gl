@@ -13,8 +13,11 @@ async function fetchPresignedUrl(
     return response.ok ? response.json() : false;
 }
 
-export async function uploadImage(file: File) {
-    const result = await fetchPresignedUrl(file.name, file.type);
+export async function uploadImage(file: File | Blob) {
+    const result = await fetchPresignedUrl(
+        file instanceof File ? file.name : '.png',
+        file.type,
+    );
 
     if (!result) {
         return false;

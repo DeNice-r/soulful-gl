@@ -1,12 +1,18 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
-import { Button } from './ui/button';
+import {
+    Popover,
+    PopoverTrigger,
+    PopoverContent,
+} from '~/components/ui/popover';
+import { Button } from '~/components/ui/button';
 import { signOut, useSession } from 'next-auth/react';
 import { type ManagementPageName, PageTitleMap } from '~/utils/types';
 
-const ShortHeader: React.FC<{ entity?: ManagementPageName }> = ({ entity }) => {
+export const ShortHeader: React.FC<{ entity?: ManagementPageName }> = ({
+    entity,
+}) => {
     const { data: session } = useSession();
 
     const image = session?.user?.image ?? 'images/placeholder.svg';
@@ -14,7 +20,7 @@ const ShortHeader: React.FC<{ entity?: ManagementPageName }> = ({ entity }) => {
 
     return (
         <header className="flex h-14 items-center gap-4 border-b bg-gray-100/40 px-6 dark:bg-gray-800/40 lg:h-[60px]">
-            <Link className="lg:hidden" href="/">
+            <Link className="lg:hidden" href="/public">
                 <Package2Icon className="h-6 w-6" />
                 <span className="sr-only">Головна</span>
             </Link>
@@ -210,5 +216,3 @@ function Package2Icon(
         </svg>
     );
 }
-
-export default ShortHeader;

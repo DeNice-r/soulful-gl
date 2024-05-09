@@ -1,7 +1,9 @@
-import React from 'react';
-import Logo from './Logo';
-import { ManagementPageName, PageTitleMap } from '~/utils/types';
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { Logo } from '~/components/common/Logo';
+import { ManagementPageName, PageTitleMap, type Props } from '~/utils/types';
+import { cn } from '~/lib/utils';
+import { className } from 'postcss-selector-parser';
 
 const SvgIcon = {
     [ManagementPageName.STATISTICS]:
@@ -24,50 +26,104 @@ const SvgIcon = {
         'M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z',
 };
 
-const Sidebar: React.FC = () => {
+export const Sidebar: React.FC<Props & { entity: ManagementPageName }> = ({
+    entity,
+    className,
+}) => {
+    const [isOpen, setIsOpen] = useState(true);
     const links = [];
+    const cls =
+        'flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 dark:text-gray-400';
     for (const page of Object.values(ManagementPageName)) {
+        const text = PageTitleMap[page];
+        const inner = (
+            <>
+                <Icon d={SvgIcon[page]} />
+                <span
+                    className={cn(
+                        'transition-opacity delay-300',
+                        isOpen ? 'opacity-100' : 'opacity-0',
+                    )}
+                >
+                    {text}
+                </span>
+            </>
+        );
         links.push(
-            <Link
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
-                href={`/management/${page}`}
-            >
-                <Icon path={page} />
-                {PageTitleMap[page]}
-            </Link>,
+            entity !== page ? (
+                <Link
+                    className={cn(
+                        cls,
+                        'hover:text-gray-900 hover:dark:text-gray-50',
+                    )}
+                    href={`/management/${page}`}
+                    key={page}
+                >
+                    {inner}
+                </Link>
+            ) : (
+                <div
+                    className={cn(
+                        cls,
+                        'text-gray-900 hover:cursor-default dark:text-gray-50',
+                    )}
+                    key={page}
+                >
+                    {inner}
+                </div>
+            ),
         );
     }
+
     return (
-        <div className="hidden border-r bg-gray-100/40 dark:bg-gray-800/40 lg:block">
-            <div className="flex flex-col gap-2">
-                <Logo className="hidden h-[60px] px-6 text-3xl" />
-                <div className="flex-1">
-                    <nav className="grid items-start px-4 text-sm font-medium">
-                        {...links}
-                    </nav>
-                </div>
+        // todo: @Anton fix adaptive
+        <div
+            className={cn(
+                'hidden min-h-screen overflow-hidden text-nowrap bg-gray-100/40 transition-all duration-1000 ease-in-out dark:bg-gray-800/40 sm:flex sm:flex-shrink-0 sm:flex-col sm:gap-2',
+                isOpen ? 'w-64' : 'w-20',
+                className,
+            )}
+        >
+            <div className="flex justify-end">
+                <Logo
+                    className={cn(
+                        'h-12 flex-grow px-6 transition-opacity delay-300',
+                        isOpen ? 'opacity-100' : 'opacity-0',
+                    )}
+                />
+                <button
+                    onClick={() => setIsOpen((prev) => !prev)}
+                    className={cn(
+                        'absolute flex h-12 w-20 items-center justify-center justify-self-end text-gray-500 dark:text-gray-400',
+                    )}
+                >
+                    {isOpen ? (
+                        <Icon d="M6 18L18 6M6 6l12 12" />
+                    ) : (
+                        <Icon d="M4 6h16M4 12h16m-16 6h16M" />
+                    )}
+                </button>
+            </div>
+            <div className="flex-1">
+                <nav className="grid items-start px-4 text-sm font-medium">
+                    {...links}
+                </nav>
             </div>
         </div>
     );
 };
 
-function Icon({ path }: { path: ManagementPageName }) {
+function Icon({ d }: { d: string }) {
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
-            stroke-width="2"
+            strokeWidth="2"
             stroke="currentColor"
-            className="h-4 w-4"
+            className="max-h-[24px] min-h-[24px] min-w-[24px] max-w-[24px]"
         >
-            <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d={SvgIcon[path]}
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" d={d} />
         </svg>
     );
 }
-
-export default Sidebar;
