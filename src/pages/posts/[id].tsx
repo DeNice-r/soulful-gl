@@ -5,6 +5,8 @@ import { useSession } from 'next-auth/react';
 import { Layout } from '~/components/common/Layout';
 import Image from 'next/image';
 import { api } from '~/utils/api';
+import { Button } from '~/components/ui/button';
+import { defaultFormatDt } from '~/utils/dates';
 
 const Post: React.FC = () => {
     const router = useRouter();
@@ -36,32 +38,54 @@ const Post: React.FC = () => {
 
     return (
         <Layout>
-            <div>
-                <h2>{post.title}</h2>
-                <p>By {post?.author?.name || 'Unknown author'}</p>
-                {post.image && (
-                    <Image
-                        src={post.image}
-                        alt={`Image for ${post.title}`}
-                        width={200}
-                        height={200}
-                    />
-                )}
-                <ReactMarkdown>{post.description}</ReactMarkdown>
-                {!post.published && (
-                    // isAtLeast(session?.user.role, UserRole.OPERATOR) &&
-                    // todo: new permission system
-                    <button onClick={() => handlePublish(post.id)}>
-                        Publish
-                    </button>
-                )}
-                {userHasValidSession && (
-                    // isAtLeast(session?.user.role, UserRole.OPERATOR) &&
-                    // todo: new permission system
-                    <button onClick={() => handleDelete(post.id)}>
-                        Delete
-                    </button>
-                )}
+            <div className="flex w-2/3 flex-col gap-6 py-10">
+                <div>
+                    <div className="flex justify-between">
+                        <h3 className="pb-6 text-justify font-bold">
+                            {post.title}
+                        </h3>
+                        <div className="flex h-full gap-4">
+                            {/* isAtLeast(session?.user.role, UserRole.OPERATOR) &&
+                        todo: new permission system */}
+                            <Button
+                                className="px-8 hover:bg-neutral-300"
+                                variant={'ghost'}
+                                onClick={() => handlePublish(post.id)}
+                            >
+                                {!post.published ? 'Опублікувати' : 'Приховати'}
+                            </Button>
+                            {userHasValidSession && (
+                                // isAtLeast(session?.user.role, UserRole.OPERATOR) &&
+                                // todo: new permission system
+                                <Button
+                                    className="px-8"
+                                    onClick={() => handleDelete(post.id)}
+                                >
+                                    Видалити
+                                </Button>
+                            )}
+                        </div>
+                    </div>
+                    <div className="flex justify-between text-sm text-neutral-500">
+                        <p className="pb-4">
+                            By {post?.author?.name || 'Unknown author'}
+                        </p>
+                        <p>{defaultFormatDt(post.createdAt)}</p>
+                    </div>
+                    {post.image && (
+                        <Image
+                            className="aspect-video"
+                            src={post.image}
+                            alt={`Image for ${post.title}`}
+                            width={1920}
+                            height={1080}
+                        />
+                    )}
+                </div>
+                <div
+                    className=""
+                    dangerouslySetInnerHTML={{ __html: post.description }}
+                />
             </div>
         </Layout>
     );

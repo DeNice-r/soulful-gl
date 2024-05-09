@@ -1,15 +1,8 @@
 import React from 'react';
-import { Footer } from '~/components/common/Footer';
-import { Header } from '~/components/common/Header';
+import { Layout } from '~/components/common/Layout';
 
 const Posts: React.FC = () => {
-    return (
-        <div className="flex h-screen flex-col justify-between">
-            <Header />
-            <div className="h-full"></div>
-            <Footer />
-        </div>
-    );
+    return <Layout></Layout>;
 };
 
 export default Posts;
