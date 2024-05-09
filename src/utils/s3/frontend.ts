@@ -1,5 +1,3 @@
-import { randomUUID } from 'crypto';
-
 async function fetchPresignedUrl(
     fileName: string,
     contentType: string,
