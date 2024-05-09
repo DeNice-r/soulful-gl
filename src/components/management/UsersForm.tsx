@@ -54,8 +54,7 @@ export const UsersForm: React.FC<{
         },
     });
     function onSubmit(values: z.infer<typeof CreateUserSchema>) {
-        console.log(values);
-        // createUser.mutate(values);
+        createUser.mutate(values);
     }
 
     // old upoader
