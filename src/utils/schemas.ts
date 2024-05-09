@@ -19,6 +19,7 @@ export const NumberIdSchema = z.number().int().nonnegative();
 export const StringIdSchema = z.string().min(1).max(100);
 export const CUIDSchema = z.string().cuid();
 export const CUIDObjectSchema = z.object({ id: CUIDSchema });
+export const EmailSchema = z.string().email();
 
 export const ShortStringSchema = z.string().min(1).max(100);
 export const MessageTextSchema = z.string().min(1).max(4096);
@@ -53,7 +54,7 @@ export const TDIUpdateSchema = z.object({
 });
 
 export const CreateUserSchema = z.object({
-    email: z.string().email(),
+    email: z.union([EmailSchema, z.string().length(0)]),
     name: ShortStringSchema,
     image: ImageSchema.optional(),
     description: RichTextSchema.optional(),
@@ -61,11 +62,12 @@ export const CreateUserSchema = z.object({
 });
 
 export const UpdateUserSchema = z.object({
-    id: CUIDSchema,
+    id: StringIdSchema,
 
     name: ShortStringSchema.optional(),
     image: ImageSchema.optional(),
     description: RichTextSchema.optional(),
+    notes: z.string().optional(),
 });
 
 export const SetSuspendedSchema = z.object({

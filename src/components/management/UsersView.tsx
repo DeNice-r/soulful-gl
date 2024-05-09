@@ -30,12 +30,12 @@ export const UsersView: React.FC<{
 }> = ({ usersQuery, page, total, router }) => {
     const [_, setState] = useState(0);
     const [isMouseDown, setIsMouseDown] = useState(false);
-    useEffect(() => Modal.setAppElement('body'));
     const { client: apiClient } = api.useContext();
     const ref = useRef<HTMLFormElement>(null);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const changeModalState = () => {
+        void usersQuery.refetch();
         setIsModalOpen(!isModalOpen);
     };
     const [editableUser, setEditableUser] =
@@ -67,6 +67,8 @@ export const UsersView: React.FC<{
             query: currentQuery,
         });
     };
+
+    useEffect(() => Modal.setAppElement('body'));
 
     useEffect(() => {
         if (usersQuery.data) rerender();

@@ -20,8 +20,6 @@ import { Editor } from './Editor';
 import Modal from 'react-modal';
 import getCroppedImg from '../utils/cropImage';
 import Cropper, { type Area, type Point } from 'react-easy-crop';
-import { cn } from '~/lib/utils';
-import { randomUUID } from 'crypto';
 
 declare module 'react' {
     interface CSSProperties {
@@ -35,6 +33,7 @@ export const UsersForm: React.FC<{
     formRef: RefObject<HTMLFormElement>;
 }> = ({ user, changeModalState, formRef }) => {
     const createUser = api.user.create.useMutation();
+    const updateUser = api.user.update.useMutation();
 
     const [imageSrc, setImageSrc] = useState<string | null>(null);
     const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
@@ -54,20 +53,13 @@ export const UsersForm: React.FC<{
         },
     });
     function onSubmit(values: z.infer<typeof CreateUserSchema>) {
-        createUser.mutate(values);
+        if (user) {
+            updateUser.mutate({ id: user.id, ...values });
+        } else {
+            createUser.mutate(values);
+        }
+        changeModalState();
     }
-
-    // old upoader
-
-    // async function upload(e: ChangeEvent<HTMLInputElement>) {
-    //     e.preventDefault();
-    //     if (e?.target?.files?.[0]) {
-    //         const imageUrl = await uploadImage(e.target.files[0]);
-    //         if (imageUrl) {
-    //             form.setValue('image', imageUrl);
-    //         }
-    //     }
-    // }
 
     function createSetDescription(
         field: keyof z.infer<typeof CreateUserSchema>,
@@ -223,7 +215,12 @@ export const UsersForm: React.FC<{
                                             <FormControl>
                                                 <Input
                                                     className="flex-grow outline outline-1 outline-neutral-400"
-                                                    placeholder="anton@gmail.com"
+                                                    disabled={!!user}
+                                                    placeholder={
+                                                        !user || user.email
+                                                            ? 'anton@gmail.com'
+                                                            : '📲'
+                                                    }
                                                     {...field}
                                                 />
                                             </FormControl>

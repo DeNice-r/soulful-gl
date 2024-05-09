@@ -73,7 +73,7 @@ export const userRouter = createTRPCRouter({
     // todo: get users with permission to chat
 
     getById: permissionProcedure
-        .input(CUIDSchema)
+        .input(StringIdSchema)
         .query(async ({ input, ctx }) => {
             return ctx.db.user.findUnique({
                 where: {
@@ -102,6 +102,10 @@ export const userRouter = createTRPCRouter({
     create: permissionProcedure
         .input(CreateUserSchema)
         .mutation(async ({ ctx, input: data }) => {
+            if (!data.email) {
+                throw new Error('Email is required');
+            }
+
             const password = randomUUID();
 
             const user = await ctx.db.user.create({
