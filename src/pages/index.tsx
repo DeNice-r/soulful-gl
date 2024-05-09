@@ -92,11 +92,7 @@ const Blog: React.FC = () => {
                     Proudly powered by WordPress 😎
                 </Link>
             </div>
-            <div className="flex justify-center bg-neutral-100">
-                <div className="md:w-4/5">
-                    <Footer />
-                </div>
-            </div>
+            <Footer />
         </main>
     );
 };
