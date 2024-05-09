@@ -1,5 +1,6 @@
 import { createTRPCRouter, spaProcedure } from '~/server/api/trpc';
-import { BusynessSchema, NumberIdSchema } from '~/utils/schemas';
+import { BusynessSchema, CUIDSchema, NumberIdSchema } from '~/utils/schemas';
+import { archiveChat } from '~/server/api/routers/common';
 
 export const chatRouter = createTRPCRouter({
     list: spaProcedure.query(async ({ ctx }) => {
@@ -52,10 +53,10 @@ export const chatRouter = createTRPCRouter({
 
     getFull: spaProcedure
         .input(NumberIdSchema)
-        .query(async ({ ctx, input }) => {
+        .query(async ({ ctx, input: id }) => {
             return ctx.db.chat.update({
                 where: {
-                    id: input,
+                    id,
                     OR: [
                         {
                             personnelId: ctx.session.user.id,
@@ -82,46 +83,29 @@ export const chatRouter = createTRPCRouter({
     archive: spaProcedure
         .input(NumberIdSchema)
         .mutation(async ({ ctx, input }) => {
-            const chat = await ctx.db.chat.findFirst({
+            return archiveChat(input, ctx);
+        }),
+
+    report: spaProcedure
+        .input(NumberIdSchema)
+        .mutation(async ({ ctx, input: id }) => {
+            const result = await ctx.db.user.updateMany({
                 where: {
-                    id: input,
-                    personnelId: ctx.session.user.id,
+                    userChat: {
+                        id,
+                        personnelId: ctx.session.user.id,
+                    },
                 },
-                include: {
-                    messages: {
-                        select: {
-                            text: true,
-                            createdAt: true,
-                            isFromUser: true,
-                        },
+                data: {
+                    reportCount: {
+                        increment: 1,
                     },
                 },
             });
 
-            if (!chat) return false;
+            if (result.count === 0) return false;
 
-            await ctx.db.$transaction([
-                ctx.db.archivedChat.create({
-                    data: {
-                        personnelId: chat.personnelId,
-                        userId: chat.userId,
-                        createdAt: chat.createdAt,
-                        messages: {
-                            create: chat.messages,
-                        },
-                    },
-                }),
-                ctx.db.chat.delete({
-                    where: {
-                        id: input,
-                    },
-                    include: {
-                        messages: true,
-                    },
-                }),
-            ]);
-
-            return true;
+            return archiveChat(id, ctx);
         }),
 
     listUnassigned: spaProcedure.query(async ({ ctx }) => {
@@ -145,43 +129,4 @@ export const chatRouter = createTRPCRouter({
                 },
             });
         }),
-
-    // todo: user starting chat on the site, better use router api instead
-    // create: protectedProcedure
-    //     .input(MessageSchema)
-    //     .mutation(async ({ ctx, input }) => {
-    //         return ctx.db.chat.create({
-    //             data: {
-    //                 personnelId: ,
-    //                 messages: {
-    //                     create: input,
-    //                 },
-    //             },
-    //         });
-    //     }),
-
-    // search: permissionProcedure
-    //     .input(SearchSchema)
-    //     .query(async ({ input: { query, limit, page, published }, ctx }) => {
-    //         return ctx.db.qandA.findMany({
-    //             ...(query && {
-    //                 where: {
-    //                     question: {
-    //                         contains: query,
-    //                         mode: 'insensitive',
-    //                     },
-    //                 },
-    //             }),
-    //
-    //             ...(typeof published === 'boolean' && {
-    //                 where: {
-    //                     published,
-    //                 },
-    //             }),
-    //
-    //             orderBy: { createdAt: 'desc' },
-    //             skip: (page - 1) * limit,
-    //             take: limit,
-    //         });
-    //     }),
 });

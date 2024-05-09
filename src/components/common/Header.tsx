@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '~/components/ui/button';
 import {
     PopoverTrigger,
@@ -8,40 +9,20 @@ import {
 } from '~/components/ui/popover';
 import { useRouter } from 'next/router';
 import { signOut, useSession } from 'next-auth/react';
-import Image from 'next/image';
-import NavLink from './NavLink';
-import Logo from './Logo';
+import { NavLink } from '../NavLink';
+import { Logo } from './Logo';
 
-const Header: React.FC = () => {
+export const Header: React.FC = () => {
     const { data: session } = useSession();
 
     const image = session?.user?.image ?? 'images/placeholder.svg';
     const name = session?.user?.name ?? 'Користувач';
 
     const router = useRouter();
-    // const [currentStatus, setCurrentStatus] = React.useState(
-    //     session?.user?.isOnline || false,
-    // );
+
     const isActive: (pathname: string) => boolean = (pathname) =>
         router.pathname === pathname;
 
-    // const changeStatus = async () => {
-    //     if (!session) return;
-    //
-    //     try {
-    //         const response = await fetch('/api/chat/status', {
-    //             method: 'POST',
-    //             headers: { 'Content-Type': 'application/json' },
-    //             body: JSON.stringify({ isOnline: !session.user.isOnline }),
-    //         });
-    //         await updateSession({
-    //             ...session,
-    //             ...(await response.json()),
-    //         });
-    //     } catch (error) {
-    //         console.error(error);
-    //     }
-    // };
     return (
         <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-gray-50 px-4 dark:bg-gray-950 sm:px-6 lg:px-8">
             <Logo className="hidden md:basis-1/4" />
@@ -236,5 +217,3 @@ function UserIcon(
         </svg>
     );
 }
-
-export default Header;

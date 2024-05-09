@@ -8,9 +8,11 @@ import { documentRouter } from '~/server/api/routers/document';
 import { documentFolderRouter } from '~/server/api/routers/documentFolder';
 import { qandaRouter } from '~/server/api/routers/qanda';
 import { chatRouter } from '~/server/api/routers/chat';
+import { statsRouter } from '~/server/api/routers/stats';
 
 export const appRouter = createTRPCRouter({
     // Admin-related routers
+    stats: statsRouter,
     user: userRouter,
     permission: permissionRouter,
 

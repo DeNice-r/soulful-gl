@@ -35,6 +35,7 @@ export interface ExtendedChat extends Chat {
 
 export type Props = {
     children?: ReactNode;
+    className?: string;
 };
 
 export enum ManagementPageName {

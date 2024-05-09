@@ -2,7 +2,7 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
-import Layout from '~/components/Layout';
+import { Layout } from '~/components/common/Layout';
 import Image from 'next/image';
 import { api } from '~/utils/api';
 
@@ -13,7 +13,7 @@ const Post: React.FC = () => {
     const updateMutation = api.post.update.useMutation();
 
     const id = router.query.id;
-    const query = api.post.getById.useQuery(id as string);
+    const query = api.post.get.useQuery(id as string);
     const post = query.data;
 
     const userHasValidSession = Boolean(session);

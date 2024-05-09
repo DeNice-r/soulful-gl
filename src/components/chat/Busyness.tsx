@@ -23,7 +23,7 @@ export const Busyness = () => {
             {Object.keys(BusynessEmoji).map((emoji, index) => (
                 <button
                     key={index}
-                    className="rounded-full border-transparent p-2 focus:border-blue-300  focus:outline-none disabled:border-2 disabled:border-gray-500 disabled:bg-gray-300"
+                    className="rounded-full border-2 border-transparent p-2 disabled:border-gray-500 disabled:bg-gray-300"
                     disabled={busyness === index}
                     onClick={() => setBusynessHandler(index)}
                 >

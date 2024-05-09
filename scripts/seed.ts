@@ -90,6 +90,7 @@ const caller = createCaller({
     },
     entity: 'world',
     action: '6 days of creation 😈',
+    host: 'localhost',
 });
 
 export default async function seed() {
@@ -99,7 +100,7 @@ export default async function seed() {
 async function createUsers() {
     const users = await caller.user.list();
 
-    if (users.length) {
+    if (users.values.length) {
         perfectlyNormalLog('Users already exist');
         return;
     }
@@ -139,9 +140,9 @@ async function createUsers() {
 }
 
 async function createPosts() {
-    const posts = await caller.post.get();
+    const posts = await caller.post.list();
 
-    if (posts.length) {
+    if (posts.values.length) {
         perfectlyNormalLog('Posts already exist');
         return;
     }
