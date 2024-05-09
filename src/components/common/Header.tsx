@@ -24,119 +24,121 @@ export const Header: React.FC = () => {
         router.pathname === pathname;
 
     return (
-        <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-gray-50 px-4 dark:bg-gray-950 sm:px-6 lg:px-8">
-            <Logo className="hidden md:basis-1/4" />
-            <nav className="flex justify-center gap-4 lg:gap-8">
-                {
-                    // session.user.role === (UserRole.OPERATOR as number) &&
-                    // todo: use permissions
-                }
-                <NavLink href="/posts">Дописи</NavLink>
-                <NavLink href="/exercises">Вправи</NavLink>
-                <NavLink href="/knowledge">База знань</NavLink>
-                <NavLink href="/QnA">Запитання та відповіді</NavLink>
-                <NavLink href="/chat">Чати</NavLink>
-            </nav>
-            {session ? (
-                <div className="flex items-center justify-end gap-4 md:basis-1/4">
-                    <Popover>
-                        <PopoverTrigger asChild>
-                            <Button
-                                className="h-8 w-8 rounded-full border-2 border-gray-100"
-                                size="icon"
-                                variant="ghost"
-                            >
-                                <Image
-                                    alt={`@${name}'s profile`}
-                                    className="rounded-full"
-                                    height={32}
-                                    src={`${image}`}
-                                    style={{
-                                        aspectRatio: '32/32',
-                                        objectFit: 'cover',
-                                    }}
-                                    width={32}
-                                />
-                                <span className="sr-only">
-                                    Toggle user menu
-                                </span>
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="mt-1 flex min-w-56">
-                            <div>
-                                <div className="flex items-center gap-2 p-3">
+        <header className="sticky top-0 z-10 flex justify-center border-b bg-neutral-200 shadow-lg dark:bg-gray-950">
+            <div className="flex h-16 w-2/3 items-center justify-between">
+                <Logo className="hidden" />
+                <nav className="flex basis-3/5 justify-center gap-4 lg:gap-8">
+                    {
+                        // session.user.role === (UserRole.OPERATOR as number) &&
+                        // todo: use permissions
+                    }
+                    <NavLink href="/posts">Дописи</NavLink>
+                    <NavLink href="/exercises">Вправи</NavLink>
+                    <NavLink href="/knowledge">База знань</NavLink>
+                    <NavLink href="/QnA">Запитання та відповіді</NavLink>
+                    <NavLink href="/chat">Чати</NavLink>
+                </nav>
+                {session ? (
+                    <div className="flex items-center justify-end gap-4">
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    className="h-8 w-8 rounded-full border-2 border-gray-100"
+                                    size="icon"
+                                    variant="ghost"
+                                >
                                     <Image
                                         alt={`@${name}'s profile`}
                                         className="rounded-full"
-                                        height={40}
+                                        height={32}
                                         src={`${image}`}
                                         style={{
-                                            aspectRatio: '40/40',
+                                            aspectRatio: '32/32',
                                             objectFit: 'cover',
                                         }}
-                                        quality={100}
-                                        width={40}
+                                        width={32}
                                     />
-                                    <div className="flex flex-col gap-1 text-sm">
-                                        <div className="font-medium">
-                                            {name}
-                                        </div>
-                                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                                            {session?.user.email}
+                                    <span className="sr-only">
+                                        Toggle user menu
+                                    </span>
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="mt-1 flex min-w-56">
+                                <div>
+                                    <div className="flex items-center gap-2 p-3">
+                                        <Image
+                                            alt={`@${name}'s profile`}
+                                            className="rounded-full"
+                                            height={40}
+                                            src={`${image}`}
+                                            style={{
+                                                aspectRatio: '40/40',
+                                                objectFit: 'cover',
+                                            }}
+                                            quality={100}
+                                            width={40}
+                                        />
+                                        <div className="flex flex-col gap-1 text-sm">
+                                            <div className="font-medium">
+                                                {name}
+                                            </div>
+                                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                                                {session?.user.email}
+                                            </div>
                                         </div>
                                     </div>
+                                    <div className="grid gap-1 p-3">
+                                        <Link
+                                            className="flex items-center gap-2 hover:text-slate-600"
+                                            href="#"
+                                        >
+                                            <UserIcon className="h-4 w-4" />
+                                            Профіль
+                                        </Link>
+                                        <Link
+                                            className="flex items-center gap-2 hover:text-slate-600"
+                                            href="/management"
+                                        >
+                                            {
+                                                //add permissions
+                                            }
+                                            <CogIcon className="h-4 w-4" />
+                                            Керування
+                                        </Link>
+                                        <Link
+                                            href="/create"
+                                            className="flex items-center gap-2 hover:text-slate-600"
+                                        >
+                                            <PencilIcon className="h-4 w-4" />
+                                            Новий допис
+                                        </Link>
+                                    </div>
+                                    <div className="p-3">
+                                        <Button
+                                            onClick={() => signOut()}
+                                            size="sm"
+                                            variant="destructive"
+                                            className="transition-colors hover:bg-red-800"
+                                        >
+                                            Вихід
+                                        </Button>
+                                    </div>
                                 </div>
-                                <div className="grid gap-1 p-3">
-                                    <Link
-                                        className="flex items-center gap-2 hover:text-slate-600"
-                                        href="#"
-                                    >
-                                        <UserIcon className="h-4 w-4" />
-                                        Профіль
-                                    </Link>
-                                    <Link
-                                        className="flex items-center gap-2 hover:text-slate-600"
-                                        href="/management"
-                                    >
-                                        {
-                                            //add permissions
-                                        }
-                                        <CogIcon className="h-4 w-4" />
-                                        Керування
-                                    </Link>
-                                    <Link
-                                        href="/create"
-                                        className="flex items-center gap-2 hover:text-slate-600"
-                                    >
-                                        <PencilIcon className="h-4 w-4" />
-                                        Новий допис
-                                    </Link>
-                                </div>
-                                <div className="p-3">
-                                    <Button
-                                        onClick={() => signOut()}
-                                        size="sm"
-                                        variant="destructive"
-                                        className="transition-colors hover:bg-red-800"
-                                    >
-                                        Вихід
-                                    </Button>
-                                </div>
-                            </div>
-                        </PopoverContent>
-                    </Popover>
-                </div>
-            ) : (
-                <>
-                    <Link
-                        href="/api/auth/signin"
-                        data-active={isActive('/signup')}
-                        className="flex basis-1/4 justify-end hover:text-sky-500"
-                    >
-                        Увійти
-                    </Link>
-                </>
-            )}
+                            </PopoverContent>
+                        </Popover>
+                    </div>
+                ) : (
+                    <>
+                        <Link
+                            href="/api/auth/signin"
+                            data-active={isActive('/signup')}
+                            className="flex basis-1/4 justify-end hover:text-sky-500"
+                        >
+                            Увійти
+                        </Link>
+                    </>
+                )}
+            </div>
         </header>
     );
 };
