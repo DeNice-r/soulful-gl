@@ -13,7 +13,7 @@ export const Post: React.FC<{
     return (
         <article
             className="flex h-full flex-col items-center gap-4 p-6 text-center text-inherit text-slate-800 md:flex-row md:gap-8 md:text-left 2xl:flex-col 2xl:gap-0 2xl:text-center"
-            onClick={() => Router.push('/post/[id]', `/post/${post.id}`)}
+            onClick={() => Router.push(`/posts/${post.id}`)}
         >
             {post.image && (
                 <Image
