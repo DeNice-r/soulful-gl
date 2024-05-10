@@ -1,5 +1,6 @@
 export const MAX_TITLE_LENGTH = 50;
-export const MAX_DESCRIPTION_LENGTH = 100;
+export const MAX_LANDING_POSTS_DESCRIPTION_LENGTH = 100;
+export const MAX_POSTS_DESCRIPTION_LENGTH = 300;
 
 export const DEFAULT_LIMIT = 9;
 

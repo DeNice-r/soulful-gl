@@ -83,7 +83,7 @@ const Post: React.FC = () => {
                     )}
                 </div>
                 <div
-                    className=""
+                    className="text-justify"
                     dangerouslySetInnerHTML={{ __html: post.description }}
                 />
             </div>
