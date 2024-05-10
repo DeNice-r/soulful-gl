@@ -35,6 +35,8 @@ export const UsersView: React.FC<{
     const { client: apiClient } = api.useContext();
     const formRef = useRef<HTMLFormElement>(null);
 
+    const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const changeModalState = () => {
         void usersQuery.refetch();
@@ -69,6 +71,13 @@ export const UsersView: React.FC<{
             query: currentQuery,
         });
     };
+
+    function debounce(fn: () => void, ms: number) {
+        if (debounceRef.current) {
+            clearTimeout(debounceRef.current);
+        }
+        debounceRef.current = setTimeout(fn, ms);
+    }
 
     useEffect(() => Modal.setAppElement('body'));
 
@@ -137,8 +146,10 @@ export const UsersView: React.FC<{
                             id="default-search"
                             className="w-full py-[1.7rem] ps-10"
                             placeholder="Шукати користувачів"
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
+                            defaultValue={query}
+                            onChange={(e) =>
+                                debounce(() => setQuery(e.target.value), 1000)
+                            }
                             required
                         />
                         {/*<Button*/}

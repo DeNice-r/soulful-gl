@@ -5,7 +5,6 @@ import {
 } from '~/server/api/trpc';
 import {
     CreateUserSchema,
-    CUIDSchema,
     SearchUsersSchema,
     SetNotesSchema,
     SetSuspendedSchema,
