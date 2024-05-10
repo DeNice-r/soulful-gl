@@ -2,7 +2,7 @@ import type React from 'react';
 import { useState } from 'react';
 import { UsersView } from '~/components/management/UsersView';
 import { api } from '~/utils/api';
-import { DEFAULT_LIMIT } from '~/utils/constants';
+import { DEFAULT_LIMIT, NO_REFETCH } from '~/utils/constants';
 import { useRouter } from 'next/router';
 
 export const Users: React.FC = () => {
@@ -18,14 +18,7 @@ export const Users: React.FC = () => {
         : DEFAULT_LIMIT;
     const page = router.query.page ? Number(router.query.page) : 1;
 
-    const users = api.user.list.useQuery(
-        { limit, page, query },
-        {
-            refetchOnWindowFocus: false,
-            refetchOnMount: false,
-            refetchOnReconnect: false,
-        },
-    );
+    const users = api.user.list.useQuery({ limit, page, query }, NO_REFETCH);
 
     const total = users.data?.count ? Math.ceil(users.data.count / limit) : 0;
 
