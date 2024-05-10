@@ -1,5 +1,5 @@
 import { z } from '~/utils/zod';
-import { BackgroundPattern } from '~/utils/types';
+import { BackgroundPattern, Order, SortableUserFields } from '~/utils/types';
 import { env } from '~/env';
 
 const FirstPage = 1;
@@ -10,6 +10,8 @@ const NoDefaultPageSchema = z.object({
     page: z.number().min(1).default(FirstPage),
     limit: z.number().min(1).max(100).default(DefaultLimit),
     query: z.string().optional(),
+    orderBy: z.nativeEnum(SortableUserFields).optional(),
+    order: z.nativeEnum(Order).optional(),
 });
 export const PageSchema = NoDefaultPageSchema.default(PaginationDefault);
 export const SearchUsersSchema = NoDefaultPageSchema.extend({

@@ -8,6 +8,8 @@ import { useRouter } from 'next/router';
 export const Users: React.FC = () => {
     const router = useRouter();
     const queryParam = router.query.query;
+    const orderBy = router.query.orderBy as string | undefined;
+    const order = router.query.order as string | undefined;
 
     const [query, setQuery] = useState<string | undefined>(
         queryParam as string,
@@ -18,13 +20,25 @@ export const Users: React.FC = () => {
         : DEFAULT_LIMIT;
     const page = router.query.page ? Number(router.query.page) : 1;
 
-    const users = api.user.list.useQuery({ limit, page, query }, NO_REFETCH);
+    const users = api.user.list.useQuery(
+        { limit, page, query, orderBy, order },
+        NO_REFETCH,
+    );
 
     const total = users.data?.count ? Math.ceil(users.data.count / limit) : 0;
 
     return (
         <UsersView
-            {...{ usersQuery: users, page, total, router, query, setQuery }}
+            {...{
+                usersQuery: users,
+                page,
+                total,
+                router,
+                query,
+                setQuery,
+                orderBy,
+                order,
+            }}
         ></UsersView>
     );
 };

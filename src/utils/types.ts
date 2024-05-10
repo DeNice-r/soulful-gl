@@ -61,3 +61,18 @@ export const PageTitleMap = {
     [ManagementPageName.DONATIONS]: 'Пожертви',
     [ManagementPageName.QnA]: 'Запитання та відповіді',
 };
+
+export const SortableUserFields = {
+    ID: 'id',
+    EMAIL: 'email',
+    NAME: 'name',
+    CREATED_AT: 'createdAt',
+    UPDATED_AT: 'updatedAt',
+    REPORT_COUNT: 'reportCount',
+    SUSPENDED: 'suspended',
+};
+
+export const Order = {
+    ASC: 'asc',
+    DESC: 'desc',
+};

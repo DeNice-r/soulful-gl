@@ -16,6 +16,17 @@ import { Spinner } from '~/components/ui/spinner';
 import { TableCell } from '@mui/material';
 import { User } from '~/components/management/User';
 import { CustomPagination } from '~/components/CustomPagination';
+import { SortableUserFields } from '~/utils/types';
+
+const UserTableHeaders: Record<string, string> = {
+    [SortableUserFields.ID]: 'Ідентифікатор',
+    [SortableUserFields.EMAIL]: 'Електронна пошта',
+    [SortableUserFields.NAME]: "Ім'я",
+    [SortableUserFields.CREATED_AT]: 'Дата створення',
+    [SortableUserFields.UPDATED_AT]: 'Дата оновлення',
+    [SortableUserFields.REPORT_COUNT]: 'Скарги',
+    [SortableUserFields.SUSPENDED]: 'Статус',
+} as const;
 
 export const UsersView: React.FC<{
     usersQuery: {
@@ -28,8 +39,10 @@ export const UsersView: React.FC<{
     total: number;
     query?: string;
     setQuery: React.Dispatch<React.SetStateAction<string | undefined>>;
+    orderBy?: string;
+    order?: string;
     router: ReturnType<typeof useRouter>;
-}> = ({ usersQuery, page, total, query, setQuery, router }) => {
+}> = ({ usersQuery, page, total, query, setQuery, orderBy, order, router }) => {
     const [_, setState] = useState(0);
     const [isMouseDown, setIsMouseDown] = useState(false);
     const { client: apiClient } = api.useContext();
@@ -66,6 +79,22 @@ export const UsersView: React.FC<{
     const goToPage = (page: number) => {
         const currentPath = router.pathname;
         const currentQuery = { ...router.query, page };
+        void router.push({
+            pathname: currentPath,
+            query: currentQuery,
+        });
+    };
+
+    const setOrderBy = (orderBy: string) => {
+        const currentPath = router.pathname;
+        const currentQuery = {
+            ...router.query,
+            orderBy,
+            order:
+                router.query.order === 'asc' || router.query.orderBy !== orderBy
+                    ? 'desc'
+                    : 'asc',
+        };
         void router.push({
             pathname: currentPath,
             query: currentQuery,
@@ -118,48 +147,40 @@ export const UsersView: React.FC<{
             document.removeEventListener('mouseup', handleMouseUp);
         };
     }, [isModalOpen, isMouseDown]);
+
     return (
         <>
             <div className="flex w-full justify-between">
-                <form className="w-1/4">
-                    <div className="relative">
-                        <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
-                            <svg
-                                className="h-4 w-4 text-gray-500 dark:text-gray-400"
-                                aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 20 20"
-                            >
-                                <path
-                                    stroke="currentColor"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                                />
-                            </svg>
-                        </div>
-                        <Input
-                            type="search"
-                            name="query"
-                            id="default-search"
-                            className="w-full py-[1.7rem] ps-10"
-                            placeholder="Шукати користувачів"
-                            defaultValue={query}
-                            onChange={(e) =>
-                                debounce(() => setQuery(e.target.value), 1000)
-                            }
-                            required
-                        />
-                        {/*<Button*/}
-                        {/*    type="submit"*/}
-                        {/*    className="absolute bottom-2.5 end-2.5"*/}
-                        {/*>*/}
-                        {/*    Пошук*/}
-                        {/*</Button>*/}
+                <div className="relative min-w-96">
+                    <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+                        <svg
+                            className="h-4 w-4 text-gray-500 dark:text-gray-400"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 20 20"
+                        >
+                            <path
+                                stroke="currentColor"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                            />
+                        </svg>
                     </div>
-                </form>
+                    <Input
+                        type="search"
+                        name="query"
+                        id="default-search"
+                        className="w-full py-[1.7rem] ps-10"
+                        placeholder="Шукати користувачів"
+                        defaultValue={query}
+                        onChange={(e) =>
+                            debounce(() => setQuery(e.target.value), 1000)
+                        }
+                    />
+                </div>
                 <Button onClick={createUser}>Новий користувач</Button>
                 <Modal
                     isOpen={isModalOpen}
@@ -177,30 +198,26 @@ export const UsersView: React.FC<{
                 <Table>
                     <TableHeader>
                         <TableRow className="hover:bg-neutral-300">
-                            <TableHead className="min-w-[150px]">
-                                Ідентифікатор
-                            </TableHead>
-                            <TableHead className="min-w-[150px]">
-                                Електронна пошта
-                            </TableHead>
-                            <TableHead className="min-w-[150px]">
-                                Ім&apos;я
-                            </TableHead>
-                            <TableHead className="hidden md:table-cell">
-                                Дата створення
-                            </TableHead>
-                            <TableHead className="hidden md:table-cell">
-                                Дата оновлення
-                            </TableHead>
-                            <TableHead className="hidden md:table-cell">
-                                Скарги
-                            </TableHead>
-                            <TableHead className="hidden sm:table-cell">
-                                Статус
-                            </TableHead>
-                            <TableHead className="pr-6 text-right">
-                                Дії
-                            </TableHead>
+                            {Object.keys(UserTableHeaders).map((key) => {
+                                return (
+                                    <TableHead
+                                        className="min-w-[150px]"
+                                        key={key}
+                                        onClick={() => setOrderBy(key)}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <span>{UserTableHeaders[key]}</span>
+                                            <span>
+                                                {orderBy === key
+                                                    ? order === 'asc'
+                                                        ? '⬆️'
+                                                        : '⬇️'
+                                                    : ''}
+                                            </span>
+                                        </div>
+                                    </TableHead>
+                                );
+                            })}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
