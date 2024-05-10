@@ -35,7 +35,14 @@ export const Post: React.FC<{
                     )}
                 ></Image>
             )}
-            <div className="flex h-full flex-col items-center justify-between gap-2 md:w-3/5 md:items-start md:gap-8 2xl:w-full 2xl:flex-col 2xl:items-center 2xl:gap-0 ">
+            <div
+                className={cn(
+                    'flex h-full flex-col justify-between gap-2 md:gap-8 2xl:gap-0 ',
+                    variant === 'posts'
+                        ? 'w-full'
+                        : 'items-center md:w-3/5 md:items-start 2xl:w-full 2xl:items-center',
+                )}
+            >
                 <div
                     className={cn(
                         variant === 'posts' &&
