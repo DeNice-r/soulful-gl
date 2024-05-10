@@ -21,29 +21,27 @@ import { sendRegEmail } from '~/utils/email';
 export const userRouter = createTRPCRouter({
     list: permissionProcedure
         .input(SearchUsersSchema)
-        .query(async ({ input: { page, limit, permissions }, ctx }) => {
+        .query(async ({ input: { page, limit, query, permissions }, ctx }) => {
             const p = ['*:*', '*:*:*'];
             for (const permission of permissions || []) {
                 p.push(permission);
                 p.push(`${permission}:*`);
             }
 
-            const where = permissions && {
-                where: {
-                    permissions: {
-                        some: {
-                            title: {
-                                in: p,
-                            },
+            let where: Record<string, object> | undefined = permissions && {
+                permissions: {
+                    some: {
+                        title: {
+                            in: p,
                         },
                     },
-                    roles: {
-                        some: {
-                            permissions: {
-                                some: {
-                                    title: {
-                                        in: p,
-                                    },
+                },
+                roles: {
+                    some: {
+                        permissions: {
+                            some: {
+                                title: {
+                                    in: p,
                                 },
                             },
                         },
@@ -51,12 +49,31 @@ export const userRouter = createTRPCRouter({
                 },
             };
 
+            const fields = ['id', 'email', 'name', 'description', 'notes'];
+
+            const contains = {
+                contains: query,
+                mode: 'insensitive',
+            };
+
+            const containsQuery = {
+                OR: fields.map((field) => ({
+                    [field]: contains,
+                })),
+            };
+
+            if (query) {
+                where
+                    ? (where = {
+                          AND: [where, containsQuery],
+                      })
+                    : (where = containsQuery);
+            }
+
             const [count, values] = await ctx.db.$transaction([
-                ctx.db.user.count(where),
+                ctx.db.user.count({ where }),
                 ctx.db.user.findMany({
-                    where: {
-                        ...where?.where,
-                    },
+                    where,
                     select: getProjection(ctx.isFullAccess),
                     orderBy: { createdAt: 'desc' },
                     skip: (page - 1) * limit,

@@ -15,7 +15,7 @@ import { Logo } from './Logo';
 export const Header: React.FC = () => {
     const { data: session } = useSession();
 
-    const image = session?.user?.image ?? 'images/placeholder.svg';
+    const image = session?.user?.image ?? '/images/placeholder.svg';
     const name = session?.user?.name ?? 'Користувач';
 
     const router = useRouter();

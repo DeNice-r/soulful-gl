@@ -26,12 +26,14 @@ export const UsersView: React.FC<{
     };
     page: number;
     total: number;
+    query?: string;
+    setQuery: React.Dispatch<React.SetStateAction<string | undefined>>;
     router: ReturnType<typeof useRouter>;
-}> = ({ usersQuery, page, total, router }) => {
+}> = ({ usersQuery, page, total, query, setQuery, router }) => {
     const [_, setState] = useState(0);
     const [isMouseDown, setIsMouseDown] = useState(false);
     const { client: apiClient } = api.useContext();
-    const ref = useRef<HTMLFormElement>(null);
+    const formRef = useRef<HTMLFormElement>(null);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const changeModalState = () => {
@@ -77,10 +79,10 @@ export const UsersView: React.FC<{
     useEffect(() => {
         const handleMouseDown = (event: MouseEvent) => {
             if (
-                ref.current &&
-                ref.current.parentElement &&
-                ref.current.parentElement.contains(event.target as Node) &&
-                !ref.current.contains(event.target as Node)
+                formRef.current?.parentElement?.contains(
+                    event.target as Node,
+                ) &&
+                !formRef.current.contains(event.target as Node)
             ) {
                 setIsMouseDown(true);
             }
@@ -89,10 +91,10 @@ export const UsersView: React.FC<{
         const handleMouseUp = (event: MouseEvent) => {
             if (
                 isMouseDown &&
-                ref.current &&
-                ref.current.parentElement &&
-                ref.current.parentElement.contains(event.target as Node) &&
-                !ref.current.contains(event.target as Node)
+                formRef.current?.parentElement?.contains(
+                    event.target as Node,
+                ) &&
+                !formRef.current.contains(event.target as Node)
             ) {
                 setIsModalOpen(false);
             }
@@ -131,17 +133,20 @@ export const UsersView: React.FC<{
                         </div>
                         <Input
                             type="search"
+                            name="query"
                             id="default-search"
                             className="w-full py-[1.7rem] ps-10"
                             placeholder="Шукати користувачів"
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
                             required
                         />
-                        <Button
-                            type="submit"
-                            className="absolute bottom-2.5 end-2.5"
-                        >
-                            Пошук
-                        </Button>
+                        {/*<Button*/}
+                        {/*    type="submit"*/}
+                        {/*    className="absolute bottom-2.5 end-2.5"*/}
+                        {/*>*/}
+                        {/*    Пошук*/}
+                        {/*</Button>*/}
                     </div>
                 </form>
                 <Button onClick={createUser}>Новий користувач</Button>
@@ -151,7 +156,7 @@ export const UsersView: React.FC<{
                     className="flex h-svh w-svw items-center justify-center"
                 >
                     <UsersForm
-                        formRef={ref}
+                        formRef={formRef}
                         changeModalState={changeModalState}
                         user={editableUser}
                     />

@@ -15,7 +15,7 @@ export const ShortHeader: React.FC<{ entity?: ManagementPageName }> = ({
 }) => {
     const { data: session } = useSession();
 
-    const image = session?.user?.image ?? 'images/placeholder.svg';
+    const image = session?.user?.image ?? '/images/placeholder.svg';
     const name = session?.user?.name ?? 'Користувач';
 
     return (

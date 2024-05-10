@@ -9,6 +9,7 @@ const PaginationDefault = { page: FirstPage, limit: DefaultLimit };
 const NoDefaultPageSchema = z.object({
     page: z.number().min(1).default(FirstPage),
     limit: z.number().min(1).max(100).default(DefaultLimit),
+    query: z.string().optional(),
 });
 export const PageSchema = NoDefaultPageSchema.default(PaginationDefault);
 export const SearchUsersSchema = NoDefaultPageSchema.extend({
