@@ -81,7 +81,6 @@ export const Post: React.FC<{
                         variant === 'landing' && 'md:self-end 2xl:mt-4',
                     )}
                 >
-                    {/* posts: self-start */}
                     {authorName}
                 </small>
             </div>
