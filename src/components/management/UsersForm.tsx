@@ -20,8 +20,6 @@ import { Editor } from './Editor';
 import Modal from 'react-modal';
 import getCroppedImg from '../utils/cropImage';
 import Cropper, { type Area, type Point } from 'react-easy-crop';
-import { cn } from '~/lib/utils';
-import { randomUUID } from 'crypto';
 
 declare module 'react' {
     interface CSSProperties {

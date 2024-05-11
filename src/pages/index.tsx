@@ -33,7 +33,7 @@ const Blog: React.FC = () => {
                         key={post.id}
                         className="flex-1 justify-center bg-neutral-300 bg-opacity-80 shadow-md outline outline-neutral-400 transition-shadow duration-100 ease-in hover:cursor-pointer hover:shadow-lg md:rounded-md"
                     >
-                        <Post post={post} />
+                        <Post variant="landing" post={post} />
                     </div>
                 ))}
             </article>
@@ -92,11 +92,7 @@ const Blog: React.FC = () => {
                     Proudly powered by WordPress 😎
                 </Link>
             </div>
-            <div className="flex justify-center bg-neutral-100">
-                <div className="md:w-4/5">
-                    <Footer />
-                </div>
-            </div>
+            <Footer />
         </main>
     );
 };
