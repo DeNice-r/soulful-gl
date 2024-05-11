@@ -6,12 +6,14 @@ export const Icon: React.FC<{
     viewBox?: string;
     className?: string;
     fill?: string;
+    stroke?: string;
     d: string;
 }> = ({
     width = '24',
     height = '24',
     viewBox = '0 0 24',
     className,
+    stroke = 'currentColor',
     fill = 'none',
     d,
 }) => {
@@ -24,7 +26,7 @@ export const Icon: React.FC<{
             width={width}
             height={height}
             className={className}
-            stroke="currentColor"
+            stroke={stroke}
         >
             <path strokeLinecap="round" strokeLinejoin="round" d={d} />
         </svg>

@@ -64,6 +64,9 @@ const config = {
                 ...transitionProperty,
                 width: 'width',
             },
+            gridTemplateColumns: {
+                auto: 'repeat(auto-fill, minmax(256px, 1fr))',
+            },
         },
     },
     plugins: [require('tailwindcss-animate')],

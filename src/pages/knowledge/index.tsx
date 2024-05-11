@@ -1,8 +1,8 @@
 import type React from 'react';
+import { Icon } from '~/components/common/Icon';
 import { Layout } from '~/components/common/Layout';
 import {
     Breadcrumb,
-    BreadcrumbEllipsis,
     BreadcrumbItem,
     BreadcrumbLink,
     BreadcrumbList,
@@ -10,12 +10,6 @@ import {
     BreadcrumbSeparator,
 } from '~/components/ui/breadcrumb';
 import { Button } from '~/components/ui/button';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu';
 
 const Knowledge: React.FC = () => {
     return (
@@ -32,23 +26,6 @@ const Knowledge: React.FC = () => {
                                     </BreadcrumbLink>
                                 </BreadcrumbItem>
                                 <BreadcrumbSeparator />
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger>
-                                        <BreadcrumbEllipsis />
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent>
-                                        <DropdownMenuItem>
-                                            Documentation
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem>
-                                            Themes
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem>
-                                            GitHub
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                                <BreadcrumbSeparator />
                                 <BreadcrumbItem>
                                     <BreadcrumbLink href="/components">
                                         Components
@@ -61,8 +38,21 @@ const Knowledge: React.FC = () => {
                             </BreadcrumbList>
                         </Breadcrumb>
                     </nav>
-                    <div className="flex w-full flex-wrap justify-between gap-8">
-                        <Button className="flex h-14 w-64 rounded-3xl bg-neutral-300 drop-shadow-md hover:bg-neutral-300/60 active:shadow-inner active:drop-shadow-none"></Button>
+                    <div className="grid w-full grid-cols-auto flex-wrap justify-between gap-8 2xl:grid-cols-4">
+                        <Button className="flex h-14 flex-grow justify-start gap-4 rounded-3xl bg-neutral-300 px-6 drop-shadow-md hover:bg-neutral-300/60 active:shadow-inner active:drop-shadow-none">
+                            <Icon
+                                stroke="#000"
+                                d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+                            />
+                            <p className="text-slate-800">Файл</p>
+                        </Button>
+                        <Button className="flex h-14 flex-grow justify-start gap-4 rounded-3xl bg-neutral-300 px-6 drop-shadow-md hover:bg-neutral-300/60 active:shadow-inner active:drop-shadow-none">
+                            <Icon
+                                stroke="#000"
+                                d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"
+                            />
+                            <p className="text-slate-800">Папка</p>
+                        </Button>
                     </div>
                 </div>
             </div>
