@@ -4,7 +4,7 @@ import { Toaster } from '~/components/ui/toaster';
 import { Footer } from './Footer';
 import { cn } from '~/lib/utils';
 
-export const Layout: React.FC<{ children: ReactNode; className?: string }> = ({
+export const Layout: React.FC<{ children?: ReactNode; className?: string }> = ({
     className,
     ...props
 }) => (

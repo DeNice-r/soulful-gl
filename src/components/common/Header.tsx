@@ -132,7 +132,7 @@ export const Header: React.FC = () => {
                         <Link
                             href="/api/auth/signin"
                             data-active={isActive('/signup')}
-                            className="flex basis-1/4 justify-end hover:text-sky-500"
+                            className="flex justify-end hover:text-sky-500"
                         >
                             Увійти
                         </Link>

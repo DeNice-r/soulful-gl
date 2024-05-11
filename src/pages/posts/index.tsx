@@ -42,7 +42,7 @@ const Posts: React.FC = () => {
     return (
         <Layout className="bg-homepage-cover">
             <div className="flex w-full flex-col items-center pb-8 md:w-2/3">
-                <div className="flex w-full flex-wrap justify-between gap-8 p-10 text-slate-800">
+                <div className="flex w-full flex-wrap justify-between gap-8 py-10 text-slate-800">
                     <h3 className="w-full pb-4 text-center font-bold">
                         Дописи з порадами щодо ментального здоров&apos;я
                     </h3>
