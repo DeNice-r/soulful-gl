@@ -22,6 +22,8 @@ const Posts: React.FC = () => {
 
     const total = posts.data?.count ? Math.ceil(posts.data.count / limit) : 0;
 
+    // const recommendations = api.recommendation.get.useQuery();
+
     function rerender() {
         setState((prev) => prev + 1);
     }
@@ -46,6 +48,7 @@ const Posts: React.FC = () => {
                     <h3 className="w-full pb-4 text-center font-bold">
                         Дописи з порадами щодо ментального здоров&apos;я
                     </h3>
+                    {/* {recommendations && ( */}
                     <div className="flex w-full flex-col gap-10 rounded-2xl bg-neutral-200 px-10 py-14 shadow-lg">
                         <div className="flex flex-col items-center justify-center gap-4 lg:flex-row">
                             <h2 className="text-center font-bold">
@@ -54,8 +57,10 @@ const Posts: React.FC = () => {
                             <SunIcon />
                         </div>
                         <div className="flex w-full flex-wrap gap-8 text-justify font-semibold">
-                            {/* todo: parce recomendations, make component */}
-                            <div className="flex min-w-52 flex-grow basis-1/5 flex-col items-center justify-center gap-4 rounded-xl bg-neutral-300 p-10 shadow-inner">
+                            {/* todo: make recommendations map */}
+                            {/* {recommendations?.data?.values.map(
+                                    (recommendation) => ( */}
+                            <article className="flex min-w-52 flex-grow basis-1/5 flex-col items-center justify-center gap-4 rounded-xl bg-neutral-300 p-10 shadow-inner">
                                 <h1 className="font-bold">Some title</h1>
                                 <p>
                                     Vivamus sodales fermentum ante. Duis sapien
@@ -63,7 +68,9 @@ const Posts: React.FC = () => {
                                     placerat magna. Vivamus sodales fermentum
                                     ante. Duis sapien mauris
                                 </p>
-                            </div>
+                            </article>
+                            {/* ),
+                                )} */}
                             {/* <p className="flex min-w-52 flex-grow basis-1/5 items-center rounded-xl bg-neutral-300 p-10 shadow-inner">
                                 Nullam molestie justo odio, in dictum risus
                                 hendrerit sit amet.
@@ -80,6 +87,7 @@ const Posts: React.FC = () => {
                             </p> */}
                         </div>
                     </div>
+                    {/* )} */}
                     {posts?.data?.values.map((post) => (
                         <div
                             key={post.id}
