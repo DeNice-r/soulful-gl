@@ -64,6 +64,7 @@ export const Post: React.FC<{
                         alt={post.title}
                         width={128}
                         height={72}
+                        className="rounded-md"
                     />
                 )}
             </TableCell>

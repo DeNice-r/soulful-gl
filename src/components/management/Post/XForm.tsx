@@ -121,9 +121,11 @@ export const XForm: React.FC<{
                                         style={{
                                             '--image-url': `url(${field.value ? field.value : post?.image})`,
                                         }}
-                                        className={`flex h-36 w-72 items-center justify-center border-2 border-gray-400 bg-white bg-[image:var(--image-url)] bg-cover transition-all hover:opacity-80 dark:bg-gray-700`}
+                                        className={`flex aspect-video w-72 items-center justify-center rounded-xl border-2 border-gray-400 bg-white bg-[image:var(--image-url)] bg-cover transition-all hover:opacity-80 dark:bg-gray-700`}
                                     >
-                                        <UploadIcon className="h-8 w-8 text-gray-500 dark:text-gray-400" />
+                                        {!post?.image && (
+                                            <UploadIcon className="h-8 w-8 text-gray-500 dark:text-gray-400" />
+                                        )}
                                     </div>
                                     <Input
                                         accept="image/*"
