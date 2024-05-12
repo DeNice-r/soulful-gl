@@ -6,15 +6,15 @@ const FirstPage = 1;
 const DefaultLimit = 10;
 const PaginationDefault = { page: FirstPage, limit: DefaultLimit };
 
-const NoDefaultPageSchema = z.object({
+const NoDefaultPageSearchSchema = z.object({
     page: z.number().min(1).default(FirstPage),
     limit: z.number().min(1).max(100).default(DefaultLimit),
     query: z.string().optional(),
-    orderBy: z.nativeEnum(SortableUserFields).optional(),
+    orderBy: z.string().optional(),
     order: z.nativeEnum(Order).optional(),
 });
-export const PageSchema = NoDefaultPageSchema.default(PaginationDefault);
-export const SearchUsersSchema = NoDefaultPageSchema.extend({
+export const PageSchema = NoDefaultPageSearchSchema.default(PaginationDefault);
+export const SearchUsersSchema = NoDefaultPageSearchSchema.extend({
     permissions: z.array(z.string()).optional(),
 }).default(PaginationDefault);
 
@@ -39,7 +39,7 @@ export const RichTextSchema = z.string().max(15000);
 export const ImageSchema = z.string();
 // .refine((value) => ImageBucketRegex.test(value));
 
-export const SearchSchema = NoDefaultPageSchema.extend({
+export const SearchSchema = NoDefaultPageSearchSchema.extend({
     query: QuerySchema.optional(),
 
     published: z.boolean().optional(),

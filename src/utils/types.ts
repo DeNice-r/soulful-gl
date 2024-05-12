@@ -62,6 +62,14 @@ export const PageTitleMap = {
     [ManagementPageName.QnA]: 'Запитання та відповіді',
 };
 
+export const SearchableUserFields = {
+    ID: 'id',
+    EMAIL: 'email',
+    NAME: 'name',
+    DESCRIPTION: 'description',
+    NOTES: 'notes',
+} as const;
+
 export const SortableUserFields = {
     ID: 'id',
     EMAIL: 'email',
@@ -70,7 +78,13 @@ export const SortableUserFields = {
     UPDATED_AT: 'updatedAt',
     REPORT_COUNT: 'reportCount',
     SUSPENDED: 'suspended',
-};
+} as const;
+
+export const SearchablePostFields = {
+    ID: 'id',
+    TITLE: 'title',
+    DESCRIPTION: 'description',
+} as const;
 
 export const SortablePostFields = {
     ID: 'id',

@@ -16,6 +16,7 @@ import { randomUUID } from 'crypto';
 import bcrypt from 'bcrypt';
 import { env } from '~/env';
 import { sendRegEmail } from '~/utils/email';
+import { SearchableUserFields } from '~/utils/types';
 
 export const userRouter = createTRPCRouter({
     list: permissionProcedure
@@ -52,15 +53,13 @@ export const userRouter = createTRPCRouter({
                     },
                 };
 
-                const fields = ['id', 'email', 'name', 'description', 'notes'];
-
                 const contains = {
                     contains: query,
                     mode: 'insensitive',
                 };
 
                 const containsQuery = {
-                    OR: fields.map((field) => ({
+                    OR: Object.values(SearchableUserFields).map((field) => ({
                         [field]: contains,
                     })),
                 };

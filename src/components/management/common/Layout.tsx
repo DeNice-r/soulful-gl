@@ -4,9 +4,9 @@ import { Sidebar } from '~/components/management/common/Sidebar';
 import { ShortHeader } from '~/components/management/common/ShortHeader';
 import { Operators } from '~/components/management/User/Operators';
 import { Toaster } from '~/components/ui/toaster';
-import { Users } from '~/components/management/User/Users';
+import Users from '~/components/management/User';
 import { Statistics } from '~/components/management/Statistics';
-import { Posts } from '~/components/management/Post/Posts';
+import Posts from '~/components/management/Post';
 
 const pages = {
     [ManagementPageName.STATISTICS]: <Statistics />,

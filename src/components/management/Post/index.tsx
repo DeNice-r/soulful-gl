@@ -29,7 +29,7 @@ const PostTableHeaders: Record<string, string> = {
     [SortablePostFields.UPDATED_AT]: 'Дата оновлення',
 } as const;
 
-export const Posts: React.FC = () => {
+const XTable: React.FC = () => {
     const router = useRouter();
     const queryParam = router.query.query;
     const orderBy = router.query.orderBy as string | undefined;
@@ -260,3 +260,5 @@ export const Posts: React.FC = () => {
         </>
     );
 };
+
+export default XTable;

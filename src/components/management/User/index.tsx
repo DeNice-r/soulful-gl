@@ -5,7 +5,7 @@ import { api } from '~/utils/api';
 import { DEFAULT_LIMIT, NO_REFETCH } from '~/utils/constants';
 import { useRouter } from 'next/router';
 
-export const Users: React.FC = () => {
+const XTable: React.FC = () => {
     const router = useRouter();
     const queryParam = router.query.query;
     const orderBy = router.query.orderBy as string | undefined;
@@ -42,3 +42,5 @@ export const Users: React.FC = () => {
         ></View>
     );
 };
+
+export default XTable;
