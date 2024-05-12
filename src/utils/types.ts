@@ -111,6 +111,20 @@ export const SortableRecommendationFields = {
     PUBLISHED: 'published',
 };
 
+export const SearchableExerciseFields = {
+    ID: 'id',
+    TITLE: 'title',
+    DESCRIPTION: 'description',
+} as const;
+
+export const SortableExerciseFields = {
+    ID: 'id',
+    TITLE: 'title',
+    CREATED_AT: 'createdAt',
+    UPDATED_AT: 'updatedAt',
+    PUBLISHED: 'published',
+};
+
 export const Order = {
     ASC: 'asc',
     DESC: 'desc',

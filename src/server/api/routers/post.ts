@@ -10,8 +10,8 @@ import {
     PostUpdateSchema,
     SetBooleanSchema,
 } from '~/utils/schemas';
-import { isPermitted } from '~/utils/authAssertions';
-import { AccessType, SearchablePostFields } from '~/utils/types';
+import { SearchablePostFields } from '~/utils/types';
+import { getFullAccessConstraint } from '~/utils/auth';
 
 export const postRouter = createTRPCRouter({
     list: publicProcedure
@@ -53,16 +53,19 @@ export const postRouter = createTRPCRouter({
                     ],
                 };
 
-                const [count, values] = await ctx.db.$transaction([
-                    ctx.db.post.count({
-                        ...(query && {
-                            where: containsQuery,
-                        }),
+                const where: object = {
+                    ...(query && {
+                        where: {
+                            ...containsQuery,
+                            ...getFullAccessConstraint(ctx),
+                        },
                     }),
+                };
+
+                const [count, values] = await ctx.db.$transaction([
+                    ctx.db.post.count(where),
                     ctx.db.post.findMany({
-                        ...(query && {
-                            where: containsQuery,
-                        }),
+                        where,
                         include: {
                             author: {
                                 select: { name: true },
@@ -86,51 +89,15 @@ export const postRouter = createTRPCRouter({
         ),
 
     get: publicProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
-        const post = await ctx.db.post.findUnique({
-            where: { id: input },
+        return ctx.db.post.findUnique({
+            where: { id: input, ...getFullAccessConstraint(ctx) },
             include: {
                 author: {
                     select: { name: true },
                 },
             },
         });
-
-        if (!post) return null;
-
-        if (
-            post.published ||
-            (ctx.session &&
-                (ctx.session.user.id === post.authorId ||
-                    isPermitted(
-                        ctx.session?.user?.permissions,
-                        ctx.entity,
-                        ctx.action,
-                    ) === AccessType.ALL))
-        )
-            return post;
-
-        return null;
     }),
-
-    getUnpublished: permissionProcedure
-        .input(PageSchema)
-        .query(async ({ input, ctx }) => {
-            return ctx.db.post.findMany({
-                where: {
-                    published: false,
-                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
-                },
-                include: {
-                    author: {
-                        select: { name: true },
-                    },
-                },
-
-                orderBy: { createdAt: 'desc' },
-                skip: (input.page - 1) * input.limit,
-                take: input.limit,
-            });
-        }),
 
     create: permissionProcedure
         .input(PostSchema)

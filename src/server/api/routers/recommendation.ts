@@ -10,8 +10,8 @@ import {
     RecommendationUpdateSchema,
     SetBooleanSchema,
 } from '~/utils/schemas';
-import { isPermitted } from '~/utils/authAssertions';
-import { AccessType, SearchableRecommendationFields } from '~/utils/types';
+import { SearchableRecommendationFields } from '~/utils/types';
+import { getFullAccessConstraint } from '~/utils/auth';
 
 export const recommendationRouter = createTRPCRouter({
     list: publicProcedure
@@ -53,16 +53,19 @@ export const recommendationRouter = createTRPCRouter({
                     ],
                 };
 
-                const [count, values] = await ctx.db.$transaction([
-                    ctx.db.recommendation.count({
-                        ...(query && {
-                            where: containsQuery,
-                        }),
+                const where: object = {
+                    ...(query && {
+                        where: {
+                            ...containsQuery,
+                            ...getFullAccessConstraint(ctx),
+                        },
                     }),
+                };
+
+                const [count, values] = await ctx.db.$transaction([
+                    ctx.db.recommendation.count(where),
                     ctx.db.recommendation.findMany({
-                        ...(query && {
-                            where: containsQuery,
-                        }),
+                        where,
                         include: {
                             author: {
                                 select: { name: true },
@@ -86,51 +89,15 @@ export const recommendationRouter = createTRPCRouter({
         ),
 
     get: publicProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
-        const recommendation = await ctx.db.recommendation.findUnique({
-            where: { id: input },
+        return ctx.db.recommendation.findUnique({
+            where: { id: input, ...getFullAccessConstraint(ctx) },
             include: {
                 author: {
                     select: { name: true },
                 },
             },
         });
-
-        if (!recommendation) return null;
-
-        if (
-            recommendation.published ||
-            (ctx.session &&
-                (ctx.session.user.id === recommendation.authorId ||
-                    isPermitted(
-                        ctx.session?.user?.permissions,
-                        ctx.entity,
-                        ctx.action,
-                    ) === AccessType.ALL))
-        )
-            return recommendation;
-
-        return null;
     }),
-
-    getUnpublished: permissionProcedure
-        .input(PageSchema)
-        .query(async ({ input, ctx }) => {
-            return ctx.db.recommendation.findMany({
-                where: {
-                    published: false,
-                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
-                },
-                include: {
-                    author: {
-                        select: { name: true },
-                    },
-                },
-
-                orderBy: { createdAt: 'desc' },
-                skip: (input.page - 1) * input.limit,
-                take: input.limit,
-            });
-        }),
 
     create: permissionProcedure
         .input(RecommendationSchema)
