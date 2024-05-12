@@ -8,6 +8,7 @@ import {
     PageSchema,
     PostSchema,
     PostUpdateSchema,
+    SetBooleanSchema,
 } from '~/utils/schemas';
 import { isPermitted } from '~/utils/authAssertions';
 import { AccessType } from '~/utils/types';
@@ -123,6 +124,20 @@ export const postRouter = createTRPCRouter({
                             })),
                         },
                     }),
+                },
+            });
+        }),
+
+    publish: permissionProcedure
+        .input(SetBooleanSchema)
+        .mutation(async ({ ctx, input: { id, value } }) => {
+            return ctx.db.post.update({
+                where: {
+                    id,
+                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
+                },
+                data: {
+                    published: value,
                 },
             });
         }),

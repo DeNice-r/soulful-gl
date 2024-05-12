@@ -7,7 +7,7 @@ import {
     CreateUserSchema,
     SearchUsersSchema,
     SetNotesSchema,
-    SetSuspendedSchema,
+    SetBooleanSchema,
     StringIdSchema,
     UpdateUserSchema,
 } from '~/utils/schemas';
@@ -171,7 +171,7 @@ export const userRouter = createTRPCRouter({
         }),
 
     suspend: permissionProcedure
-        .input(SetSuspendedSchema)
+        .input(SetBooleanSchema)
         .mutation(async ({ ctx, input: { id, value } }) => {
             // todo: archive all user's chats if any upon suspension
             if (ctx.session.user.id === id) {

@@ -1,14 +1,15 @@
 import React from 'react';
 import { api, type RouterOutputs } from '~/utils/api';
-import { TableCell } from '../ui/table';
+import { TableCell } from '../../ui/table';
 import {
     Popover,
     PopoverTrigger,
     PopoverContent,
 } from '~/components/ui/popover';
-import { Button } from '../ui/button';
+import { Button } from '../../ui/button';
 import { defaultFormatDt } from '~/utils/dates';
 import { useToast } from '~/components/ui/use-toast';
+import Image from 'next/image';
 
 export const User: React.FC<{
     user: RouterOutputs['user']['list']['values'][number];
@@ -54,6 +55,15 @@ export const User: React.FC<{
 
     return (
         <>
+            <TableCell>
+                <Image
+                    className="rounded-full"
+                    src={user.image ? user.image : '/images/placeholder.svg'}
+                    alt={user.name ?? 'Аватар'}
+                    width={32}
+                    height={32}
+                />
+            </TableCell>
             <TableCell>{user.id}</TableCell>
             <TableCell>{user.email ?? '📲'}</TableCell>
             <TableCell>{user.name ?? '👤'}</TableCell>

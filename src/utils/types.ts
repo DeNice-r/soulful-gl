@@ -72,6 +72,14 @@ export const SortableUserFields = {
     SUSPENDED: 'suspended',
 };
 
+export const SortablePostFields = {
+    ID: 'id',
+    TITLE: 'title',
+    AUTHOR_NAME: 'authorName',
+    CREATED_AT: 'createdAt',
+    UPDATED_AT: 'updatedAt',
+};
+
 export const Order = {
     ASC: 'asc',
     DESC: 'desc',

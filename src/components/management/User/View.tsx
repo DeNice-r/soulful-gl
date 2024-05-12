@@ -11,14 +11,15 @@ import {
 } from '~/components/ui/table';
 import { type RouterOutputs, api } from '~/utils/api';
 import Modal from 'react-modal';
-import { UsersForm } from '~/components/management/UsersForm';
+import { XForm } from '~/components/management/User/XForm';
 import { Spinner } from '~/components/ui/spinner';
 import { TableCell } from '@mui/material';
-import { User } from '~/components/management/User';
+import { User } from '~/components/management/User/User';
 import { CustomPagination } from '~/components/CustomPagination';
 import { SortableUserFields } from '~/utils/types';
 
 const UserTableHeaders: Record<string, string> = {
+    image: 'Аватар',
     [SortableUserFields.ID]: 'Ідентифікатор',
     [SortableUserFields.EMAIL]: 'Електронна пошта',
     [SortableUserFields.NAME]: "Ім'я",
@@ -28,7 +29,7 @@ const UserTableHeaders: Record<string, string> = {
     [SortableUserFields.SUSPENDED]: 'Статус',
 } as const;
 
-export const UsersView: React.FC<{
+export const View: React.FC<{
     usersQuery: {
         data?: RouterOutputs['user']['list'];
         // return type is unused anyway, so no need to waste time on it
@@ -187,7 +188,7 @@ export const UsersView: React.FC<{
                     onRequestClose={changeModalState}
                     className="flex h-svh w-svw items-center justify-center"
                 >
-                    <UsersForm
+                    <XForm
                         formRef={formRef}
                         changeModalState={changeModalState}
                         user={editableUser}
@@ -201,7 +202,6 @@ export const UsersView: React.FC<{
                             {Object.keys(UserTableHeaders).map((key) => {
                                 return (
                                     <TableHead
-                                        className="min-w-[150px]"
                                         key={key}
                                         onClick={() => setOrderBy(key)}
                                     >

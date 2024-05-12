@@ -1,12 +1,12 @@
 import React from 'react';
 import { ManagementPageName } from '~/utils/types';
-import { Sidebar } from '~/components/management/Sidebar';
-import { ShortHeader } from '~/components/management/ShortHeader';
-import { Operators } from '~/components/management/Operators';
+import { Sidebar } from '~/components/management/common/Sidebar';
+import { ShortHeader } from '~/components/management/common/ShortHeader';
+import { Operators } from '~/components/management/User/Operators';
 import { Toaster } from '~/components/ui/toaster';
-import { Users } from '~/components/management/Users';
+import { Users } from '~/components/management/User/Users';
 import { Statistics } from '~/components/management/Statistics';
-import { Posts } from '~/components/management/Posts';
+import { Posts } from '~/components/management/Post/Posts';
 
 const pages = {
     [ManagementPageName.STATISTICS]: <Statistics />,

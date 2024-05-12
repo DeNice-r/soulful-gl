@@ -33,9 +33,9 @@ export const TitleSchema = z.string().min(1).max(200);
 export const QuerySchema = z.string().min(1).max(200);
 export const RichTextSchema = z.string().max(15000);
 
-const ImageBucketRegex = new RegExp(
-    `https://${env.NEXT_PUBLIC_AWS_S3_BUCKET}\\.s3(?:\\.${env.NEXT_PUBLIC_AWS_REGION})?\\.amazonaws\\.com/.+`,
-);
+// const ImageBucketRegex = new RegExp(
+//     `https://${env.NEXT_PUBLIC_AWS_S3_BUCKET}\\.s3(?:\\.${env.NEXT_PUBLIC_AWS_REGION})?\\.amazonaws\\.com/.+`,
+// );
 export const ImageSchema = z.string();
 // .refine((value) => ImageBucketRegex.test(value));
 
@@ -73,7 +73,7 @@ export const UpdateUserSchema = z.object({
     notes: z.string().optional(),
 });
 
-export const SetSuspendedSchema = z.object({
+export const SetBooleanSchema = z.object({
     id: z.string(),
 
     value: z.boolean(),
@@ -118,7 +118,7 @@ export const RecommendationUpdateSchema = TDIUpdateSchema.extend({
 });
 
 export const PostSchema = TDISchema.extend({
-    tags: z.array(z.string()).min(1).max(25).default([]),
+    tags: z.array(z.string()).min(1).max(25).optional().default([]),
     published: z.boolean().default(false),
 });
 

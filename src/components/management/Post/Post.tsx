@@ -1,28 +1,48 @@
 import React from 'react';
+import Image from 'next/image';
 import { api, type RouterOutputs } from '~/utils/api';
-import { TableCell } from '../ui/table';
+import { TableCell } from '../../ui/table';
 import {
     Popover,
     PopoverTrigger,
     PopoverContent,
 } from '~/components/ui/popover';
-import { Button } from '../ui/button';
+import { Button } from '../../ui/button';
 import { defaultFormatDt } from '~/utils/dates';
 import { useToast } from '~/components/ui/use-toast';
 import { truncateString } from '~/utils';
+import { MoreHorizontalIcon } from 'lucide-react';
 
 export const Post: React.FC<{
     post: RouterOutputs['post']['list']['values'][number];
     editPost: (arg: string) => void;
     refetch: () => void;
 }> = ({ post, editPost, refetch }) => {
-    // const publishPostMutation = api.post.publish.useMutation();
+    const publishPostMutation = api.post.publish.useMutation();
     const deletePostMutation = api.post.delete.useMutation();
     const { toast } = useToast();
 
-    async function deletePost(id: string) {
+    async function publishPost() {
         try {
-            await deletePostMutation.mutateAsync(id);
+            publishPostMutation.mutate({
+                id: post.id,
+                value: !post.published,
+            });
+        } catch (e) {
+            console.error(e);
+            toast({
+                title: 'Помилка',
+                description:
+                    e instanceof Error ? e.message : 'Невідома помилка',
+                variant: 'destructive',
+            });
+        }
+        void refetch();
+    }
+
+    async function deletePost() {
+        try {
+            deletePostMutation.mutate(post.id);
         } catch (e) {
             console.error(e);
             toast({
@@ -37,12 +57,19 @@ export const Post: React.FC<{
 
     return (
         <>
+            <TableCell>
+                {post.image && (
+                    <Image
+                        src={post.image ?? '/images/placeholder.svg'}
+                        alt={post.title}
+                        width={128}
+                        height={72}
+                    />
+                )}
+            </TableCell>
             <TableCell>{post.id}</TableCell>
-            <TableCell>{truncateString(post.title)}</TableCell>
-            <TableCell>{truncateString(post.description)}</TableCell>
-            <TableCell>{post.image}</TableCell>
-            <TableCell>{post?.author?.name}</TableCell>
-
+            <TableCell>{post.title}</TableCell>
+            <TableCell>{post?.author?.name ?? '👤'}</TableCell>
             <TableCell>{defaultFormatDt(post.createdAt)}</TableCell>
             <TableCell>{defaultFormatDt(post.updatedAt)}</TableCell>
             <TableCell>{post.published ? '✅' : '⛔'}</TableCell>
@@ -58,16 +85,11 @@ export const Post: React.FC<{
                         <Button onClick={() => editPost(post.id)}>
                             Редагувати
                         </Button>
-                        {/*<Button*/}
-                        {/*    variant="outline"*/}
-                        {/*    onClick={() => publishPost(user.id)}*/}
-                        {/*>*/}
-                        {/*    {user.suspended ? 'Увімкнути' : 'Відключити'} запис*/}
-                        {/*</Button>*/}
-                        <Button
-                            variant={'destructive'}
-                            onClick={() => deletePost(post.id)}
-                        >
+                        <Button variant="outline" onClick={publishPost}>
+                            {post.published ? 'Приховати' : 'Опублікувати'}{' '}
+                            запис
+                        </Button>
+                        <Button variant="destructive" onClick={deletePost}>
                             Видалити
                         </Button>
                     </PopoverContent>
@@ -76,26 +98,3 @@ export const Post: React.FC<{
         </>
     );
 };
-
-function MoreHorizontalIcon(
-    props: React.JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>,
-) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <circle cx="12" cy="12" r="1" />
-            <circle cx="19" cy="12" r="1" />
-            <circle cx="5" cy="12" r="1" />
-        </svg>
-    );
-}

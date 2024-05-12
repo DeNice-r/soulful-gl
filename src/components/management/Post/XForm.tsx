@@ -13,12 +13,12 @@ import { Input } from '~/components/ui/input';
 import type * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CreateUserSchema } from '~/utils/schemas';
+import { PostSchema } from '~/utils/schemas';
 import { api, type RouterOutputs } from '~/utils/api';
 import { uploadImage } from '~/utils/s3/frontend';
-import { Editor } from './Editor';
+import { Editor } from '../common/Editor';
 import Modal from 'react-modal';
-import getCroppedImg from '../utils/cropImage';
+import getCroppedImg from '../../utils/cropImage';
 import Cropper, { type Area, type Point } from 'react-easy-crop';
 
 declare module 'react' {
@@ -27,13 +27,13 @@ declare module 'react' {
     }
 }
 
-export const UsersForm: React.FC<{
-    user?: RouterOutputs['user']['getById'];
+export const XForm: React.FC<{
+    post?: RouterOutputs['post']['get'];
     changeModalState: () => void;
     formRef: RefObject<HTMLFormElement>;
-}> = ({ user, changeModalState, formRef }) => {
-    const createUser = api.user.create.useMutation();
-    const updateUser = api.user.update.useMutation();
+}> = ({ post, changeModalState, formRef }) => {
+    const create = api.post.create.useMutation();
+    const update = api.post.update.useMutation();
 
     const [imageSrc, setImageSrc] = useState<string | null>(null);
     const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
@@ -42,28 +42,25 @@ export const UsersForm: React.FC<{
         null,
     );
 
-    const form = useForm<z.infer<typeof CreateUserSchema>>({
-        resolver: zodResolver(CreateUserSchema),
+    const form = useForm<z.infer<typeof PostSchema>>({
+        resolver: zodResolver(PostSchema),
         defaultValues: {
-            name: user?.name ?? '',
-            description: user?.description ?? '',
-            email: user?.email ?? '',
-            image: user?.image ?? '',
-            notes: user?.notes ?? '',
+            title: post?.title ?? '',
+            description: post?.description ?? '',
+            image: post?.image ?? '',
+            // published: post?.published ?? false,
         },
     });
-    function onSubmit(values: z.infer<typeof CreateUserSchema>) {
-        if (user) {
-            updateUser.mutate({ id: user.id, ...values });
+    async function onSubmit(values: z.infer<typeof PostSchema>) {
+        if (post) {
+            await update.mutateAsync({ id: post.id, ...values });
         } else {
-            createUser.mutate(values);
+            await create.mutateAsync(values);
         }
         changeModalState();
     }
 
-    function createSetDescription(
-        field: keyof z.infer<typeof CreateUserSchema>,
-    ) {
+    function createSetValue(field: keyof z.infer<typeof PostSchema>) {
         return async function setDescription(value: string) {
             form.setValue(field, value);
         };
@@ -122,9 +119,9 @@ export const UsersForm: React.FC<{
                                 >
                                     <div
                                         style={{
-                                            '--image-url': `url(${field.value ? field.value : user?.image})`,
+                                            '--image-url': `url(${field.value ? field.value : post?.image})`,
                                         }}
-                                        className={`flex h-24 w-24 items-center justify-center rounded-full border-2 border-gray-400 bg-white bg-[image:var(--image-url)] bg-cover transition-all hover:opacity-80 dark:bg-gray-700`}
+                                        className={`flex h-36 w-72 items-center justify-center border-2 border-gray-400 bg-white bg-[image:var(--image-url)] bg-cover transition-all hover:opacity-80 dark:bg-gray-700`}
                                     >
                                         <UploadIcon className="h-8 w-8 text-gray-500 dark:text-gray-400" />
                                     </div>
@@ -172,8 +169,7 @@ export const UsersForm: React.FC<{
                                                     image={imageSrc ?? ''}
                                                     crop={crop}
                                                     zoom={zoom}
-                                                    aspect={1 / 1}
-                                                    cropShape="round"
+                                                    aspect={16 / 9}
                                                     onCropChange={setCrop}
                                                     onCropComplete={
                                                         onCropComplete
@@ -206,40 +202,16 @@ export const UsersForm: React.FC<{
                             <div className="flex w-full justify-between gap-4">
                                 <FormField
                                     control={form.control}
-                                    name="email"
+                                    name="title"
                                     render={({ field }) => (
                                         <FormItem className="basis-1/2">
                                             <FormLabel className="text-xl">
-                                                Електронна пошта
+                                                Заголовок
                                             </FormLabel>
                                             <FormControl>
                                                 <Input
                                                     className="flex-grow outline outline-1 outline-neutral-400"
-                                                    disabled={!!user}
-                                                    placeholder={
-                                                        !user || user.email
-                                                            ? 'anton@gmail.com'
-                                                            : '📲'
-                                                    }
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="name"
-                                    render={({ field }) => (
-                                        <FormItem className="basis-1/2">
-                                            <FormLabel className="text-xl">
-                                                Ім&apos;я користувача
-                                            </FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    className="flex-grow outline outline-1 outline-neutral-400"
-                                                    placeholder="Антон"
+                                                    placeholder="Як обрати психолога. 7 порад."
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -258,16 +230,16 @@ export const UsersForm: React.FC<{
                                         </FormLabel>
                                         <Editor
                                             defaultValue={
-                                                user?.description ?? ''
+                                                post?.description ?? ''
                                             }
-                                            onChange={createSetDescription(
+                                            onChange={createSetValue(
                                                 'description',
                                             )}
                                         />
                                         <style>
                                             {`
                                             .ql-editor {
-                                                max-height: 100px;
+                                                max-height: 350px;
                                             }`}
                                         </style>
                                         <FormControl>
@@ -277,66 +249,18 @@ export const UsersForm: React.FC<{
                                             />
                                         </FormControl>
                                         <FormDescription>
-                                            Опис нового користувача (видимий для
-                                            користувача)
+                                            Текст допису
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name="notes"
-                                render={({ field }) => (
-                                    <FormItem className="">
-                                        <FormLabel className="text-xl">
-                                            Нотатки про користувача
-                                        </FormLabel>
-                                        <Editor
-                                            defaultValue={user?.notes ?? ''}
-                                            onChange={createSetDescription(
-                                                'notes',
-                                            )}
-                                        />
-                                        <FormControl>
-                                            <Input
-                                                className="hidden"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
                         </div>
-                        {/* todo: userRole */}
-                        {/* <FormField
-                            control={form.control}
-                            name="role"
-                            render={({ field }) => (
-                                <FormItem className="flex-1">
-                                    <FormLabel className="text-xl">
-                                        Username
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            className="flex-grow outline outline-1 outline-neutral-400"
-                                            placeholder="anton@gmail.com"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormDescription>
-                                        This is your public display name.
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        /> */}
                     </div>
 
                     <div className="flex gap-8 self-end">
                         <Button className=" px-7 py-6" type="submit">
-                            {user ? 'Редагувати' : 'Створити'}
+                            {post ? 'Редагувати' : 'Створити'}
                         </Button>
                         <Button
                             className="px-7 py-6"

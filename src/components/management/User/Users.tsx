@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { UsersView } from '~/components/management/UsersView';
+import type React from 'react';
+import { useState } from 'react';
+import { View } from '~/components/management/User/View';
 import { api } from '~/utils/api';
 import { DEFAULT_LIMIT, NO_REFETCH } from '~/utils/constants';
 import { useRouter } from 'next/router';
 
-export const Operators: React.FC = () => {
+export const Users: React.FC = () => {
     const router = useRouter();
     const queryParam = router.query.query;
     const orderBy = router.query.orderBy as string | undefined;
@@ -20,14 +21,14 @@ export const Operators: React.FC = () => {
     const page = router.query.page ? Number(router.query.page) : 1;
 
     const users = api.user.list.useQuery(
-        { limit, page, query, orderBy, order, permissions: ['chat:*'] },
+        { limit, page, query, orderBy, order },
         NO_REFETCH,
     );
 
     const total = users.data?.count ? Math.ceil(users.data.count / limit) : 0;
 
     return (
-        <UsersView
+        <View
             {...{
                 usersQuery: users,
                 page,
@@ -38,6 +39,6 @@ export const Operators: React.FC = () => {
                 orderBy,
                 order,
             }}
-        ></UsersView>
+        ></View>
     );
 };
