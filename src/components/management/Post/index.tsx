@@ -6,7 +6,6 @@ import { useRouter } from 'next/router';
 import Modal from 'react-modal';
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
-import { XForm } from '~/components/management/Post/XForm';
 import {
     Table,
     TableBody,
@@ -18,15 +17,17 @@ import { CustomPagination } from '~/components/CustomPagination';
 import { TableCell } from '@mui/material';
 import { Spinner } from '~/components/ui/spinner';
 import { SortablePostFields } from '~/utils/types';
-import { Post } from '~/components/management/Post/Post';
+import { Single } from '~/components/management/Post/Single';
+import { XForm } from '~/components/management/Post/XForm';
 
-const PostTableHeaders: Record<string, string> = {
+const TableHeaders: Record<string, string> = {
     image: 'Зображення',
     [SortablePostFields.ID]: 'Ідентифікатор',
     [SortablePostFields.TITLE]: 'Заголовок',
     author: 'Автор',
     [SortablePostFields.CREATED_AT]: 'Дата створення',
     [SortablePostFields.UPDATED_AT]: 'Дата оновлення',
+    [SortablePostFields.PUBLISHED]: 'Статус',
 } as const;
 
 const XTable: React.FC = () => {
@@ -44,12 +45,14 @@ const XTable: React.FC = () => {
         : DEFAULT_LIMIT;
     const page = router.query.page ? Number(router.query.page) : 1;
 
-    const posts = api.post.list.useQuery(
+    const entities = api.post.list.useQuery(
         { limit, page, query, orderBy, order },
         NO_REFETCH,
     );
 
-    const total = posts.data?.count ? Math.ceil(posts.data.count / limit) : 0;
+    const total = entities.data?.count
+        ? Math.ceil(entities.data.count / limit)
+        : 0;
 
     const [_, setState] = useState(0);
     const [isMouseDown, setIsMouseDown] = useState(false);
@@ -60,7 +63,7 @@ const XTable: React.FC = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const changeModalState = () => {
-        void posts.refetch();
+        void entities.refetch();
         setIsModalOpen(!isModalOpen);
     };
     const [editablePost, setEditablePost] =
@@ -81,7 +84,7 @@ const XTable: React.FC = () => {
     }
 
     async function refetch() {
-        await posts.refetch();
+        await entities.refetch();
     }
 
     const goToPage = (page: number) => {
@@ -119,8 +122,8 @@ const XTable: React.FC = () => {
     useEffect(() => Modal.setAppElement('body'));
 
     useEffect(() => {
-        if (posts.data) rerender();
-    }, [posts.data]);
+        if (entities.data) rerender();
+    }, [entities.data]);
 
     useEffect(() => {
         const handleMouseDown = (event: MouseEvent) => {
@@ -198,7 +201,7 @@ const XTable: React.FC = () => {
                     <XForm
                         formRef={formRef}
                         changeModalState={changeModalState}
-                        post={editablePost}
+                        entity={editablePost}
                     />
                 </Modal>
             </div>
@@ -206,7 +209,7 @@ const XTable: React.FC = () => {
                 <Table>
                     <TableHeader>
                         <TableRow className="hover:bg-neutral-300">
-                            {Object.keys(PostTableHeaders).map((key) => {
+                            {Object.keys(TableHeaders).map((key) => {
                                 return (
                                     <TableHead
                                         className="min-w-[150px]"
@@ -214,7 +217,7 @@ const XTable: React.FC = () => {
                                         onClick={() => setOrderBy(key)}
                                     >
                                         <div className="flex items-center justify-between">
-                                            <span>{PostTableHeaders[key]}</span>
+                                            <span>{TableHeaders[key]}</span>
                                             <span>
                                                 {orderBy === key
                                                     ? order === 'asc'
@@ -229,15 +232,15 @@ const XTable: React.FC = () => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {posts.data?.values &&
-                            posts.data.values.map((post) => (
+                        {entities.data?.values &&
+                            entities.data.values.map((post) => (
                                 <TableRow
                                     key={post.id}
                                     className="hover:bg-neutral-100/30"
                                 >
-                                    <Post
-                                        editPost={editPost}
-                                        post={post}
+                                    <Single
+                                        edit={editPost}
+                                        entity={post}
                                         refetch={refetch}
                                     />
                                 </TableRow>
@@ -247,7 +250,7 @@ const XTable: React.FC = () => {
                             total={total}
                             goToPage={goToPage}
                         />
-                        {!posts.data && (
+                        {!entities.data && (
                             <TableRow>
                                 <TableCell colSpan={100}>
                                     <Spinner size="large" />

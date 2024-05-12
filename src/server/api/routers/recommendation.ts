@@ -8,26 +8,84 @@ import {
     PageSchema,
     RecommendationSchema,
     RecommendationUpdateSchema,
+    SetBooleanSchema,
 } from '~/utils/schemas';
 import { isPermitted } from '~/utils/authAssertions';
-import { AccessType } from '~/utils/types';
+import { AccessType, SearchableRecommendationFields } from '~/utils/types';
 
 export const recommendationRouter = createTRPCRouter({
-    get: publicProcedure.input(PageSchema).query(async ({ input, ctx }) => {
-        return ctx.db.recommendation.findMany({
-            include: {
-                author: {
-                    select: { name: true },
-                },
+    list: publicProcedure
+        .input(PageSchema)
+        .query(
+            async ({ input: { page, limit, query, orderBy, order }, ctx }) => {
+                const contains = {
+                    contains: query,
+                    mode: 'insensitive',
+                };
+
+                const containsQuery: object = {
+                    OR: [
+                        ...Object.values(SearchableRecommendationFields).map(
+                            (field) => ({
+                                [field]: contains,
+                            }),
+                        ),
+
+                        {
+                            author: {
+                                name: {
+                                    contains: query,
+                                    mode: 'insensitive',
+                                },
+                            },
+                        },
+
+                        {
+                            tags: {
+                                some: {
+                                    title: {
+                                        contains: query,
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                };
+
+                const [count, values] = await ctx.db.$transaction([
+                    ctx.db.recommendation.count({
+                        ...(query && {
+                            where: containsQuery,
+                        }),
+                    }),
+                    ctx.db.recommendation.findMany({
+                        ...(query && {
+                            where: containsQuery,
+                        }),
+                        include: {
+                            author: {
+                                select: { name: true },
+                            },
+                        },
+                        orderBy: {
+                            [orderBy ? orderBy : 'createdAt']: order
+                                ? order
+                                : 'desc',
+                        },
+                        skip: (page - 1) * limit,
+                        take: limit,
+                    }),
+                ]);
+
+                return {
+                    count,
+                    values,
+                };
             },
+        ),
 
-            orderBy: { createdAt: 'desc' },
-            skip: (input.page - 1) * input.limit,
-            take: input.limit,
-        });
-    }),
-
-    getById: publicProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
+    get: publicProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
         const recommendation = await ctx.db.recommendation.findUnique({
             where: { id: input },
             include: {
@@ -101,6 +159,20 @@ export const recommendationRouter = createTRPCRouter({
                     image: input.image,
 
                     published: input.published,
+                },
+            });
+        }),
+
+    publish: permissionProcedure
+        .input(SetBooleanSchema)
+        .mutation(async ({ ctx, input: { id, value } }) => {
+            return ctx.db.recommendation.update({
+                where: {
+                    id,
+                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
+                },
+                data: {
+                    published: value,
                 },
             });
         }),

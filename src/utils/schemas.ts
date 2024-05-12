@@ -108,7 +108,9 @@ export const MultiPermissionRoleSchema = z.object({
 });
 
 export const RecommendationSchema = TDISchema.extend({
-    published: z.boolean(),
+    title: z.string().min(3).max(100),
+    description: z.string().min(3).max(250),
+    published: z.boolean().optional().default(false),
 });
 
 export const RecommendationUpdateSchema = TDIUpdateSchema.extend({

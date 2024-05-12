@@ -43,6 +43,7 @@ export enum ManagementPageName {
     USERS = 'users',
     OPERATORS = 'operators',
     POSTS = 'posts',
+    RECOMMENDATIONS = 'recommendations',
     EXCERCISES = 'excercises',
     KNOWLEDGE = 'knowledge',
     ACHIEVEMENTS = 'achievements',
@@ -55,6 +56,7 @@ export const PageTitleMap = {
     [ManagementPageName.USERS]: 'Користувачі',
     [ManagementPageName.OPERATORS]: 'Оператори',
     [ManagementPageName.POSTS]: 'Дописи',
+    [ManagementPageName.RECOMMENDATIONS]: 'Рекомендації',
     [ManagementPageName.EXCERCISES]: 'Вправи',
     [ManagementPageName.KNOWLEDGE]: 'База знань',
     [ManagementPageName.ACHIEVEMENTS]: 'Досягнення',
@@ -91,6 +93,22 @@ export const SortablePostFields = {
     TITLE: 'title',
     CREATED_AT: 'createdAt',
     UPDATED_AT: 'updatedAt',
+    PUBLISHED: 'published',
+};
+
+export const SearchableRecommendationFields = {
+    ID: 'id',
+    TITLE: 'title',
+    DESCRIPTION: 'description',
+} as const;
+
+export const SortableRecommendationFields = {
+    ID: 'id',
+    TITLE: 'title',
+    DESCRIPTION: 'description',
+    CREATED_AT: 'createdAt',
+    UPDATED_AT: 'updatedAt',
+    PUBLISHED: 'published',
 };
 
 export const Order = {

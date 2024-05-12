@@ -20,17 +20,19 @@ const XTable: React.FC = () => {
         : DEFAULT_LIMIT;
     const page = router.query.page ? Number(router.query.page) : 1;
 
-    const users = api.user.list.useQuery(
+    const entities = api.user.list.useQuery(
         { limit, page, query, orderBy, order },
         NO_REFETCH,
     );
 
-    const total = users.data?.count ? Math.ceil(users.data.count / limit) : 0;
+    const total = entities.data?.count
+        ? Math.ceil(entities.data.count / limit)
+        : 0;
 
     return (
         <View
             {...{
-                usersQuery: users,
+                entities,
                 page,
                 total,
                 router,

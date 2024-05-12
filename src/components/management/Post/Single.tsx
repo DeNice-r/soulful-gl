@@ -10,23 +10,22 @@ import {
 import { Button } from '../../ui/button';
 import { defaultFormatDt } from '~/utils/dates';
 import { useToast } from '~/components/ui/use-toast';
-import { truncateString } from '~/utils';
 import { MoreHorizontalIcon } from 'lucide-react';
 
-export const Post: React.FC<{
-    post: RouterOutputs['post']['list']['values'][number];
-    editPost: (arg: string) => void;
+export const Single: React.FC<{
+    entity: RouterOutputs['post']['list']['values'][number];
+    edit: (arg: string) => void;
     refetch: () => void;
-}> = ({ post, editPost, refetch }) => {
-    const publishPostMutation = api.post.publish.useMutation();
-    const deletePostMutation = api.post.delete.useMutation();
+}> = ({ entity, edit, refetch }) => {
+    const publish = api.post.publish.useMutation();
+    const delete_ = api.post.delete.useMutation();
     const { toast } = useToast();
 
-    async function publishPost() {
+    async function publishHandler() {
         try {
-            publishPostMutation.mutate({
-                id: post.id,
-                value: !post.published,
+            publish.mutate({
+                id: entity.id,
+                value: !entity.published,
             });
         } catch (e) {
             console.error(e);
@@ -40,9 +39,9 @@ export const Post: React.FC<{
         void refetch();
     }
 
-    async function deletePost() {
+    async function deleteHandler() {
         try {
-            deletePostMutation.mutate(post.id);
+            delete_.mutate(entity.id);
         } catch (e) {
             console.error(e);
             toast({
@@ -58,22 +57,22 @@ export const Post: React.FC<{
     return (
         <>
             <TableCell>
-                {post.image && (
+                {entity.image && (
                     <Image
-                        src={post.image ?? '/images/placeholder.svg'}
-                        alt={post.title}
+                        src={entity.image ?? '/images/placeholder.svg'}
+                        alt={entity.title}
                         width={128}
                         height={72}
                         className="rounded-md"
                     />
                 )}
             </TableCell>
-            <TableCell>{post.id}</TableCell>
-            <TableCell>{post.title}</TableCell>
-            <TableCell>{post?.author?.name ?? '👤'}</TableCell>
-            <TableCell>{defaultFormatDt(post.createdAt)}</TableCell>
-            <TableCell>{defaultFormatDt(post.updatedAt)}</TableCell>
-            <TableCell>{post.published ? '✅' : '⛔'}</TableCell>
+            <TableCell>{entity.id}</TableCell>
+            <TableCell>{entity.title}</TableCell>
+            <TableCell>{entity?.author?.name ?? '👤'}</TableCell>
+            <TableCell>{defaultFormatDt(entity.createdAt)}</TableCell>
+            <TableCell>{defaultFormatDt(entity.updatedAt)}</TableCell>
+            <TableCell>{entity.published ? '✅' : '⛔'}</TableCell>
             <TableCell className="text-right">
                 <Popover>
                     <PopoverTrigger asChild>
@@ -83,14 +82,14 @@ export const Post: React.FC<{
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className="flex flex-col gap-2 transition-colors">
-                        <Button onClick={() => editPost(post.id)}>
+                        <Button onClick={() => edit(entity.id)}>
                             Редагувати
                         </Button>
-                        <Button variant="outline" onClick={publishPost}>
-                            {post.published ? 'Приховати' : 'Опублікувати'}{' '}
+                        <Button variant="outline" onClick={publishHandler}>
+                            {entity.published ? 'Приховати' : 'Опублікувати'}{' '}
                             запис
                         </Button>
-                        <Button variant="destructive" onClick={deletePost}>
+                        <Button variant="destructive" onClick={deleteHandler}>
                             Видалити
                         </Button>
                     </PopoverContent>

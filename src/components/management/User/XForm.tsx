@@ -28,10 +28,10 @@ declare module 'react' {
 }
 
 export const XForm: React.FC<{
-    user?: RouterOutputs['user']['getById'];
+    entity?: RouterOutputs['user']['get'];
     changeModalState: () => void;
     formRef: RefObject<HTMLFormElement>;
-}> = ({ user, changeModalState, formRef }) => {
+}> = ({ entity, changeModalState, formRef }) => {
     const create = api.user.create.useMutation();
     const update = api.user.update.useMutation();
 
@@ -45,16 +45,16 @@ export const XForm: React.FC<{
     const form = useForm<z.infer<typeof CreateUserSchema>>({
         resolver: zodResolver(CreateUserSchema),
         defaultValues: {
-            name: user?.name ?? '',
-            description: user?.description ?? '',
-            email: user?.email ?? '',
-            image: user?.image ?? '',
-            notes: user?.notes ?? '',
+            name: entity?.name ?? '',
+            description: entity?.description ?? '',
+            email: entity?.email ?? '',
+            image: entity?.image ?? '',
+            notes: entity?.notes ?? '',
         },
     });
     async function onSubmit(values: z.infer<typeof CreateUserSchema>) {
-        if (user) {
-            await update.mutateAsync({ id: user.id, ...values });
+        if (entity) {
+            await update.mutateAsync({ id: entity.id, ...values });
         } else {
             await create.mutateAsync(values);
         }
@@ -120,11 +120,11 @@ export const XForm: React.FC<{
                                 >
                                     <div
                                         style={{
-                                            '--image-url': `url(${field.value ? field.value : user?.image})`,
+                                            '--image-url': `url(${field.value ? field.value : entity?.image})`,
                                         }}
                                         className={`flex h-24 w-24 items-center justify-center rounded-full border-2 border-gray-400 bg-white bg-[image:var(--image-url)] bg-cover transition-all hover:opacity-80 dark:bg-gray-700`}
                                     >
-                                        {!user?.image && (
+                                        {!entity?.image && (
                                             <UploadIcon className="h-8 w-8 text-gray-500 dark:text-gray-400" />
                                         )}
                                     </div>
@@ -215,9 +215,9 @@ export const XForm: React.FC<{
                                             <FormControl>
                                                 <Input
                                                     className="flex-grow outline outline-1 outline-neutral-400"
-                                                    disabled={!!user}
+                                                    disabled={!!entity}
                                                     placeholder={
-                                                        !user || user.email
+                                                        !entity || entity.email
                                                             ? 'anton@gmail.com'
                                                             : '📲'
                                                     }
@@ -258,7 +258,7 @@ export const XForm: React.FC<{
                                         </FormLabel>
                                         <Editor
                                             defaultValue={
-                                                user?.description ?? ''
+                                                entity?.description ?? ''
                                             }
                                             onChange={createSetValue(
                                                 'description',
@@ -293,7 +293,7 @@ export const XForm: React.FC<{
                                             Нотатки про користувача
                                         </FormLabel>
                                         <Editor
-                                            defaultValue={user?.notes ?? ''}
+                                            defaultValue={entity?.notes ?? ''}
                                             onChange={createSetValue('notes')}
                                         />
                                         <FormControl>
@@ -334,7 +334,7 @@ export const XForm: React.FC<{
 
                     <div className="flex gap-8 self-end">
                         <Button className=" px-7 py-6" type="submit">
-                            {user ? 'Редагувати' : 'Створити'}
+                            {entity ? 'Редагувати' : 'Створити'}
                         </Button>
                         <Button
                             className="px-7 py-6"

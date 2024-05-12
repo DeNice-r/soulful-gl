@@ -2,17 +2,20 @@ import React from 'react';
 import { ManagementPageName } from '~/utils/types';
 import { Sidebar } from '~/components/management/common/Sidebar';
 import { ShortHeader } from '~/components/management/common/ShortHeader';
-import { Operators } from '~/components/management/User/Operators';
 import { Toaster } from '~/components/ui/toaster';
-import Users from '~/components/management/User';
+
 import { Statistics } from '~/components/management/Statistics';
+import Users from '~/components/management/User';
+import { Operators } from '~/components/management/User/Operators';
 import Posts from '~/components/management/Post';
+import Recommendations from '~/components/management/Recommendation';
 
 const pages = {
     [ManagementPageName.STATISTICS]: <Statistics />,
     [ManagementPageName.USERS]: <Users />,
     [ManagementPageName.OPERATORS]: <Operators />,
     [ManagementPageName.POSTS]: <Posts />,
+    [ManagementPageName.RECOMMENDATIONS]: <Recommendations />,
     [ManagementPageName.EXCERCISES]: `<Excercises />`,
     [ManagementPageName.KNOWLEDGE]: `<Knowledge />`,
     [ManagementPageName.ACHIEVEMENTS]: `<Achievements />`,

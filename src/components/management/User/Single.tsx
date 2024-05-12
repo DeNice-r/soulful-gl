@@ -11,20 +11,20 @@ import { defaultFormatDt } from '~/utils/dates';
 import { useToast } from '~/components/ui/use-toast';
 import Image from 'next/image';
 
-export const User: React.FC<{
-    user: RouterOutputs['user']['list']['values'][number];
-    editUser: (arg: string) => void;
+export const Single: React.FC<{
+    entity: RouterOutputs['user']['list']['values'][number];
+    edit: (arg: string) => void;
     refetch: () => void;
-}> = ({ user, editUser, refetch }) => {
-    const suspendUserMutation = api.user.suspend.useMutation();
-    const deleteUserMutation = api.user.delete.useMutation();
+}> = ({ entity, edit, refetch }) => {
+    const suspend = api.user.suspend.useMutation();
+    const delete_ = api.user.delete.useMutation();
     const { toast } = useToast();
 
-    async function suspendUser(id: string) {
+    async function suspendHandler(id: string) {
         try {
-            await suspendUserMutation.mutateAsync({
+            await suspend.mutateAsync({
                 id,
-                value: !user.suspended,
+                value: !entity.suspended,
             });
         } catch (e) {
             console.error(e);
@@ -38,9 +38,9 @@ export const User: React.FC<{
         void refetch();
     }
 
-    async function deleteUser(id: string) {
+    async function deleteHandler(id: string) {
         try {
-            await deleteUserMutation.mutateAsync(id);
+            await delete_.mutateAsync(id);
         } catch (e) {
             console.error(e);
             toast({
@@ -58,19 +58,21 @@ export const User: React.FC<{
             <TableCell>
                 <Image
                     className="rounded-full"
-                    src={user.image ? user.image : '/images/placeholder.svg'}
-                    alt={user.name ?? 'Аватар'}
+                    src={
+                        entity.image ? entity.image : '/images/placeholder.svg'
+                    }
+                    alt={entity.name ?? 'Аватар'}
                     width={32}
                     height={32}
                 />
             </TableCell>
-            <TableCell>{user.id}</TableCell>
-            <TableCell>{user.email ?? '📲'}</TableCell>
-            <TableCell>{user.name ?? '👤'}</TableCell>
-            <TableCell>{defaultFormatDt(user.createdAt)}</TableCell>
-            <TableCell>{defaultFormatDt(user.updatedAt)}</TableCell>
-            <TableCell>{user.reportCount}</TableCell>
-            <TableCell>{user.suspended ? '⛔' : '✅'}</TableCell>
+            <TableCell>{entity.id}</TableCell>
+            <TableCell>{entity.email ?? '📲'}</TableCell>
+            <TableCell>{entity.name ?? '👤'}</TableCell>
+            <TableCell>{defaultFormatDt(entity.createdAt)}</TableCell>
+            <TableCell>{defaultFormatDt(entity.updatedAt)}</TableCell>
+            <TableCell>{entity.reportCount}</TableCell>
+            <TableCell>{entity.suspended ? '⛔' : '✅'}</TableCell>
             <TableCell className="text-right">
                 <Popover>
                     <PopoverTrigger asChild>
@@ -80,18 +82,19 @@ export const User: React.FC<{
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className="flex flex-col gap-2 transition-colors">
-                        <Button onClick={() => editUser(user.id)}>
+                        <Button onClick={() => edit(entity.id)}>
                             Редагувати
                         </Button>
                         <Button
                             variant="outline"
-                            onClick={() => suspendUser(user.id)}
+                            onClick={() => suspendHandler(entity.id)}
                         >
-                            {user.suspended ? 'Увімкнути' : 'Відключити'} запис
+                            {entity.suspended ? 'Увімкнути' : 'Відключити'}{' '}
+                            запис
                         </Button>
                         <Button
                             variant={'destructive'}
-                            onClick={() => deleteUser(user.id)}
+                            onClick={() => deleteHandler(entity.id)}
                         >
                             Видалити
                         </Button>

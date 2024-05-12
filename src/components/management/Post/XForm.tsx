@@ -28,10 +28,10 @@ declare module 'react' {
 }
 
 export const XForm: React.FC<{
-    post?: RouterOutputs['post']['get'];
+    entity?: RouterOutputs['post']['get'];
     changeModalState: () => void;
     formRef: RefObject<HTMLFormElement>;
-}> = ({ post, changeModalState, formRef }) => {
+}> = ({ entity, changeModalState, formRef }) => {
     const create = api.post.create.useMutation();
     const update = api.post.update.useMutation();
 
@@ -45,15 +45,14 @@ export const XForm: React.FC<{
     const form = useForm<z.infer<typeof PostSchema>>({
         resolver: zodResolver(PostSchema),
         defaultValues: {
-            title: post?.title ?? '',
-            description: post?.description ?? '',
-            image: post?.image ?? '',
-            // published: post?.published ?? false,
+            title: entity?.title ?? '',
+            description: entity?.description ?? '',
+            image: entity?.image ?? '',
         },
     });
     async function onSubmit(values: z.infer<typeof PostSchema>) {
-        if (post) {
-            await update.mutateAsync({ id: post.id, ...values });
+        if (entity) {
+            await update.mutateAsync({ id: entity.id, ...values });
         } else {
             await create.mutateAsync(values);
         }
@@ -119,11 +118,11 @@ export const XForm: React.FC<{
                                 >
                                     <div
                                         style={{
-                                            '--image-url': `url(${field.value ? field.value : post?.image})`,
+                                            '--image-url': `url(${field.value ? field.value : entity?.image})`,
                                         }}
                                         className={`flex aspect-video w-72 items-center justify-center rounded-xl border-2 border-gray-400 bg-white bg-[image:var(--image-url)] bg-cover transition-all hover:opacity-80 dark:bg-gray-700`}
                                     >
-                                        {!post?.image && (
+                                        {!entity?.image && (
                                             <UploadIcon className="h-8 w-8 text-gray-500 dark:text-gray-400" />
                                         )}
                                     </div>
@@ -206,7 +205,7 @@ export const XForm: React.FC<{
                                     control={form.control}
                                     name="title"
                                     render={({ field }) => (
-                                        <FormItem className="basis-1/2">
+                                        <FormItem className="basis-full">
                                             <FormLabel className="text-xl">
                                                 Заголовок
                                             </FormLabel>
@@ -232,7 +231,7 @@ export const XForm: React.FC<{
                                         </FormLabel>
                                         <Editor
                                             defaultValue={
-                                                post?.description ?? ''
+                                                entity?.description ?? ''
                                             }
                                             onChange={createSetValue(
                                                 'description',
@@ -262,7 +261,7 @@ export const XForm: React.FC<{
 
                     <div className="flex gap-8 self-end">
                         <Button className=" px-7 py-6" type="submit">
-                            {post ? 'Редагувати' : 'Створити'}
+                            {entity ? 'Редагувати' : 'Створити'}
                         </Button>
                         <Button
                             className="px-7 py-6"

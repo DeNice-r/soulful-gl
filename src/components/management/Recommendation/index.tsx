@@ -1,49 +1,59 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { type useRouter } from 'next/router';
-import { Button } from '~/components/ui/button';
-import { Input } from '~/components/ui/input';
-import {
-    TableHead,
-    TableRow,
-    TableHeader,
-    TableBody,
-    Table,
-} from '~/components/ui/table';
-import { type RouterOutputs, api } from '~/utils/api';
+import React, { useEffect, useRef } from 'react';
+import { useState } from 'react';
+import { api, type RouterOutputs } from '~/utils/api';
+import { DEFAULT_LIMIT, NO_REFETCH } from '~/utils/constants';
+import { useRouter } from 'next/router';
 import Modal from 'react-modal';
-import { XForm } from '~/components/management/User/XForm';
-import { Spinner } from '~/components/ui/spinner';
-import { TableCell } from '@mui/material';
-import { Single } from '~/components/management/User/Single';
+import { Input } from '~/components/ui/input';
+import { Button } from '~/components/ui/button';
+import {
+    Table,
+    TableBody,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '~/components/ui/table';
 import { CustomPagination } from '~/components/CustomPagination';
-import { SortableUserFields } from '~/utils/types';
+import { TableCell } from '@mui/material';
+import { Spinner } from '~/components/ui/spinner';
+import { SortableRecommendationFields } from '~/utils/types';
+import { Single } from '~/components/management/Recommendation/Single';
+import { XForm } from '~/components/management/Recommendation/XForm';
 
 const TableHeaders: Record<string, string> = {
-    image: 'Аватар',
-    [SortableUserFields.ID]: 'Ідентифікатор',
-    [SortableUserFields.EMAIL]: 'Електронна пошта',
-    [SortableUserFields.NAME]: "Ім'я",
-    [SortableUserFields.CREATED_AT]: 'Дата створення',
-    [SortableUserFields.UPDATED_AT]: 'Дата оновлення',
-    [SortableUserFields.REPORT_COUNT]: 'Скарги',
-    [SortableUserFields.SUSPENDED]: 'Статус',
+    [SortableRecommendationFields.ID]: 'Ідентифікатор',
+    [SortableRecommendationFields.TITLE]: 'Заголовок',
+    [SortableRecommendationFields.DESCRIPTION]: 'Наповнення',
+    author: 'Автор',
+    [SortableRecommendationFields.CREATED_AT]: 'Дата створення',
+    [SortableRecommendationFields.UPDATED_AT]: 'Дата оновлення',
+    [SortableRecommendationFields.PUBLISHED]: 'Статус',
 } as const;
 
-export const View: React.FC<{
-    entities: {
-        data?: RouterOutputs['user']['list'];
-        // return type is unused anyway, so no need to waste time on it
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        refetch: () => Promise<any>;
-    };
-    page: number;
-    total: number;
-    query?: string;
-    setQuery: React.Dispatch<React.SetStateAction<string | undefined>>;
-    orderBy?: string;
-    order?: string;
-    router: ReturnType<typeof useRouter>;
-}> = ({ entities, page, total, query, setQuery, orderBy, order, router }) => {
+const XTable: React.FC = () => {
+    const router = useRouter();
+    const queryParam = router.query.query;
+    const orderBy = router.query.orderBy as string | undefined;
+    const order = router.query.order as string | undefined;
+
+    const [query, setQuery] = useState<string | undefined>(
+        queryParam as string,
+    );
+
+    const limit = router.query.limit
+        ? Number(router.query.limit)
+        : DEFAULT_LIMIT;
+    const page = router.query.page ? Number(router.query.page) : 1;
+
+    const entities = api.recommendation.list.useQuery(
+        { limit, page, query, orderBy, order },
+        NO_REFETCH,
+    );
+
+    const total = entities.data?.count
+        ? Math.ceil(entities.data.count / limit)
+        : 0;
+
     const [_, setState] = useState(0);
     const [isMouseDown, setIsMouseDown] = useState(false);
     const { client: apiClient } = api.useContext();
@@ -56,10 +66,11 @@ export const View: React.FC<{
         void entities.refetch();
         setIsModalOpen(!isModalOpen);
     };
-    const [editable, setEditable] = useState<RouterOutputs['user']['get']>();
+    const [editable, setEditable] =
+        useState<RouterOutputs['recommendation']['get']>();
 
     const edit = async (arg: string) => {
-        setEditable(await apiClient.user.get.query(arg));
+        setEditable(await apiClient.recommendation.get.query(arg));
         changeModalState();
     };
 
@@ -174,14 +185,14 @@ export const View: React.FC<{
                         name="query"
                         id="default-search"
                         className="w-full py-[1.7rem] ps-10"
-                        placeholder="Шукати користувачів"
+                        placeholder="Шукати рекомендації"
                         defaultValue={query}
                         onChange={(e) =>
                             debounce(() => setQuery(e.target.value), 1000)
                         }
                     />
                 </div>
-                <Button onClick={createUser}>Новий користувач</Button>
+                <Button onClick={createUser}>Нова рекомендація</Button>
                 <Modal
                     isOpen={isModalOpen}
                     onRequestClose={changeModalState}
@@ -201,6 +212,7 @@ export const View: React.FC<{
                             {Object.keys(TableHeaders).map((key) => {
                                 return (
                                     <TableHead
+                                        className="min-w-[150px]"
                                         key={key}
                                         onClick={() => setOrderBy(key)}
                                     >
@@ -251,3 +263,5 @@ export const View: React.FC<{
         </>
     );
 };
+
+export default XTable;
