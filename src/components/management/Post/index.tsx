@@ -24,7 +24,7 @@ const PostTableHeaders: Record<string, string> = {
     image: 'Зображення',
     [SortablePostFields.ID]: 'Ідентифікатор',
     [SortablePostFields.TITLE]: 'Заголовок',
-    [SortablePostFields.AUTHOR_NAME]: 'Автор',
+    author: 'Автор',
     [SortablePostFields.CREATED_AT]: 'Дата створення',
     [SortablePostFields.UPDATED_AT]: 'Дата оновлення',
 } as const;

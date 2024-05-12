@@ -89,7 +89,6 @@ export const SearchablePostFields = {
 export const SortablePostFields = {
     ID: 'id',
     TITLE: 'title',
-    AUTHOR_NAME: 'authorName',
     CREATED_AT: 'createdAt',
     UPDATED_AT: 'updatedAt',
 };

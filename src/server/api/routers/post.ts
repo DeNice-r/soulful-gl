@@ -23,6 +23,8 @@ export const postRouter = createTRPCRouter({
                     mode: 'insensitive',
                 };
 
+                if (orderBy === 'author') orderBy = 'authorId';
+
                 const containsQuery: object = {
                     OR: [
                         ...Object.values(SearchablePostFields).map((field) => ({
@@ -52,7 +54,11 @@ export const postRouter = createTRPCRouter({
                 };
 
                 const [count, values] = await ctx.db.$transaction([
-                    ctx.db.post.count(),
+                    ctx.db.post.count({
+                        ...(query && {
+                            where: containsQuery,
+                        }),
+                    }),
                     ctx.db.post.findMany({
                         ...(query && {
                             where: containsQuery,
