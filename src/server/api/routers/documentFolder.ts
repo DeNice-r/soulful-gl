@@ -9,23 +9,19 @@ export const documentFolderRouter = createTRPCRouter({
     list: permissionProcedure
         .input(CUIDSchema.optional())
         .query(async ({ input, ctx }) => {
-            if (input) {
-                return ctx.db.documentFolder.findMany({
-                    where: {
-                        parentId: input,
-                    },
-                });
-            }
-
             const [folders, documents] = await Promise.all([
                 ctx.db.documentFolder.findMany({
                     where: {
-                        parent: null,
+                        ...(input
+                            ? { parent: { id: input } }
+                            : { parent: null }),
                     },
                 }),
                 ctx.db.document.findMany({
                     where: {
-                        folder: null,
+                        ...(input
+                            ? { folder: { id: input } }
+                            : { folder: null }),
                     },
                 }),
             ]);
