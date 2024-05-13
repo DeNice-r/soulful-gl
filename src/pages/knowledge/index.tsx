@@ -1,5 +1,4 @@
 import type React from 'react';
-import { Icon } from '~/components/common/Icon';
 import { Layout } from '~/components/common/Layout';
 import {
     Breadcrumb,
@@ -10,8 +9,98 @@ import {
     BreadcrumbSeparator,
 } from '~/components/ui/breadcrumb';
 import { Button } from '~/components/ui/button';
+import { Plus } from 'lucide-react';
+import {
+    ContextMenu,
+    ContextMenuContent,
+    ContextMenuItem,
+    ContextMenuTrigger,
+} from '~/components/ui/context-menu';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '~/components/ui/popover';
+import { useState, type MouseEvent } from 'react';
+import { api } from '~/utils/api';
+import { useRouter } from 'next/router';
+import { FSEntity } from './FSEntity';
 
 const Knowledge: React.FC = () => {
+    const [currentEntity, setCurrentEntity] = useState<{
+        id: string;
+        type: 'folder' | 'document';
+    } | null>(null);
+    const [isEditing, setIsEditing] = useState(false);
+
+    const router = useRouter();
+
+    function handleChangeId(e: MouseEvent<HTMLElement>) {
+        const element = e.target as HTMLElement;
+        const button = element.closest('button');
+        const buttonId = button?.getAttribute('id');
+        setIsEditing(false);
+        if (button && buttonId) {
+            setCurrentEntity({
+                id: buttonId,
+                type: button.getAttribute('name') as 'folder' | 'document',
+            });
+        } else {
+            setCurrentEntity(null);
+        }
+    }
+
+    const documentFolders = api.documentFolder.list.useQuery();
+
+    const deleteMutation = {
+        folder: api.documentFolder.delete.useMutation(),
+        document: api.document.delete.useMutation(),
+    };
+
+    const updateMutation = {
+        folder: api.documentFolder.update.useMutation(),
+        document: api.document.update.useMutation(),
+    };
+
+    const handleDelete = async () => {
+        if (!currentEntity || !currentEntity.id) {
+            return;
+        }
+        await deleteMutation[currentEntity.type].mutateAsync(currentEntity.id);
+        router.reload();
+    };
+
+    const handleTitleChange = async (
+        e: React.KeyboardEvent<HTMLInputElement>,
+        id: string,
+    ) => {
+        const inputElement = e.target as HTMLInputElement;
+        if (e.key === 'Enter' && currentEntity?.id === id) {
+            await updateMutation[currentEntity.type].mutateAsync({
+                id: id,
+                title: inputElement.value,
+            });
+            await documentFolders.refetch();
+            setIsEditing(false);
+        }
+    };
+
+    function handleRenameCancel(e: React.KeyboardEvent<HTMLDivElement>) {
+        if (e.key === 'Escape' && currentEntity) {
+            setCurrentEntity(null);
+            setIsEditing(false);
+        }
+    }
+
+    function handleClickRenameCancel(e: React.MouseEvent<HTMLDivElement>) {
+        const element = e.target as HTMLElement;
+        const button = element.closest('button');
+        if (button?.getAttribute('id') !== currentEntity?.id) {
+            setCurrentEntity(null);
+            setIsEditing(false);
+        }
+    }
+
     return (
         <Layout footer={false} className="bg-knowledge-cover">
             <div className="flex w-2/3 flex-col items-center gap-10 py-12 text-slate-800">
@@ -38,22 +127,99 @@ const Knowledge: React.FC = () => {
                             </BreadcrumbList>
                         </Breadcrumb>
                     </nav>
-                    <div className="grid w-full grid-cols-auto flex-wrap justify-between gap-8 2xl:grid-cols-4">
-                        <Button className="flex h-14 flex-grow justify-start gap-4 rounded-3xl bg-neutral-300 px-6 drop-shadow-md hover:bg-neutral-300/60 active:shadow-inner active:drop-shadow-none">
-                            <Icon
-                                stroke="#000"
-                                d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
-                            />
-                            <p className="text-slate-800">Файл</p>
-                        </Button>
-                        <Button className="flex h-14 flex-grow justify-start gap-4 rounded-3xl bg-neutral-300 px-6 drop-shadow-md hover:bg-neutral-300/60 active:shadow-inner active:drop-shadow-none">
-                            <Icon
-                                stroke="#000"
-                                d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"
-                            />
-                            <p className="text-slate-800">Папка</p>
-                        </Button>
-                    </div>
+                    <ContextMenu>
+                        <ContextMenuTrigger asChild>
+                            <div
+                                onContextMenu={handleChangeId}
+                                onClick={handleClickRenameCancel}
+                                onKeyDown={handleRenameCancel}
+                                className="grid w-full grid-cols-auto grid-rows-6 flex-wrap justify-between gap-8 text-slate-800 2xl:grid-cols-4"
+                            >
+                                {!!documentFolders?.data?.folders?.length &&
+                                    documentFolders?.data?.folders?.map(
+                                        (entity) => (
+                                            <FSEntity
+                                                key={entity.id}
+                                                {...{
+                                                    type: 'folder',
+                                                    entity,
+                                                    handleTitleChange,
+                                                    currentEntity,
+                                                    isEditing,
+                                                }}
+                                            />
+                                        ),
+                                    )}
+                                {!!documentFolders?.data?.documents?.length &&
+                                    documentFolders?.data?.documents?.map(
+                                        (entity) => (
+                                            <FSEntity
+                                                key={entity.id}
+                                                {...{
+                                                    type: 'document',
+                                                    entity,
+                                                    handleTitleChange,
+                                                    currentEntity:
+                                                        currentEntity,
+                                                    isEditing,
+                                                }}
+                                            />
+                                        ),
+                                    )}
+
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button className="flex h-14 w-14 rounded-full bg-neutral-300 text-slate-800 drop-shadow-md hover:bg-neutral-400/40 active:drop-shadow-none">
+                                            <Plus />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent
+                                        align="start"
+                                        className="max-w-40 p-2 text-sm"
+                                    >
+                                        <div className="flex flex-col text-slate-800">
+                                            <p className="cursor-pointer rounded-t-md p-1 hover:bg-neutral-100">
+                                                Створити папку
+                                            </p>
+                                            <p className="cursor-pointer rounded-b-md p-1 hover:bg-neutral-100">
+                                                Створити файл
+                                            </p>
+                                        </div>
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                        </ContextMenuTrigger>
+
+                        <ContextMenuContent>
+                            {currentEntity ? (
+                                <>
+                                    <ContextMenuItem
+                                        className="cursor-pointer"
+                                        onClick={() => {
+                                            setIsEditing(true);
+                                        }}
+                                    >
+                                        Перейменувати
+                                    </ContextMenuItem>
+                                    <ContextMenuItem
+                                        onClick={handleDelete}
+                                        className="cursor-pointer text-red-500 focus:text-red-600"
+                                    >
+                                        Видалити
+                                    </ContextMenuItem>
+                                </>
+                            ) : (
+                                <>
+                                    <ContextMenuItem className="cursor-pointer">
+                                        Створити файл
+                                    </ContextMenuItem>
+                                    <ContextMenuItem className="cursor-pointer">
+                                        Створити папку
+                                    </ContextMenuItem>
+                                </>
+                            )}
+                        </ContextMenuContent>
+                    </ContextMenu>
                 </div>
             </div>
         </Layout>
