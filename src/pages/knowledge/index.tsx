@@ -24,7 +24,7 @@ import {
 import { useState, type MouseEvent } from 'react';
 import { api } from '~/utils/api';
 import { useRouter } from 'next/router';
-import FSEntity from './FSEntity';
+import { FSEntity } from '../../components/management/FSEntity';
 
 const Knowledge: React.FC = () => {
     const [currentEntity, setCurrentEntity] = useState<{

@@ -4,7 +4,7 @@ import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { type RouterOutputs } from '~/utils/api';
 
-const FSEntity: React.FC<{
+export const FSEntity: React.FC<{
     entity: RouterOutputs['documentFolder']['list'][
         | 'folders'
         | 'documents'][number];
@@ -45,5 +45,3 @@ const FSEntity: React.FC<{
         </Button>
     );
 };
-
-export default FSEntity;
