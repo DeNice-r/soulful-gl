@@ -1,4 +1,4 @@
-import type React from 'react';
+import React from 'react';
 import { Layout } from '~/components/common/Layout';
 import {
     Breadcrumb,
@@ -21,10 +21,18 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '~/components/ui/popover';
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '~/components/ui/dialog';
 import { useState, type MouseEvent } from 'react';
 import { api } from '~/utils/api';
-import { useRouter } from 'next/router';
 import { FSEntity } from '../../components/management/FSEntity';
+import { Input } from '~/components/ui/input';
+import { Label } from '~/components/ui/label';
 
 const Knowledge: React.FC = () => {
     const [currentEntity, setCurrentEntity] = useState<{
@@ -32,8 +40,16 @@ const Knowledge: React.FC = () => {
         type: 'folder' | 'document';
     } | null>(null);
     const [isEditing, setIsEditing] = useState(false);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [newEntityName, setNewEntityName] = useState('Нова папка');
+    const [creationEntity, setCreationEntity] = useState<'folder' | 'document'>(
+        'folder',
+    );
 
-    const router = useRouter();
+    function openCreateEntityWindow(type: 'folder' | 'document') {
+        setIsDialogOpen(true);
+        setCreationEntity(type);
+    }
 
     function handleChangeId(e: MouseEvent<HTMLElement>) {
         const element = e.target as HTMLElement;
@@ -62,12 +78,17 @@ const Knowledge: React.FC = () => {
         document: api.document.update.useMutation(),
     };
 
+    const createMutation = {
+        folder: api.documentFolder.create.useMutation(),
+        document: api.document.create.useMutation(),
+    };
+
     const handleDelete = async () => {
         if (!currentEntity || !currentEntity.id) {
             return;
         }
         await deleteMutation[currentEntity.type].mutateAsync(currentEntity.id);
-        router.reload();
+        await documentFolders.refetch();
     };
 
     const handleTitleChange = async (
@@ -83,6 +104,20 @@ const Knowledge: React.FC = () => {
             await documentFolders.refetch();
             setIsEditing(false);
         }
+    };
+
+    const handleFolderCreation = async () => {
+        setIsDialogOpen(false);
+        setTimeout(() => {
+            void (async () => {
+                await createMutation[creationEntity].mutateAsync({
+                    title: newEntityName,
+                    description: '',
+                });
+                setNewEntityName('Нова папка');
+                await documentFolders.refetch();
+            })();
+        });
     };
 
     function handleRenameCancel(e: React.KeyboardEvent<HTMLDivElement>) {
@@ -108,21 +143,17 @@ const Knowledge: React.FC = () => {
                 <div className="flex h-full w-full flex-col gap-8 rounded-2xl bg-neutral-200 px-16 py-10 drop-shadow-lg">
                     <nav>
                         <Breadcrumb>
-                            <BreadcrumbList>
+                            <BreadcrumbList className="text-lg">
                                 <BreadcrumbItem>
-                                    <BreadcrumbLink href="/">
-                                        Home
+                                    <BreadcrumbLink href="/knowledge">
+                                        Головна
                                     </BreadcrumbLink>
                                 </BreadcrumbItem>
-                                <BreadcrumbSeparator />
+                                <BreadcrumbSeparator className="[&>svg]:size-5" />
                                 <BreadcrumbItem>
-                                    <BreadcrumbLink href="/components">
-                                        Components
-                                    </BreadcrumbLink>
-                                </BreadcrumbItem>
-                                <BreadcrumbSeparator />
-                                <BreadcrumbItem>
-                                    <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
+                                    <BreadcrumbPage>
+                                        Current Folder
+                                    </BreadcrumbPage>
                                 </BreadcrumbItem>
                             </BreadcrumbList>
                         </Breadcrumb>
@@ -178,10 +209,25 @@ const Knowledge: React.FC = () => {
                                         className="max-w-40 p-2 text-sm"
                                     >
                                         <div className="flex flex-col text-slate-800">
-                                            <p className="cursor-pointer rounded-t-md p-1 hover:bg-neutral-100">
+                                            <p
+                                                onClick={() =>
+                                                    openCreateEntityWindow(
+                                                        'folder',
+                                                    )
+                                                }
+                                                className="cursor-pointer rounded-t-md p-1 hover:bg-neutral-100"
+                                            >
                                                 Створити папку
                                             </p>
-                                            <p className="cursor-pointer rounded-b-md p-1 hover:bg-neutral-100">
+
+                                            <p
+                                                onClick={() =>
+                                                    openCreateEntityWindow(
+                                                        'document',
+                                                    )
+                                                }
+                                                className="cursor-pointer rounded-b-md p-1 hover:bg-neutral-100"
+                                            >
                                                 Створити файл
                                             </p>
                                         </div>
@@ -210,16 +256,59 @@ const Knowledge: React.FC = () => {
                                 </>
                             ) : (
                                 <>
-                                    <ContextMenuItem className="cursor-pointer">
-                                        Створити файл
-                                    </ContextMenuItem>
-                                    <ContextMenuItem className="cursor-pointer">
+                                    <ContextMenuItem
+                                        onClick={() =>
+                                            openCreateEntityWindow('folder')
+                                        }
+                                        className="cursor-pointer"
+                                    >
                                         Створити папку
+                                    </ContextMenuItem>
+                                    <ContextMenuItem
+                                        onClick={() =>
+                                            openCreateEntityWindow('document')
+                                        }
+                                        className="cursor-pointer"
+                                    >
+                                        Створити файл
                                     </ContextMenuItem>
                                 </>
                             )}
                         </ContextMenuContent>
                     </ContextMenu>
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Створити папку</DialogTitle>
+                            </DialogHeader>
+                            <div className="flex gap-4 py-4">
+                                <div className="flex w-full items-center justify-center gap-4">
+                                    <Label
+                                        htmlFor="name"
+                                        className="text-right"
+                                    >
+                                        Назва
+                                    </Label>
+                                    <Input
+                                        id="name"
+                                        placeholder="Нова папка"
+                                        className="w-3/5"
+                                        onChange={(e) =>
+                                            setNewEntityName(e.target.value)
+                                        }
+                                    />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button
+                                    type="submit"
+                                    onClick={handleFolderCreation}
+                                >
+                                    Створити
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </div>
         </Layout>
