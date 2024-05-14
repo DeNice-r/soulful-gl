@@ -9,7 +9,7 @@ import {
 } from '~/components/ui/popover';
 import { useRouter } from 'next/router';
 import { signOut, useSession } from 'next-auth/react';
-import { NavLink } from '../NavLink';
+import { NavLink } from '../utils/NavLink';
 import { Logo } from './Logo';
 
 export const Header: React.FC = () => {

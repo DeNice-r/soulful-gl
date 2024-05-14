@@ -1,6 +1,6 @@
 import { z } from '~/utils/zod';
-import { BackgroundPattern, Order, SortableUserFields } from '~/utils/types';
-import { env } from '~/env';
+import { BackgroundPattern, Order } from '~/utils/types';
+import { MAX_ASSET_LIMIT } from '~/utils/constants';
 
 const FirstPage = 1;
 const DefaultLimit = 10;
@@ -8,7 +8,7 @@ const PaginationDefault = { page: FirstPage, limit: DefaultLimit };
 
 const NoDefaultPageSearchSchema = z.object({
     page: z.number().min(1).default(FirstPage),
-    limit: z.number().min(1).max(100).default(DefaultLimit),
+    limit: z.number().min(1).max(MAX_ASSET_LIMIT).default(DefaultLimit),
     query: z.string().optional(),
     orderBy: z.string().optional(),
     order: z.nativeEnum(Order).optional(),
@@ -118,6 +118,8 @@ export const RecommendationUpdateSchema = TDIUpdateSchema.extend({
 
     published: z.boolean().optional(),
 });
+
+export const CountSchema = z.number().min(1).max(MAX_ASSET_LIMIT).default(4);
 
 export const PostSchema = TDISchema.extend({
     tags: z.array(z.string()).min(1).max(25).optional().default([]),

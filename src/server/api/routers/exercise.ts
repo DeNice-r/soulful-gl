@@ -4,6 +4,7 @@ import {
     ExerciseStepSchema,
     ExerciseUpdateSchema,
     PageSchema,
+    SetBooleanSchema,
 } from '~/utils/schemas';
 
 import {
@@ -66,8 +67,8 @@ export const exerciseRouter = createTRPCRouter({
                 };
 
                 const [count, values] = await ctx.db.$transaction([
-                    ctx.db.post.count(where),
-                    ctx.db.post.findMany({
+                    ctx.db.exercise.count(where),
+                    ctx.db.exercise.findMany({
                         where,
                         include: {
                             author: {
@@ -189,6 +190,20 @@ export const exerciseRouter = createTRPCRouter({
                     title: input.title,
                     description: input.description,
                     image: input.image,
+                },
+            });
+        }),
+
+    publish: permissionProcedure
+        .input(SetBooleanSchema)
+        .mutation(async ({ ctx, input: { id, value } }) => {
+            return ctx.db.exercise.update({
+                where: {
+                    id,
+                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
+                },
+                data: {
+                    published: value,
                 },
             });
         }),

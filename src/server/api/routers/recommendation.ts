@@ -4,6 +4,7 @@ import {
     publicProcedure,
 } from '~/server/api/trpc';
 import {
+    CountSchema,
     CUIDSchema,
     PageSchema,
     RecommendationSchema,
@@ -99,6 +100,11 @@ export const recommendationRouter = createTRPCRouter({
         });
     }),
 
+    random: publicProcedure.input(CountSchema).query(async ({ input, ctx }) => {
+        return ctx.db
+            .$queryRaw`select * from "Recommendation" limit ${input} offset floor(random() * (select count(*) from "Recommendation"));`;
+    }),
+
     create: permissionProcedure
         .input(RecommendationSchema)
         .mutation(async ({ ctx, input }) => {
@@ -123,7 +129,6 @@ export const recommendationRouter = createTRPCRouter({
                 data: {
                     title: input.title,
                     description: input.description,
-                    image: input.image,
 
                     published: input.published,
                 },

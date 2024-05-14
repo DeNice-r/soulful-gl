@@ -9,6 +9,7 @@ import Users from '~/components/management/User';
 import { Operators } from '~/components/management/User/Operators';
 import Posts from '~/components/management/Post';
 import Recommendations from '~/components/management/Recommendation';
+import Exercises from '~/components/management/Exercise';
 
 const pages = {
     [ManagementPageName.STATISTICS]: <Statistics />,
@@ -16,7 +17,7 @@ const pages = {
     [ManagementPageName.OPERATORS]: <Operators />,
     [ManagementPageName.POSTS]: <Posts />,
     [ManagementPageName.RECOMMENDATIONS]: <Recommendations />,
-    [ManagementPageName.EXCERCISES]: `<Excercises />`,
+    [ManagementPageName.EXERCISES]: <Exercises />,
     [ManagementPageName.KNOWLEDGE]: `<Knowledge />`,
     [ManagementPageName.ACHIEVEMENTS]: `<Achievements />`,
     [ManagementPageName.DONATIONS]: `<Donations />`,

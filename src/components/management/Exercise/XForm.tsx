@@ -13,7 +13,7 @@ import { Input } from '~/components/ui/input';
 import type * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { PostSchema } from '~/utils/schemas';
+import { ExerciseSchema } from '~/utils/schemas';
 import { api, type RouterOutputs } from '~/utils/api';
 import { uploadImage } from '~/utils/s3/frontend';
 import { Editor } from '../common/Editor';
@@ -28,12 +28,12 @@ declare module 'react' {
 }
 
 export const XForm: React.FC<{
-    entity?: RouterOutputs['post']['get'];
+    entity?: RouterOutputs['exercise']['get'];
     changeModalState: () => void;
     formRef: RefObject<HTMLFormElement>;
 }> = ({ entity, changeModalState, formRef }) => {
-    const create = api.post.create.useMutation();
-    const update = api.post.update.useMutation();
+    const create = api.exercise.create.useMutation();
+    const update = api.exercise.update.useMutation();
 
     const [imageSrc, setImageSrc] = useState<string | null>(null);
     const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
@@ -42,15 +42,15 @@ export const XForm: React.FC<{
         null,
     );
 
-    const form = useForm<z.infer<typeof PostSchema>>({
-        resolver: zodResolver(PostSchema),
+    const form = useForm<z.infer<typeof ExerciseSchema>>({
+        resolver: zodResolver(ExerciseSchema),
         defaultValues: {
             title: entity?.title ?? '',
             description: entity?.description ?? '',
             image: entity?.image ?? '',
         },
     });
-    async function onSubmit(values: z.infer<typeof PostSchema>) {
+    async function onSubmit(values: z.infer<typeof ExerciseSchema>) {
         if (entity) {
             await update.mutateAsync({ id: entity.id, ...values });
         } else {
@@ -59,7 +59,7 @@ export const XForm: React.FC<{
         changeModalState();
     }
 
-    function createSetValue(field: keyof z.infer<typeof PostSchema>) {
+    function createSetValue(field: keyof z.infer<typeof ExerciseSchema>) {
         return async function setDescription(value: string) {
             form.setValue(field, value);
         };
@@ -141,7 +141,7 @@ export const XForm: React.FC<{
                                     <div className="flex h-3/5 w-2/5 flex-col items-center gap-10 rounded-lg bg-gray-300 outline outline-neutral-400">
                                         <div className="flex h-10 w-full items-center justify-between border-b-2 border-gray-500 bg-gray-400">
                                             <span className="px-5">
-                                                Обріжте нову картинку для допису
+                                                Обріжте нову картинку для вправи
                                             </span>
                                             <button
                                                 onClick={onClose}
@@ -211,7 +211,7 @@ export const XForm: React.FC<{
                                             <FormControl>
                                                 <Input
                                                     className="flex-grow outline outline-1 outline-neutral-400"
-                                                    placeholder="Як обрати психолога. 7 порад."
+                                                    placeholder="Заспокоєння у стресовій ситуації"
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -249,7 +249,7 @@ export const XForm: React.FC<{
                                             />
                                         </FormControl>
                                         <FormDescription>
-                                            Текст допису
+                                            Текст головної сторінки вправи
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>

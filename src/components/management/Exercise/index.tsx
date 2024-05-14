@@ -16,18 +16,18 @@ import {
 import { CustomPagination } from '~/components/utils/CustomPagination';
 import { TableCell } from '@mui/material';
 import { Spinner } from '~/components/ui/spinner';
-import { SortablePostFields } from '~/utils/types';
-import { Single } from '~/components/management/Post/Single';
-import { XForm } from '~/components/management/Post/XForm';
+import { SortableExerciseFields } from '~/utils/types';
+import { Single } from '~/components/management/Exercise/Single';
+import { XForm } from '~/components/management/Exercise/XForm';
 
 const TableHeaders: Record<string, string> = {
     image: 'Зображення',
-    [SortablePostFields.ID]: 'Ідентифікатор',
-    [SortablePostFields.TITLE]: 'Заголовок',
+    [SortableExerciseFields.ID]: 'Ідентифікатор',
+    [SortableExerciseFields.TITLE]: 'Заголовок',
     author: 'Автор',
-    [SortablePostFields.CREATED_AT]: 'Дата створення',
-    [SortablePostFields.UPDATED_AT]: 'Дата оновлення',
-    [SortablePostFields.PUBLISHED]: 'Статус',
+    [SortableExerciseFields.CREATED_AT]: 'Дата створення',
+    [SortableExerciseFields.UPDATED_AT]: 'Дата оновлення',
+    [SortableExerciseFields.PUBLISHED]: 'Статус',
 } as const;
 
 const XTable: React.FC = () => {
@@ -45,7 +45,7 @@ const XTable: React.FC = () => {
         : DEFAULT_LIMIT;
     const page = router.query.page ? Number(router.query.page) : 1;
 
-    const entities = api.post.list.useQuery(
+    const entities = api.exercise.list.useQuery(
         { limit, page, query, orderBy, order },
         NO_REFETCH,
     );
@@ -66,10 +66,11 @@ const XTable: React.FC = () => {
         void entities.refetch();
         setIsModalOpen(!isModalOpen);
     };
-    const [editable, setEditable] = useState<RouterOutputs['post']['get']>();
+    const [editable, setEditable] =
+        useState<RouterOutputs['exercise']['get']>();
 
     const editHandler = async (arg: string) => {
-        setEditable(await apiClient.post.get.query(arg));
+        setEditable(await apiClient.exercise.get.query(arg));
         changeModalState();
     };
 
@@ -184,14 +185,14 @@ const XTable: React.FC = () => {
                         name="query"
                         id="default-search"
                         className="w-full py-[1.7rem] ps-10"
-                        placeholder="Шукати дописи"
+                        placeholder="Шукати вправи"
                         defaultValue={query}
                         onChange={(e) =>
                             debounce(() => setQuery(e.target.value), 1000)
                         }
                     />
                 </div>
-                <Button onClick={createHandler}>Новий допис</Button>
+                <Button onClick={createHandler}>Нова вправа</Button>
                 <Modal
                     isOpen={isModalOpen}
                     onRequestClose={changeModalState}

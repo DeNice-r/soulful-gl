@@ -13,7 +13,7 @@ import {
     TableHeader,
     TableRow,
 } from '~/components/ui/table';
-import { CustomPagination } from '~/components/CustomPagination';
+import { CustomPagination } from '~/components/utils/CustomPagination';
 import { TableCell } from '@mui/material';
 import { Spinner } from '~/components/ui/spinner';
 import { SortableRecommendationFields } from '~/utils/types';
@@ -69,12 +69,12 @@ const XTable: React.FC = () => {
     const [editable, setEditable] =
         useState<RouterOutputs['recommendation']['get']>();
 
-    const edit = async (arg: string) => {
+    const editHandler = async (arg: string) => {
         setEditable(await apiClient.recommendation.get.query(arg));
         changeModalState();
     };
 
-    function createUser() {
+    function createHandler() {
         setEditable(null);
         changeModalState();
     }
@@ -192,7 +192,7 @@ const XTable: React.FC = () => {
                         }
                     />
                 </div>
-                <Button onClick={createUser}>Нова рекомендація</Button>
+                <Button onClick={createHandler}>Нова рекомендація</Button>
                 <Modal
                     isOpen={isModalOpen}
                     onRequestClose={changeModalState}
@@ -239,7 +239,7 @@ const XTable: React.FC = () => {
                                     className="hover:bg-neutral-100/30"
                                 >
                                     <Single
-                                        edit={edit}
+                                        edit={editHandler}
                                         entity={entity}
                                         refetch={refetch}
                                     />

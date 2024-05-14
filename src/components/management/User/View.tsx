@@ -15,7 +15,7 @@ import { XForm } from '~/components/management/User/XForm';
 import { Spinner } from '~/components/ui/spinner';
 import { TableCell } from '@mui/material';
 import { Single } from '~/components/management/User/Single';
-import { CustomPagination } from '~/components/CustomPagination';
+import { CustomPagination } from '~/components/utils/CustomPagination';
 import { SortableUserFields } from '~/utils/types';
 
 const TableHeaders: Record<string, string> = {
@@ -58,12 +58,12 @@ export const View: React.FC<{
     };
     const [editable, setEditable] = useState<RouterOutputs['user']['get']>();
 
-    const edit = async (arg: string) => {
+    const editHandler = async (arg: string) => {
         setEditable(await apiClient.user.get.query(arg));
         changeModalState();
     };
 
-    function createUser() {
+    function createHandler() {
         setEditable(null);
         changeModalState();
     }
@@ -181,7 +181,7 @@ export const View: React.FC<{
                         }
                     />
                 </div>
-                <Button onClick={createUser}>Новий користувач</Button>
+                <Button onClick={createHandler}>Новий користувач</Button>
                 <Modal
                     isOpen={isModalOpen}
                     onRequestClose={changeModalState}
@@ -227,7 +227,7 @@ export const View: React.FC<{
                                     className="hover:bg-neutral-100/30"
                                 >
                                     <Single
-                                        edit={edit}
+                                        edit={editHandler}
                                         entity={entity}
                                         refetch={refetch}
                                     />
