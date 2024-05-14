@@ -173,7 +173,7 @@ export const QandAUdateSchema = z.object({
 export const DocumentSchema = TDISchema.extend({
     folderId: CUIDSchema.optional(),
 
-    tags: z.array(z.string()).min(1).max(25).default([]),
+    tags: z.array(z.string()).max(25).default([]),
 });
 
 export const DocumentUpdateSchema = TDIUpdateSchema.extend({
@@ -189,7 +189,7 @@ export const DocumentFolderSchema = z.object({
 
     title: ShortStringSchema,
 
-    tags: z.array(z.string()).min(1).max(25).default([]),
+    tags: z.array(z.string()).max(25).default([]),
 });
 
 export const DocumentFolderUpdateSchema = z.object({
