@@ -2,8 +2,8 @@ import React from 'react';
 import { Layout } from '~/components/common/Layout';
 import {
     Breadcrumb,
+    BreadcrumbEllipsis,
     BreadcrumbItem,
-    BreadcrumbLink,
     BreadcrumbList,
     BreadcrumbPage,
     BreadcrumbSeparator,
@@ -30,9 +30,17 @@ import {
 } from '~/components/ui/dialog';
 import { useState, type MouseEvent } from 'react';
 import { api } from '~/utils/api';
-import { FSEntity } from '../../components/management/FSEntity';
+import { FSEntity } from '~/components/management/FSEntity';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
+
+const CURRENT_PATH = 'knowledge';
+const ENTITY_TYPE = {
+    FOLDER: 'f',
+    DOCUMENT: 'd',
+};
 
 const Knowledge: React.FC = () => {
     const [currentEntity, setCurrentEntity] = useState<{
@@ -45,10 +53,58 @@ const Knowledge: React.FC = () => {
     const [creationEntity, setCreationEntity] = useState<'folder' | 'document'>(
         'folder',
     );
+    const [document, setDocument] = useState<{
+        title: string;
+        description: string;
+    } | null>(null);
+
+    const router = useRouter();
+
+    // const [_1, _2, entity, currentEntityId] = router.pathname.split('/').pop();
+
+    const [currentEntityType, currentEntityId] = (
+        router.query.args?.length ? router.query.args : [null, null]
+    ) as (string | null)[];
+
+    const { client: apiClient } = api.useUtils();
+    const documentFolders = api.documentFolder.list.useQuery(currentEntityId);
+
+    const deleteMutation = {
+        folder: api.documentFolder.delete.useMutation(),
+        document: api.document.delete.useMutation(),
+    };
+
+    const updateMutation = {
+        folder: api.documentFolder.update.useMutation(),
+        document: api.document.update.useMutation(),
+    };
+
+    const createMutation = {
+        folder: api.documentFolder.create.useMutation(),
+        document: api.document.create.useMutation(),
+    };
 
     function openCreateEntityWindow(type: 'folder' | 'document') {
         setIsDialogOpen(true);
         setCreationEntity(type);
+    }
+
+    function handleGoToEntity(e: MouseEvent<HTMLElement>) {
+        const element = e.target as HTMLElement;
+        const button = element.closest('button');
+        const buttonId = button && button?.getAttribute('id');
+        const type = button && button.getAttribute('name');
+        if (button && buttonId) {
+            if (type === 'folder') {
+                void router.push({
+                    pathname: `/${CURRENT_PATH}/f/${buttonId}`,
+                });
+            } else if (type === 'document') {
+                void router.push({
+                    pathname: `/${CURRENT_PATH}/d/${buttonId}`,
+                });
+            }
+        }
     }
 
     function handleChangeId(e: MouseEvent<HTMLElement>) {
@@ -65,23 +121,6 @@ const Knowledge: React.FC = () => {
             setCurrentEntity(null);
         }
     }
-
-    const documentFolders = api.documentFolder.list.useQuery();
-
-    const deleteMutation = {
-        folder: api.documentFolder.delete.useMutation(),
-        document: api.document.delete.useMutation(),
-    };
-
-    const updateMutation = {
-        folder: api.documentFolder.update.useMutation(),
-        document: api.document.update.useMutation(),
-    };
-
-    const createMutation = {
-        folder: api.documentFolder.create.useMutation(),
-        document: api.document.create.useMutation(),
-    };
 
     const handleDelete = async () => {
         if (!currentEntity || !currentEntity.id) {
@@ -113,6 +152,10 @@ const Knowledge: React.FC = () => {
                 await createMutation[creationEntity].mutateAsync({
                     title: newEntityName,
                     description: '',
+                    parentId:
+                        currentEntityType === ENTITY_TYPE.FOLDER
+                            ? currentEntityId
+                            : null,
                 });
                 setNewEntityName('Нова папка');
                 await documentFolders.refetch();
@@ -130,9 +173,30 @@ const Knowledge: React.FC = () => {
     function handleClickRenameCancel(e: React.MouseEvent<HTMLDivElement>) {
         const element = e.target as HTMLElement;
         const button = element.closest('button');
-        if (button?.getAttribute('id') !== currentEntity?.id) {
+        if (
+            currentEntity?.id &&
+            currentEntity?.id !== button?.getAttribute('id')
+        ) {
             setCurrentEntity(null);
             setIsEditing(false);
+            return true;
+        }
+    }
+
+    if (currentEntityType === ENTITY_TYPE.DOCUMENT && currentEntityId) {
+        void (async () => {
+            const document =
+                await apiClient.document.get.query(currentEntityId);
+            setDocument(document);
+        })();
+
+        if (document !== null) {
+            return (
+                <div>
+                    <h3>{document.title}</h3>
+                    {document.description}
+                </div>
+            );
         }
     }
 
@@ -141,28 +205,60 @@ const Knowledge: React.FC = () => {
             <div className="flex w-2/3 flex-col items-center gap-10 py-12 text-slate-800">
                 <h3 className="font-bold">База знань</h3>
                 <div className="flex h-full w-full flex-col gap-8 rounded-2xl bg-neutral-200 px-16 py-10 drop-shadow-lg">
-                    <nav>
-                        <Breadcrumb>
-                            <BreadcrumbList className="text-lg">
-                                <BreadcrumbItem>
-                                    <BreadcrumbLink href="/knowledge">
-                                        Головна
-                                    </BreadcrumbLink>
-                                </BreadcrumbItem>
-                                <BreadcrumbSeparator className="[&>svg]:size-5" />
-                                <BreadcrumbItem>
-                                    <BreadcrumbPage>
-                                        Current Folder
-                                    </BreadcrumbPage>
-                                </BreadcrumbItem>
-                            </BreadcrumbList>
-                        </Breadcrumb>
-                    </nav>
+                    <Breadcrumb>
+                        <BreadcrumbList className="text-lg">
+                            <BreadcrumbItem>
+                                <Link
+                                    className="transition-colors hover:text-neutral-950 dark:hover:text-neutral-50"
+                                    href="/knowledge/f/"
+                                >
+                                    Головна
+                                </Link>
+                            </BreadcrumbItem>
+                            {documentFolders.data?.parent?.parentId && (
+                                <>
+                                    <BreadcrumbSeparator className="[&>svg]:size-5" />
+                                    <BreadcrumbItem>
+                                        <BreadcrumbEllipsis />
+                                    </BreadcrumbItem>
+                                </>
+                            )}
+                            {documentFolders.data?.parent?.id && (
+                                <>
+                                    <BreadcrumbSeparator className="[&>svg]:size-5" />
+                                    <BreadcrumbItem>
+                                        <Link
+                                            className="transition-colors hover:text-neutral-950 dark:hover:text-neutral-50"
+                                            href={`/knowledge/f/${documentFolders.data?.parent?.id}`}
+                                        >
+                                            {
+                                                documentFolders?.data?.parent
+                                                    ?.title
+                                            }
+                                        </Link>
+                                    </BreadcrumbItem>
+                                </>
+                            )}
+                            {documentFolders.data?.title && (
+                                <>
+                                    <BreadcrumbSeparator className="[&>svg]:size-5" />
+                                    <BreadcrumbItem>
+                                        <BreadcrumbPage>
+                                            {documentFolders?.data?.title}
+                                        </BreadcrumbPage>
+                                    </BreadcrumbItem>
+                                </>
+                            )}
+                        </BreadcrumbList>
+                    </Breadcrumb>
                     <ContextMenu>
                         <ContextMenuTrigger asChild>
                             <div
                                 onContextMenu={handleChangeId}
-                                onClick={handleClickRenameCancel}
+                                onClick={(e) => {
+                                    handleClickRenameCancel(e) ||
+                                        handleGoToEntity(e);
+                                }}
                                 onKeyDown={handleRenameCancel}
                                 className="grid w-full grid-cols-auto grid-rows-6 flex-wrap justify-between gap-8 text-slate-800 2xl:grid-cols-4"
                             >

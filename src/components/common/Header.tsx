@@ -34,7 +34,7 @@ export const Header: React.FC = () => {
                     }
                     <NavLink href="/posts">Дописи</NavLink>
                     <NavLink href="/exercises">Вправи</NavLink>
-                    <NavLink href="/knowledge">База знань</NavLink>
+                    <NavLink href="/knowledge/f">База знань</NavLink>
                     <NavLink href="/QnA">Запитання та відповіді</NavLink>
                     <NavLink href="/chat">Чати</NavLink>
                 </nav>

@@ -37,13 +37,13 @@ export const documentRouter = createTRPCRouter({
     create: permissionProcedure
         .input(DocumentSchema)
         .mutation(async ({ ctx, input }) => {
-            const { folderId, ...noFolderInput } = input;
+            const { parentId, ...noFolderInput } = input;
             return ctx.db.document.create({
                 data: {
                     ...noFolderInput,
-                    ...(folderId && {
-                        folder: {
-                            connect: { id: folderId },
+                    ...(parentId && {
+                        parent: {
+                            connect: { id: parentId },
                         },
                     }),
                     tags: {

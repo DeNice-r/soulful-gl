@@ -7,28 +7,43 @@ import {
 
 export const documentFolderRouter = createTRPCRouter({
     list: permissionProcedure
-        .input(CUIDSchema.optional())
+        .input(CUIDSchema.nullable().optional())
         .query(async ({ input, ctx }) => {
-            const [folders, documents] = await Promise.all([
-                ctx.db.documentFolder.findMany({
-                    where: {
-                        ...(input
-                            ? { parent: { id: input } }
-                            : { parent: null }),
+            if (input) {
+                const x = await ctx.db.documentFolder.findUnique({
+                    where: { id: input },
+                    select: {
+                        title: true,
+                        parent: {
+                            select: { id: true, title: true, parentId: true },
+                        },
+                        documents: true,
+                        folders: true,
                     },
-                }),
-                ctx.db.document.findMany({
-                    where: {
-                        ...(input
-                            ? { folder: { id: input } }
-                            : { folder: null }),
-                    },
-                }),
-            ]);
+                });
 
+                return {
+                    documents: x?.documents ?? [],
+                    folders: x?.folders ?? [],
+                    parent: x?.parent,
+                    title: x?.title,
+                };
+            }
+            const where = {
+                where: {
+                    ...(input ? { parentId: input } : { parentId: null }),
+                },
+            };
+
+            const [folders, documents] = await Promise.all([
+                ctx.db.documentFolder.findMany(where),
+                ctx.db.document.findMany(where),
+            ]);
             return {
                 documents,
                 folders,
+                parent: null,
+                title: null,
             };
         }),
 
