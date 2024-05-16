@@ -8,6 +8,7 @@ import {
     MAX_POSTS_DESCRIPTION_LENGTH,
 } from '~/utils/constants';
 import { cn } from '~/lib/utils';
+import { defaultFormatDt } from '~/utils/dates';
 
 export const Post: React.FC<{
     post: RouterOutputs['post']['list']['values'][number];
@@ -59,30 +60,43 @@ export const Post: React.FC<{
                     >
                         {truncateString(post.title)}
                     </p>
-                    <div
-                        className={cn(
-                            'text-sm md:text-base',
-                            variant === 'landing' && 'py-2 md:py-4',
-                        )}
-                        dangerouslySetInnerHTML={{
-                            __html: truncateString(
-                                post.description,
-                                variant === 'posts'
-                                    ? MAX_POSTS_DESCRIPTION_LENGTH
-                                    : MAX_LANDING_POSTS_DESCRIPTION_LENGTH,
-                            ),
-                        }}
-                    />
+                    {/*<div*/}
+                    {/*    className={cn(*/}
+                    {/*        'text-sm md:text-base',*/}
+                    {/*        variant === 'landing' && 'py-2 md:py-4',*/}
+                    {/*    )}*/}
+                    {/*    dangerouslySetInnerHTML={{*/}
+                    {/*        __html: truncateString(*/}
+                    {/*            post.description,*/}
+                    {/*            variant === 'posts'*/}
+                    {/*                ? MAX_POSTS_DESCRIPTION_LENGTH*/}
+                    {/*                : MAX_LANDING_POSTS_DESCRIPTION_LENGTH,*/}
+                    {/*        ),*/}
+                    {/*    }}*/}
+                    {/*/>*/}
                 </div>
-                <small
-                    className={cn(
-                        'text-xs font-light',
-                        variant === 'posts' && 'self-start px-8 pb-8',
-                        variant === 'landing' && 'md:self-end 2xl:mt-4',
-                    )}
-                >
-                    {authorName}
-                </small>
+                <div className="flex justify-between">
+                    <small
+                        className={cn(
+                            'text-xs font-light',
+                            variant === 'posts' && 'self-start px-8 pb-8',
+                            variant === 'landing' && 'md:self-end 2xl:mt-4',
+                        )}
+                    >
+                        {authorName}
+                    </small>
+                    <small
+                        className={cn(
+                            'text-xs font-light',
+                            variant === 'posts' && 'self-start px-8 pb-8',
+                            variant === 'landing' && 'md:self-end 2xl:mt-4',
+                        )}
+                    >
+                        {defaultFormatDt(post.createdAt)}
+                        {/*{post.createdAt != post.updatedAt &&*/}
+                        {/*    ` (оновлено ${defaultFormatDt(post.updatedAt)})`}*/}
+                    </small>
+                </div>
             </div>
         </article>
     );

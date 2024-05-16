@@ -14,7 +14,8 @@ export const NavLink = ({
     props?: never;
 }) => {
     const pathname = usePathname();
-    const pathnameParts = pathname.split('/');
+
+    const pathnameParts = pathname ? pathname.split('/') : [];
     const isActive = pathname === href || '/' + pathnameParts[1] === href;
 
     return (
