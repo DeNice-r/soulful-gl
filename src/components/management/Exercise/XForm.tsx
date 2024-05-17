@@ -20,6 +20,7 @@ import { Editor } from '../common/Editor';
 import Modal from 'react-modal';
 import getCroppedImg from '../../utils/cropImage';
 import Cropper, { type Area, type Point } from 'react-easy-crop';
+import { MoveLeft, MoveRight, Trash2, X, Plus } from 'lucide-react';
 
 declare module 'react' {
     interface CSSProperties {
@@ -104,8 +105,15 @@ export const XForm: React.FC<{
             <form
                 ref={formRef}
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="flex h-[90%] w-3/4 items-center justify-center rounded-lg bg-gray-300 outline outline-neutral-400"
+                className="relative flex h-[90%] w-3/4 items-center justify-center rounded-lg bg-gray-300 outline outline-neutral-400"
             >
+                <Button
+                    className="absolute right-5 top-5 h-6 rounded-full border-none p-0 hover:bg-transparent focus-visible:ring-0"
+                    variant="ghost"
+                    onClick={changeModalState}
+                >
+                    <X className="hover:text-slate-700" />
+                </Button>
                 <div className="flex h-[90%] w-4/5 flex-col items-center justify-between gap-4">
                     <FormField
                         control={form.control}
@@ -239,7 +247,7 @@ export const XForm: React.FC<{
                                         <style>
                                             {`
                                             .ql-editor {
-                                                max-height: 350px;
+                                                max-height: 320px;
                                             }`}
                                         </style>
                                         <FormControl>
@@ -258,17 +266,30 @@ export const XForm: React.FC<{
                         </div>
                     </div>
 
-                    <div className="flex gap-8 self-end">
-                        <Button className=" px-7 py-6" type="submit">
-                            {entity ? 'Редагувати' : 'Створити'}
-                        </Button>
-                        <Button
-                            className="px-7 py-6"
-                            variant="destructive"
-                            onClick={changeModalState}
-                        >
-                            Відмінити
-                        </Button>
+                    <div className="flex w-full justify-between">
+                        <div className="flex flex-grow basis-1 gap-8">
+                            <Button className=" px-7 py-6" disabled={true}>
+                                <MoveLeft />
+                            </Button>
+                            <Button className="px-7 py-6">
+                                <MoveRight />
+                            </Button>
+                        </div>
+                        <div className="flex flex-grow basis-1 justify-center">
+                            <Button
+                                className="text-wrap px-7 py-6"
+                                variant={'destructive'}
+                                //v- - - - - - -    if page is first, then
+                                disabled={true}
+                            >
+                                <Trash2 />
+                            </Button>
+                        </div>
+                        <div className="flex flex-grow basis-1 justify-end gap-8">
+                            <Button className="px-7 py-6 text-sm" type="submit">
+                                {entity ? 'Редагувати' : 'Створити'}
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </form>
