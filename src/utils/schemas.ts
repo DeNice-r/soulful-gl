@@ -122,7 +122,7 @@ export const RecommendationUpdateSchema = TDIUpdateSchema.extend({
 export const CountSchema = z.number().min(1).max(MAX_ASSET_LIMIT).default(4);
 
 export const PostSchema = TDISchema.extend({
-    tags: z.array(z.string()).min(1).max(25).optional().default([]),
+    tags: z.array(z.string()).min(1).max(25).default([]).optional(),
     published: z.boolean().default(false),
 });
 

@@ -28,7 +28,7 @@ export const Layout: React.FC<{ entity?: ManagementPageName }> = ({
     entity = ManagementPageName.STATISTICS,
 }) => {
     return (
-        <div className="flex min-h-screen overflow-hidden">
+        <div className="flex min-h-screen">
             <Sidebar {...{ entity }} />
             <div className="flex flex-grow flex-col">
                 <ShortHeader {...{ entity }} />
