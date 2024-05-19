@@ -10,6 +10,7 @@ import { Operators } from '~/components/management/User/Operators';
 import Posts from '~/components/management/Post';
 import Recommendations from '~/components/management/Recommendation';
 import Exercises from '~/components/management/Exercise';
+import { PageProvider } from '../Exercise/PageProvider';
 
 const pages = {
     [ManagementPageName.STATISTICS]: <Statistics />,
@@ -28,15 +29,17 @@ export const Layout: React.FC<{ entity?: ManagementPageName }> = ({
     entity = ManagementPageName.STATISTICS,
 }) => {
     return (
-        <div className="flex min-h-screen">
-            <Sidebar {...{ entity }} />
-            <div className="flex flex-grow flex-col">
-                <ShortHeader {...{ entity }} />
-                <main className="flex flex-1 flex-col gap-4 p-4 md:gap-4 md:p-6">
-                    {entity in pages ? pages[entity] : 'Page not found'}
-                </main>
+        <PageProvider>
+            <div className="flex min-h-screen">
+                <Sidebar {...{ entity }} />
+                <div className="flex flex-grow flex-col">
+                    <ShortHeader {...{ entity }} />
+                    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-4 md:p-6">
+                        {entity in pages ? pages[entity] : 'Page not found'}
+                    </main>
+                </div>
+                <Toaster />
             </div>
-            <Toaster />
-        </div>
+        </PageProvider>
     );
 };
