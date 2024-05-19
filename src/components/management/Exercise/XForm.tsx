@@ -21,6 +21,7 @@ import Modal from 'react-modal';
 import getCroppedImg from '../../utils/cropImage';
 import Cropper, { type Area, type Point } from 'react-easy-crop';
 import { MoveLeft, MoveRight, Trash2, X, Plus } from 'lucide-react';
+import { usePageContext } from './PageProvider';
 
 declare module 'react' {
     interface CSSProperties {
@@ -43,14 +44,30 @@ export const XForm: React.FC<{
         null,
     );
 
+    const {
+        pages,
+        currentPage,
+        savePageData,
+        goToPreviousPage,
+        goToNextPage,
+        deletePage,
+    } = usePageContext();
+
+    const currentPageData = pages[currentPage]?.data || {
+        image: '',
+        title: '',
+        description: '',
+    };
+
     const form = useForm<z.infer<typeof ExerciseSchema>>({
         resolver: zodResolver(ExerciseSchema),
         defaultValues: {
-            title: entity?.title ?? '',
-            description: entity?.description ?? '',
-            image: entity?.image ?? '',
+            title: entity?.title ?? currentPageData.title,
+            description: entity?.description ?? currentPageData.description,
+            image: entity?.image ?? currentPageData.image,
         },
     });
+
     async function onSubmit(values: z.infer<typeof ExerciseSchema>) {
         if (entity) {
             await update.mutateAsync({ id: entity.id, ...values });
@@ -100,6 +117,24 @@ export const XForm: React.FC<{
             setImageSrc(imageDataUrl?.toString() ?? '');
         }
     };
+
+    function handleDeletePage() {
+        deletePage(currentPage);
+    }
+
+    function handlePreviousPage() {
+        goToPreviousPage();
+    }
+
+    function handleNextPage() {
+        console.log(form.getValues(['image', 'title', 'description']));
+        goToNextPage({
+            image: form.getValues('image') ?? '',
+            title: form.getValues('title'),
+            description: form.getValues('description'),
+        });
+    }
+
     return (
         <Form {...form}>
             <form
@@ -268,19 +303,30 @@ export const XForm: React.FC<{
 
                     <div className="flex w-full justify-between">
                         <div className="flex flex-grow basis-1 gap-8">
-                            <Button className=" px-7 py-6" disabled={true}>
+                            <Button
+                                className=" px-7 py-6"
+                                disabled={currentPage < 1 ?? true}
+                                onClick={handlePreviousPage}
+                            >
                                 <MoveLeft />
                             </Button>
-                            <Button className="px-7 py-6">
-                                <MoveRight />
+                            <Button
+                                className="px-7 py-6"
+                                onClick={handleNextPage}
+                            >
+                                {currentPage + 1 == pages.length ? (
+                                    <Plus />
+                                ) : (
+                                    <MoveRight />
+                                )}
                             </Button>
                         </div>
                         <div className="flex flex-grow basis-1 justify-center">
                             <Button
                                 className="text-wrap px-7 py-6"
                                 variant={'destructive'}
-                                //v- - - - - - -    if page is first, then
-                                disabled={true}
+                                onClick={handleDeletePage}
+                                disabled={currentPage < 1 ?? true}
                             >
                                 <Trash2 />
                             </Button>
