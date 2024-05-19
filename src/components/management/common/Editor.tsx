@@ -3,6 +3,7 @@ import { type LegacyRef, useEffect, useMemo, useRef, useState } from 'react';
 import 'react-quill/dist/quill.snow.css';
 import { uploadImage } from '~/utils/s3/frontend';
 import { type ReactQuillProps } from 'react-quill';
+import { useToast } from '~/components/ui/use-toast';
 
 const ReactQuill = dynamic(
     async () => {
@@ -27,10 +28,15 @@ interface ActualReactQuill {
         getSelection: () => { index: number; length: number };
         insertEmbed: (index: number, type: string, value: string) => void;
         clipboard: {
-            // addMatcher: (
-            //     type: number,
-            //     handler: (node: Node, delta: any) => Promise<any>,
-            // ) => void;
+            addMatcher: (
+                type: string,
+                handler: (
+                    node: HTMLImageElement,
+                    delta: {
+                        ops: unknown[];
+                    },
+                ) => { ops: unknown[] },
+            ) => void;
         };
     };
 }
@@ -42,6 +48,7 @@ export const Editor = ({
     defaultValue: string;
     onChange: (value: string) => void;
 }) => {
+    const { toast } = useToast();
     const quillRef = useRef<ActualReactQuill>(null);
     const [text, setText] = useState(defaultValue);
     function changeValue(value: string) {
@@ -73,6 +80,24 @@ export const Editor = ({
                 .insertEmbed(range?.index ?? 0, 'image', imageUrl);
         };
     }
+
+    useEffect(() => {
+        const quill = quillRef.current;
+        if (!quill) return;
+
+        quill.getEditor().clipboard.addMatcher('img', (node, delta) => {
+            if (node.src.startsWith('data:image')) {
+                toast({
+                    title: 'Помилка',
+                    description:
+                        'Будь ласка, використовуйте кнопку "🖼️" для завантаження зображень',
+                    variant: 'destructive',
+                });
+                delta.ops = [];
+            }
+            return delta;
+        });
+    }, [quillRef.current]);
 
     const modules = useMemo(
         () => ({
