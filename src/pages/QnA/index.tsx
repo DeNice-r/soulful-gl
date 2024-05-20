@@ -21,15 +21,14 @@ import { useForm } from 'react-hook-form';
 import type * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '~/components/ui/input';
-import { Label } from '~/components/ui/label';
 import { api } from '~/utils/api';
-import { QandASchema } from '~/utils/schemas';
+import { UserQandASchema } from '~/utils/schemas';
 
 const QnA: React.FC = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-    const form = useForm<z.infer<typeof QandASchema>>({
-        resolver: zodResolver(QandASchema),
+    const form = useForm<z.infer<typeof UserQandASchema>>({
+        resolver: zodResolver(UserQandASchema),
     });
 
     const QnAs = api.qanda.list.useQuery();
@@ -40,7 +39,7 @@ const QnA: React.FC = () => {
 
     const createMutation = api.qanda.create.useMutation();
 
-    const onSubmit = async (values: z.infer<typeof QandASchema>) => {
+    const onSubmit = async (values: z.infer<typeof UserQandASchema>) => {
         changeDialogState();
         createMutation.mutate(values);
     };
@@ -73,7 +72,7 @@ const QnA: React.FC = () => {
                         Запитайте нас
                     </Button>
                 </div>
-                {QnAs?.data?.map((QnA) => (
+                {QnAs.data?.values.map((QnA) => (
                     <div
                         key={QnA.id}
                         className="flex w-full flex-col gap-3 rounded-xl bg-neutral-200 p-10 drop-shadow-xl"

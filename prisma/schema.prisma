@@ -186,7 +186,7 @@ model Recommendation {
 
   title       String
   description String
-  image       String?
+  // image       String?
 
   published Boolean @default(false)
 

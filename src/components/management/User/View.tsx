@@ -11,14 +11,27 @@ import {
 } from '~/components/ui/table';
 import { type RouterOutputs, api } from '~/utils/api';
 import Modal from 'react-modal';
-import { UsersForm } from '~/components/management/UsersForm';
+import { XForm } from '~/components/management/User/XForm';
 import { Spinner } from '~/components/ui/spinner';
 import { TableCell } from '@mui/material';
-import { User } from '~/components/management/User';
-import { CustomPagination } from '~/components/CustomPagination';
+import { Single } from '~/components/management/User/Single';
+import { CustomPagination } from '~/components/utils/CustomPagination';
+import { SortableUserFields } from '~/utils/types';
+import { AmountSelect } from '~/components/management/common/AmountSelect';
 
-export const UsersView: React.FC<{
-    usersQuery: {
+const TableHeaders: Record<string, string> = {
+    image: 'Аватар',
+    [SortableUserFields.ID]: 'Ідентифікатор',
+    [SortableUserFields.EMAIL]: 'Електронна пошта',
+    [SortableUserFields.NAME]: "Ім'я",
+    [SortableUserFields.CREATED_AT]: 'Дата створення',
+    [SortableUserFields.UPDATED_AT]: 'Дата оновлення',
+    [SortableUserFields.REPORT_COUNT]: 'Скарги',
+    [SortableUserFields.SUSPENDED]: 'Статус',
+} as const;
+
+export const View: React.FC<{
+    entities: {
         data?: RouterOutputs['user']['list'];
         // return type is unused anyway, so no need to waste time on it
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -26,28 +39,33 @@ export const UsersView: React.FC<{
     };
     page: number;
     total: number;
+    query?: string;
+    setQuery: React.Dispatch<React.SetStateAction<string | undefined>>;
+    orderBy?: string;
+    order?: string;
     router: ReturnType<typeof useRouter>;
-}> = ({ usersQuery, page, total, router }) => {
+}> = ({ entities, page, total, query, setQuery, orderBy, order, router }) => {
     const [_, setState] = useState(0);
     const [isMouseDown, setIsMouseDown] = useState(false);
-    useEffect(() => Modal.setAppElement('body'));
     const { client: apiClient } = api.useContext();
-    const ref = useRef<HTMLFormElement>(null);
+    const formRef = useRef<HTMLFormElement>(null);
+
+    const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const changeModalState = () => {
+        void entities.refetch();
         setIsModalOpen(!isModalOpen);
     };
-    const [editableUser, setEditableUser] =
-        useState<RouterOutputs['user']['getById']>();
+    const [editable, setEditable] = useState<RouterOutputs['user']['get']>();
 
-    const editUser = async (arg: string) => {
-        setEditableUser(await apiClient.user.getById.query(arg));
+    const editHandler = async (arg: string) => {
+        setEditable(await apiClient.user.get.query(arg));
         changeModalState();
     };
 
-    function createUser() {
-        setEditableUser(null);
+    function createHandler() {
+        setEditable(null);
         changeModalState();
     }
 
@@ -56,7 +74,7 @@ export const UsersView: React.FC<{
     }
 
     async function refetch() {
-        await usersQuery.refetch();
+        await entities.refetch();
     }
 
     const goToPage = (page: number) => {
@@ -68,17 +86,42 @@ export const UsersView: React.FC<{
         });
     };
 
+    const setOrderBy = (orderBy: string) => {
+        const currentPath = router.pathname;
+        const currentQuery = {
+            ...router.query,
+            orderBy,
+            order:
+                router.query.order === 'asc' || router.query.orderBy !== orderBy
+                    ? 'desc'
+                    : 'asc',
+        };
+        void router.push({
+            pathname: currentPath,
+            query: currentQuery,
+        });
+    };
+
+    function debounce(fn: () => void, ms: number) {
+        if (debounceRef.current) {
+            clearTimeout(debounceRef.current);
+        }
+        debounceRef.current = setTimeout(fn, ms);
+    }
+
+    useEffect(() => Modal.setAppElement('body'));
+
     useEffect(() => {
-        if (usersQuery.data) rerender();
-    }, [usersQuery.data]);
+        if (entities.data) rerender();
+    }, [entities.data]);
 
     useEffect(() => {
         const handleMouseDown = (event: MouseEvent) => {
             if (
-                ref.current &&
-                ref.current.parentElement &&
-                ref.current.parentElement.contains(event.target as Node) &&
-                !ref.current.contains(event.target as Node)
+                formRef.current?.parentElement?.contains(
+                    event.target as Node,
+                ) &&
+                !formRef.current.contains(event.target as Node)
             ) {
                 setIsMouseDown(true);
             }
@@ -87,10 +130,10 @@ export const UsersView: React.FC<{
         const handleMouseUp = (event: MouseEvent) => {
             if (
                 isMouseDown &&
-                ref.current &&
-                ref.current.parentElement &&
-                ref.current.parentElement.contains(event.target as Node) &&
-                !ref.current.contains(event.target as Node)
+                formRef.current?.parentElement?.contains(
+                    event.target as Node,
+                ) &&
+                !formRef.current.contains(event.target as Node)
             ) {
                 setIsModalOpen(false);
             }
@@ -105,11 +148,12 @@ export const UsersView: React.FC<{
             document.removeEventListener('mouseup', handleMouseUp);
         };
     }, [isModalOpen, isMouseDown]);
+
     return (
         <>
             <div className="flex w-full justify-between">
-                <form className="w-1/4">
-                    <div className="relative">
+                <div className="flex gap-5">
+                    <div className="relative min-w-96">
                         <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
                             <svg
                                 className="h-4 w-4 text-gray-500 dark:text-gray-400"
@@ -129,29 +173,28 @@ export const UsersView: React.FC<{
                         </div>
                         <Input
                             type="search"
+                            name="query"
                             id="default-search"
-                            className="w-full py-[1.7rem] ps-10"
+                            className="w-full ps-10"
                             placeholder="Шукати користувачів"
-                            required
+                            defaultValue={query}
+                            onChange={(e) =>
+                                debounce(() => setQuery(e.target.value), 1000)
+                            }
                         />
-                        <Button
-                            type="submit"
-                            className="absolute bottom-2.5 end-2.5"
-                        >
-                            Пошук
-                        </Button>
                     </div>
-                </form>
-                <Button onClick={createUser}>Новий користувач</Button>
+                    <AmountSelect />
+                </div>
+                <Button onClick={createHandler}>Новий користувач</Button>
                 <Modal
                     isOpen={isModalOpen}
                     onRequestClose={changeModalState}
                     className="flex h-svh w-svw items-center justify-center"
                 >
-                    <UsersForm
-                        formRef={ref}
+                    <XForm
+                        formRef={formRef}
                         changeModalState={changeModalState}
-                        user={editableUser}
+                        entity={editable}
                     />
                 </Modal>
             </div>
@@ -159,42 +202,37 @@ export const UsersView: React.FC<{
                 <Table>
                     <TableHeader>
                         <TableRow className="hover:bg-neutral-300">
-                            <TableHead className="min-w-[150px]">
-                                Ідентифікатор
-                            </TableHead>
-                            <TableHead className="min-w-[150px]">
-                                Електронна пошта
-                            </TableHead>
-                            <TableHead className="min-w-[150px]">
-                                Ім&apos;я
-                            </TableHead>
-                            <TableHead className="hidden md:table-cell">
-                                Дата створення
-                            </TableHead>
-                            <TableHead className="hidden md:table-cell">
-                                Дата оновлення
-                            </TableHead>
-                            <TableHead className="hidden md:table-cell">
-                                Скарги
-                            </TableHead>
-                            <TableHead className="hidden sm:table-cell">
-                                Статус
-                            </TableHead>
-                            <TableHead className="pr-6 text-right">
-                                Дії
-                            </TableHead>
+                            {Object.keys(TableHeaders).map((key) => {
+                                return (
+                                    <TableHead
+                                        key={key}
+                                        onClick={() => setOrderBy(key)}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <span>{TableHeaders[key]}</span>
+                                            <span>
+                                                {orderBy === key
+                                                    ? order === 'asc'
+                                                        ? '⬆️'
+                                                        : '⬇️'
+                                                    : ''}
+                                            </span>
+                                        </div>
+                                    </TableHead>
+                                );
+                            })}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {usersQuery.data?.values &&
-                            usersQuery.data.values.map((user) => (
+                        {entities.data?.values &&
+                            entities.data.values.map((entity) => (
                                 <TableRow
-                                    key={user.id}
+                                    key={entity.id}
                                     className="hover:bg-neutral-100/30"
                                 >
-                                    <User
-                                        editUser={editUser}
-                                        user={user}
+                                    <Single
+                                        edit={editHandler}
+                                        entity={entity}
                                         refetch={refetch}
                                     />
                                 </TableRow>
@@ -208,7 +246,7 @@ export const UsersView: React.FC<{
                                 />
                             </TableCell>
                         </TableRow>
-                        {!usersQuery.data && (
+                        {!entities.data && (
                             <TableRow>
                                 <TableCell colSpan={100}>
                                     <Spinner size="large" />

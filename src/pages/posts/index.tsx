@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
-import { CustomPagination } from '~/components/CustomPagination';
+import { CustomPagination } from '~/components/utils/CustomPagination';
 import { Post } from '~/components/Post';
 import { Layout } from '~/components/common/Layout';
 import { Spinner } from '~/components/ui/spinner';
@@ -22,7 +22,10 @@ const Posts: React.FC = () => {
 
     const total = posts.data?.count ? Math.ceil(posts.data.count / limit) : 0;
 
-    const recommendations = api.recommendation.get.useQuery();
+    // api.recommendation.random.useQuery()
+    const recommendations = {
+        data: [{ id: 1, title: 'title', description: 'description' }],
+    }; // todo
 
     function rerender() {
         setState((prev) => prev + 1);

@@ -23,6 +23,7 @@ const ChatUI = () => {
     const unassignedChatsQuery = api.chat.listUnassigned.useQuery(undefined, {
         enabled: false,
     });
+    const unassignedChatsQueryRef = useRef<NodeJS.Timeout | null>(null);
 
     const chatsRef = useRef<FullChats>({});
     const [_, changeState] = React.useState<number>(0);
@@ -45,14 +46,30 @@ const ChatUI = () => {
     const wsReconnectInterval = React.useRef<NodeJS.Timeout>();
 
     useEffect(() => {
-        if (status !== 'authenticated') return;
+        if (
+            status !== 'authenticated' ||
+            wsRef.current ||
+            unassignedChatsQueryRef.current
+        )
+            return;
+
+        unassignedChatsQueryRef.current = setInterval(() => {
+            void unassignedChatsQuery.refetch();
+        }, 60_000);
+        void unassignedChatsQuery.refetch();
 
         void wsConnect();
 
-        void unassignedChatsQuery.refetch();
-        setInterval(() => {
-            void unassignedChatsQuery.refetch();
-        }, 60_000);
+        return () => {
+            if (!wsRef.current) return;
+            wsRef.current.onclose = null;
+            wsRef.current.onerror = null;
+            wsRef.current.close();
+            delete wsRef.current;
+            if (unassignedChatsQueryRef.current)
+                clearInterval(unassignedChatsQueryRef.current);
+            console.log('[Router] Connection destroyed');
+        };
     }, [status]);
 
     useEffect(() => {
@@ -108,12 +125,13 @@ const ChatUI = () => {
         if (wsRef.current && wsRef.current?.readyState !== WebSocket.CLOSED)
             return;
 
-        if (!chatListFullQuery.isFetched) void chatListFullQuery.refetch();
         const token = await apiClient.user.getAccessToken.query();
 
         wsRef.current = new WebSocket(
             `${process.env.NEXT_PUBLIC_WSS_ENDPOINT}/${token}`,
         );
+
+        if (!chatListFullQuery.isFetched) void chatListFullQuery.refetch();
 
         wsRef.current.onopen = wsOnOpen;
         wsRef.current.onclose = wsOnClose;

@@ -4,75 +4,106 @@ import {
     publicProcedure,
 } from '~/server/api/trpc';
 import {
+    CountSchema,
     CUIDSchema,
     PageSchema,
     RecommendationSchema,
     RecommendationUpdateSchema,
+    SetBooleanSchema,
 } from '~/utils/schemas';
-import { isPermitted } from '~/utils/authAssertions';
-import { AccessType } from '~/utils/types';
+import { SearchableRecommendationFields } from '~/utils/types';
+import { getFullAccessConstraintWithAuthor } from '~/utils/auth';
 
 export const recommendationRouter = createTRPCRouter({
-    get: publicProcedure.input(PageSchema).query(async ({ input, ctx }) => {
-        return ctx.db.recommendation.findMany({
-            include: {
-                author: {
-                    select: { name: true },
-                },
-            },
-
-            orderBy: { createdAt: 'desc' },
-            skip: (input.page - 1) * input.limit,
-            take: input.limit,
-        });
-    }),
-
-    getById: publicProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
-        const recommendation = await ctx.db.recommendation.findUnique({
-            where: { id: input },
-            include: {
-                author: {
-                    select: { name: true },
-                },
-            },
-        });
-
-        if (!recommendation) return null;
-
-        if (
-            recommendation.published ||
-            (ctx.session &&
-                (ctx.session.user.id === recommendation.authorId ||
-                    isPermitted(
-                        ctx.session?.user?.permissions,
-                        ctx.entity,
-                        ctx.action,
-                    ) === AccessType.ALL))
-        )
-            return recommendation;
-
-        return null;
-    }),
-
-    getUnpublished: permissionProcedure
+    list: publicProcedure
         .input(PageSchema)
-        .query(async ({ input, ctx }) => {
-            return ctx.db.recommendation.findMany({
-                where: {
-                    published: false,
-                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
-                },
-                include: {
-                    author: {
-                        select: { name: true },
-                    },
-                },
+        .query(
+            async ({ input: { page, limit, query, orderBy, order }, ctx }) => {
+                const contains = {
+                    contains: query,
+                    mode: 'insensitive',
+                };
 
-                orderBy: { createdAt: 'desc' },
-                skip: (input.page - 1) * input.limit,
-                take: input.limit,
-            });
-        }),
+                const containsQuery: object = {
+                    OR: [
+                        ...Object.values(SearchableRecommendationFields).map(
+                            (field) => ({
+                                [field]: contains,
+                            }),
+                        ),
+
+                        {
+                            author: {
+                                name: {
+                                    contains: query,
+                                    mode: 'insensitive',
+                                },
+                            },
+                        },
+
+                        {
+                            tags: {
+                                some: {
+                                    title: {
+                                        contains: query,
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                };
+
+                const where: object = {
+                    ...(query && {
+                        where: {
+                            ...containsQuery,
+                            ...getFullAccessConstraintWithAuthor(ctx),
+                        },
+                    }),
+                };
+
+                const [count, values] = await ctx.db.$transaction([
+                    ctx.db.recommendation.count(where),
+                    ctx.db.recommendation.findMany({
+                        where,
+                        include: {
+                            author: {
+                                select: { name: true },
+                            },
+                        },
+                        orderBy: {
+                            [orderBy ? orderBy : 'createdAt']: order
+                                ? order
+                                : 'desc',
+                        },
+                        skip: (page - 1) * limit,
+                        take: limit,
+                    }),
+                ]);
+
+                return {
+                    count,
+                    values,
+                };
+            },
+        ),
+
+    get: publicProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
+        return ctx.db.recommendation.findUnique({
+            where: { id: input, ...getFullAccessConstraintWithAuthor(ctx) },
+            include: {
+                author: {
+                    select: { name: true },
+                },
+            },
+        });
+    }),
+
+    random: publicProcedure.input(CountSchema).query(async ({ input, ctx }) => {
+        return ctx.db
+            .$queryRaw`select * from "Recommendation" limit ${input} offset floor(random() * (select count(*) from "Recommendation"));`;
+    }),
 
     create: permissionProcedure
         .input(RecommendationSchema)
@@ -98,9 +129,22 @@ export const recommendationRouter = createTRPCRouter({
                 data: {
                     title: input.title,
                     description: input.description,
-                    image: input.image,
 
                     published: input.published,
+                },
+            });
+        }),
+
+    publish: permissionProcedure
+        .input(SetBooleanSchema)
+        .mutation(async ({ ctx, input: { id, value } }) => {
+            return ctx.db.recommendation.update({
+                where: {
+                    id,
+                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
+                },
+                data: {
+                    published: value,
                 },
             });
         }),
