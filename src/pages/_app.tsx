@@ -18,7 +18,7 @@ const App: AppType<{ session: Session | null }> = ({
 }) => {
     return (
         <SessionProvider session={session}>
-            <main className="h-full bg-neutral-200 font-sans">
+            <main className="h-full bg-neutral-50 font-sans">
                 <Component {...pageProps} />
             </main>
         </SessionProvider>

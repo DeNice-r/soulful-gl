@@ -7,8 +7,6 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '~/components/ui/pagination';
-import { TableRow } from '~/components/ui/table';
-import { TableCell } from '@mui/material';
 import React from 'react';
 
 export function CustomPagination({
@@ -48,42 +46,36 @@ export function CustomPagination({
     }
 
     return (
-        <TableRow>
-            <TableCell colSpan={100}>
-                <Pagination>
-                    <PaginationContent>
-                        <PaginationItem>
-                            <PaginationPrevious
-                                disabled={page <= 1}
-                                onClick={() => goToPage(page - 1)}
-                            />
-                        </PaginationItem>
-                        {1 < page - 2 && <PageShortcut target={1} />}
-                        {1 < page - 4 && (
-                            <PaginationItem>
-                                <PaginationEllipsis />
-                            </PaginationItem>
-                        )}
-                        {1 === page - 4 && <PageShortcut target={3} />}
-                        {getButtons()}
-                        {total === page + 4 && (
-                            <PageShortcut target={total - 1} />
-                        )}
-                        {page + 4 < total && (
-                            <PaginationItem>
-                                <PaginationEllipsis />
-                            </PaginationItem>
-                        )}
-                        {page + 2 < total && <PageShortcut target={total} />}
-                        <PaginationItem>
-                            <PaginationNext
-                                disabled={page >= total}
-                                onClick={() => goToPage(page + 1)}
-                            />
-                        </PaginationItem>
-                    </PaginationContent>
-                </Pagination>
-            </TableCell>
-        </TableRow>
+        <Pagination>
+            <PaginationContent>
+                <PaginationItem>
+                    <PaginationPrevious
+                        disabled={page <= 1}
+                        onClick={() => goToPage(page - 1)}
+                    />
+                </PaginationItem>
+                {1 < page - 2 && <PageShortcut target={1} />}
+                {1 < page - 4 && (
+                    <PaginationItem>
+                        <PaginationEllipsis />
+                    </PaginationItem>
+                )}
+                {1 === page - 4 && <PageShortcut target={3} />}
+                {getButtons()}
+                {total === page + 4 && <PageShortcut target={total - 1} />}
+                {page + 4 < total && (
+                    <PaginationItem>
+                        <PaginationEllipsis />
+                    </PaginationItem>
+                )}
+                {page + 2 < total && <PageShortcut target={total} />}
+                <PaginationItem>
+                    <PaginationNext
+                        disabled={page >= total}
+                        onClick={() => goToPage(page + 1)}
+                    />
+                </PaginationItem>
+            </PaginationContent>
+        </Pagination>
     );
 }

@@ -237,11 +237,15 @@ export const View: React.FC<{
                                     />
                                 </TableRow>
                             ))}
-                        <CustomPagination
-                            page={page}
-                            total={total}
-                            goToPage={goToPage}
-                        />
+                        <TableRow>
+                            <TableCell colSpan={100}>
+                                <CustomPagination
+                                    page={page}
+                                    total={total}
+                                    goToPage={goToPage}
+                                />
+                            </TableCell>
+                        </TableRow>
                         {!entities.data && (
                             <TableRow>
                                 <TableCell colSpan={100}>

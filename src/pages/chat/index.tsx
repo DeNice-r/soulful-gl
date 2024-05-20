@@ -225,7 +225,7 @@ const ChatUI = () => {
     }
 
     return (
-        <Layout>
+        <Layout footer={false}>
             <Fade in={error}>
                 <Alert
                     variant="filled"

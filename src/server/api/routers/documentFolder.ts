@@ -7,32 +7,43 @@ import {
 
 export const documentFolderRouter = createTRPCRouter({
     list: permissionProcedure
-        .input(CUIDSchema.optional())
+        .input(CUIDSchema.nullable().optional())
         .query(async ({ input, ctx }) => {
             if (input) {
-                return ctx.db.documentFolder.findMany({
-                    where: {
-                        parentId: input,
+                const x = await ctx.db.documentFolder.findUnique({
+                    where: { id: input },
+                    select: {
+                        title: true,
+                        parent: {
+                            select: { id: true, title: true, parentId: true },
+                        },
+                        documents: true,
+                        folders: true,
                     },
                 });
+
+                return {
+                    documents: x?.documents ?? [],
+                    folders: x?.folders ?? [],
+                    parent: x?.parent,
+                    title: x?.title,
+                };
             }
+            const where = {
+                where: {
+                    ...(input ? { parentId: input } : { parentId: null }),
+                },
+            };
 
             const [folders, documents] = await Promise.all([
-                ctx.db.documentFolder.findMany({
-                    where: {
-                        parent: null,
-                    },
-                }),
-                ctx.db.document.findMany({
-                    where: {
-                        folder: null,
-                    },
-                }),
+                ctx.db.documentFolder.findMany(where),
+                ctx.db.document.findMany(where),
             ]);
-
             return {
                 documents,
                 folders,
+                parent: null,
+                title: null,
             };
         }),
 

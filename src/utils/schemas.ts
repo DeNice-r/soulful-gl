@@ -195,25 +195,25 @@ export const QandAUdateSchema = z.object({
 });
 
 export const DocumentSchema = TDISchema.extend({
-    folderId: CUIDSchema.optional(),
+    parentId: CUIDSchema.nullable().optional(),
 
-    tags: z.array(z.string()).min(1).max(25).default([]),
+    tags: z.array(z.string()).max(25).default([]),
 });
 
 export const DocumentUpdateSchema = TDIUpdateSchema.extend({
     id: z.string().cuid(),
 
-    folderId: CUIDSchema.optional(),
+    parentId: CUIDSchema.nullable().optional(),
 
     tags: z.array(z.string()).min(1).max(25).optional(),
 });
 
 export const DocumentFolderSchema = z.object({
-    parentId: CUIDSchema.optional(),
+    parentId: CUIDSchema.nullable().optional(),
 
     title: ShortStringSchema,
 
-    tags: z.array(z.string()).min(1).max(25).default([]),
+    tags: z.array(z.string()).max(25).default([]),
 });
 
 export const DocumentFolderUpdateSchema = z.object({
@@ -221,7 +221,7 @@ export const DocumentFolderUpdateSchema = z.object({
 
     title: ShortStringSchema.optional(),
 
-    parentId: CUIDSchema.optional(),
+    parentId: CUIDSchema.nullable().optional(),
 
     tags: z.array(z.string()).min(1).max(25).optional(),
 });

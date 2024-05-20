@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Logo } from '~/components/common/Logo';
 import { ManagementPageName, PageTitleMap, type Props } from '~/utils/types';
 import { cn } from '~/lib/utils';
-import { className } from 'postcss-selector-parser';
+import { Icon } from '~/components/common/Icon';
 
 const SvgIcon = {
     [ManagementPageName.STATISTICS]:
@@ -113,18 +113,3 @@ export const Sidebar: React.FC<Props & { entity: ManagementPageName }> = ({
         </div>
     );
 };
-
-function Icon({ d }: { d: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="2"
-            stroke="currentColor"
-            className="max-h-[24px] min-h-[24px] min-w-[24px] max-w-[24px]"
-        >
-            <path strokeLinecap="round" strokeLinejoin="round" d={d} />
-        </svg>
-    );
-}
