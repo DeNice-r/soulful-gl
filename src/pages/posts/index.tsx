@@ -61,7 +61,7 @@ const Posts: React.FC = () => {
                                     (recommendation) => (
                                         <article
                                             key={recommendation.id}
-                                            className="flex min-w-52 flex-grow basis-1/5 flex-col items-center justify-center gap-4 rounded-xl bg-neutral-300 p-10 shadow-inner"
+                                            className="flex min-w-52 flex-grow basis-1/5 flex-col items-center justify-center gap-4 rounded-xl bg-neutral-200 p-10 shadow-inner"
                                         >
                                             <h1 className="font-bold">
                                                 {recommendation.title}
@@ -90,7 +90,7 @@ const Posts: React.FC = () => {
                     {posts?.data?.values.map((post) => (
                         <div
                             key={post.id}
-                            className="flex w-full flex-grow justify-center rounded-md bg-neutral-300 shadow-md outline-2 outline-neutral-300 transition-shadow duration-100 ease-in hover:cursor-pointer hover:shadow-xl hover:outline xl:w-5/12"
+                            className="flex w-full flex-grow justify-center rounded-md bg-neutral-200 shadow-md outline-2 outline-neutral-200 transition-shadow duration-100 ease-in hover:cursor-pointer hover:shadow-xl hover:outline xl:w-5/12"
                         >
                             <Post variant="posts" post={post} />
                         </div>
