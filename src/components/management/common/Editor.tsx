@@ -44,16 +44,18 @@ interface ActualReactQuill {
 export const Editor = ({
     defaultValue,
     onChange,
+    value,
 }: {
-    defaultValue: string;
+    defaultValue?: string;
     onChange: (value: string) => void;
+    value?: string;
 }) => {
     const { toast } = useToast();
     const quillRef = useRef<ActualReactQuill>(null);
     const [text, setText] = useState(defaultValue);
-    function changeValue(value: string) {
-        setText(value);
-        onChange(value);
+    function changeValue(newValue: string) {
+        setText(newValue);
+        onChange(newValue);
     }
 
     function imageHandler() {
@@ -98,6 +100,12 @@ export const Editor = ({
             return delta;
         });
     }, [quillRef.current]);
+
+    useEffect(() => {
+        if (value !== undefined) {
+            setText(value);
+        }
+    }, [value]);
 
     const modules = useMemo(
         () => ({

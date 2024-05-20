@@ -1,4 +1,9 @@
-import React, { type RefObject, type ChangeEvent, useState } from 'react';
+import React, {
+    type RefObject,
+    type ChangeEvent,
+    useState,
+    useEffect,
+} from 'react';
 import {
     Form,
     FormControl,
@@ -58,6 +63,12 @@ export const XForm: React.FC<{
         title: '',
         description: '',
     };
+
+    useEffect(() => {
+        form.setValue('image', currentPageData.image);
+        form.setValue('title', currentPageData.title);
+        form.setValue('description', currentPageData.description);
+    }, [currentPage]);
 
     const form = useForm<z.infer<typeof ExerciseSchema>>({
         resolver: zodResolver(ExerciseSchema),
@@ -123,15 +134,28 @@ export const XForm: React.FC<{
     }
 
     function handlePreviousPage() {
-        goToPreviousPage();
+        const [image, title, description] = form.getValues([
+            'image',
+            'title',
+            'description',
+        ]);
+        goToPreviousPage({
+            image: image ?? '',
+            title,
+            description,
+        });
     }
 
     function handleNextPage() {
-        console.log(form.getValues(['image', 'title', 'description']));
+        const [image, title, description] = form.getValues([
+            'image',
+            'title',
+            'description',
+        ]);
         goToNextPage({
-            image: form.getValues('image') ?? '',
-            title: form.getValues('title'),
-            description: form.getValues('description'),
+            image: image ?? '',
+            title,
+            description,
         });
     }
 
@@ -278,6 +302,7 @@ export const XForm: React.FC<{
                                             onChange={createSetValue(
                                                 'description',
                                             )}
+                                            value={field.value}
                                         />
                                         <style>
                                             {`

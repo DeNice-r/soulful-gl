@@ -18,7 +18,7 @@ interface PageContextProps {
     pages: PageData[];
     currentPage: number;
     savePageData: (index: number, data: PageData['data']) => void;
-    goToPreviousPage: () => void;
+    goToPreviousPage: (currentPageData: PageData['data']) => void;
     goToNextPage: (currentPageData: PageData['data']) => void;
     deletePage: (index: number) => void;
 }
@@ -32,11 +32,8 @@ export const PageProvider = ({ children }: { children: ReactNode }) => {
     const [currentPage, setCurrentPage] = useState(0);
 
     const savePageData = (index: number, data: PageData['data']) => {
-        console.log(data, 'data');
-
         const newPages = [...pages];
         newPages[index] = { ...newPages[index], data };
-        console.log(newPages);
         setPages(newPages);
     };
 
@@ -51,7 +48,8 @@ export const PageProvider = ({ children }: { children: ReactNode }) => {
         setCurrentPage(pages.length);
     };
 
-    const goToPreviousPage = () => {
+    const goToPreviousPage = (currentPageData: PageData['data']) => {
+        savePageData(currentPage, currentPageData);
         if (currentPage > 0) {
             setCurrentPage(currentPage - 1);
         }
@@ -59,7 +57,6 @@ export const PageProvider = ({ children }: { children: ReactNode }) => {
 
     const goToNextPage = (currentPageData: PageData['data']) => {
         savePageData(currentPage, currentPageData);
-        setTimeout(() => console.log(pages), 500);
         if (currentPage < pages.length - 1) {
             setCurrentPage(currentPage + 1);
         } else {
