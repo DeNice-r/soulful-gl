@@ -21,4 +21,8 @@
     html {
         overflow-y:scroll;
     }
+    body[data-scroll-locked] {
+        min-width: 100%;
+        pointer-events: all !important;
+    }
 }

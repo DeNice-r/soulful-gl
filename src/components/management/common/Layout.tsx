@@ -20,8 +20,6 @@ const pages = {
     [ManagementPageName.POSTS]: <Posts />,
     [ManagementPageName.RECOMMENDATIONS]: <Recommendations />,
     [ManagementPageName.EXERCISES]: <Exercises />,
-    [ManagementPageName.KNOWLEDGE]: `<Knowledge />`,
-    [ManagementPageName.ACHIEVEMENTS]: `<Achievements />`,
     [ManagementPageName.DONATIONS]: `<Donations />`,
     [ManagementPageName.QnA]: <QnA />,
 };

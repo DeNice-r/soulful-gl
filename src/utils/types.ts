@@ -45,8 +45,6 @@ export enum ManagementPageName {
     POSTS = 'posts',
     RECOMMENDATIONS = 'recommendations',
     EXERCISES = 'exercises',
-    KNOWLEDGE = 'knowledge',
-    ACHIEVEMENTS = 'achievements',
     DONATIONS = 'donations',
     QnA = 'QnA',
 }
@@ -58,8 +56,6 @@ export const PageTitleMap = {
     [ManagementPageName.POSTS]: 'Дописи',
     [ManagementPageName.RECOMMENDATIONS]: 'Рекомендації',
     [ManagementPageName.EXERCISES]: 'Вправи',
-    [ManagementPageName.KNOWLEDGE]: 'База знань',
-    [ManagementPageName.ACHIEVEMENTS]: 'Досягнення',
     [ManagementPageName.DONATIONS]: 'Пожертви',
     [ManagementPageName.QnA]: 'Запитання та відповіді',
 };
@@ -142,3 +138,5 @@ export const Order = {
     ASC: 'asc',
     DESC: 'desc',
 };
+
+export const AmountPerPageOptions = [10, 20, 50, 100];
