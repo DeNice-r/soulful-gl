@@ -3,22 +3,34 @@ import { Layout } from '~/components/common/Layout';
 import { Button } from '~/components/ui/button';
 import {
     Dialog,
-    DialogDescription,
     DialogContent,
     DialogFooter,
     DialogHeader,
     DialogTitle,
 } from '~/components/ui/dialog';
+import {
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '~/components/ui/form';
+import { useForm } from 'react-hook-form';
+import type * as z from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import { api } from '~/utils/api';
+import { QandASchema } from '~/utils/schemas';
 
 const QnA: React.FC = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-    const [question, setQuestion] = useState('');
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
+    const form = useForm<z.infer<typeof QandASchema>>({
+        resolver: zodResolver(QandASchema),
+    });
 
     const QnAs = api.qanda.list.useQuery();
 
@@ -28,18 +40,9 @@ const QnA: React.FC = () => {
 
     const createMutation = api.qanda.create.useMutation();
 
-    const handleQnACreation = async () => {
+    const onSubmit = async (values: z.infer<typeof QandASchema>) => {
         changeDialogState();
-        setTimeout(() => {
-            void (async () => {
-                await createMutation.mutateAsync({
-                    authorName: name,
-                    authorEmail: email,
-                    question: question,
-                });
-                await QnAs.refetch();
-            })();
-        });
+        createMutation.mutate(values);
     };
     return (
         <Layout className="flex w-full flex-col items-center bg-homepage-cover">
@@ -87,47 +90,91 @@ const QnA: React.FC = () => {
                     <DialogHeader className="self-start">
                         <DialogTitle>Задати питання</DialogTitle>
                     </DialogHeader>
-
-                    <div className="flex w-4/5 flex-col gap-4 py-4">
-                        <div className="flex  items-center justify-end gap-4">
-                            <Label htmlFor="name" className="text-right">
-                                Ім&apos;я
-                            </Label>
-                            <Input
-                                id="name"
-                                placeholder="Антон"
-                                className="w-2/3"
-                                onChange={(e) => setName(e.target.value)}
+                    <Form {...form}>
+                        <form
+                            onSubmit={form.handleSubmit(onSubmit)}
+                            className="flex w-4/5 flex-col gap-4 py-4"
+                        >
+                            <FormField
+                                control={form.control}
+                                name="authorName"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col gap-2 space-y-0">
+                                        <div className="flex items-center justify-end gap-4">
+                                            <FormLabel
+                                                htmlFor="name"
+                                                className="text-right"
+                                            >
+                                                Ім&apos;я
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    id="name"
+                                                    placeholder="Антон"
+                                                    className="w-2/3"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                        </div>
+                                        <FormMessage className="w-2/3 self-end text-center" />
+                                    </FormItem>
+                                )}
                             />
-                        </div>
-                        <div className="flex  items-center justify-end gap-4">
-                            <Label htmlFor="email" className="text-right">
-                                Ел. пошта
-                            </Label>
-                            <Input
-                                id="email"
-                                placeholder="anton@gmail.com"
-                                className="w-2/3"
-                                onChange={(e) => setEmail(e.target.value)}
+                            <FormField
+                                control={form.control}
+                                name="authorEmail"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col gap-2 space-y-0">
+                                        <div className="flex items-center justify-end gap-4">
+                                            <FormLabel
+                                                htmlFor="email"
+                                                className="text-right"
+                                            >
+                                                Ел. пошта
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    id="email"
+                                                    placeholder="anton@gmail.com"
+                                                    className="w-2/3"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                        </div>
+                                        <FormMessage className="w-2/3 self-end text-center" />
+                                    </FormItem>
+                                )}
                             />
-                        </div>
-                        <div className="flex items-center justify-end gap-4">
-                            <Label htmlFor="question" className="text-right">
-                                Запитання
-                            </Label>
-                            <Input
-                                id="question"
-                                placeholder="Чи можливо..."
-                                className="w-2/3"
-                                onChange={(e) => setQuestion(e.target.value)}
+                            <FormField
+                                control={form.control}
+                                name="question"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col gap-2 space-y-0">
+                                        <div className="flex items-center justify-end gap-4">
+                                            <FormLabel
+                                                htmlFor="question"
+                                                className="text-right"
+                                            >
+                                                Ел. пошта
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    id="question"
+                                                    placeholder="Чи можливо..."
+                                                    className="w-2/3"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                        </div>
+                                        <FormMessage className="w-2/3 self-end text-center" />
+                                    </FormItem>
+                                )}
                             />
-                        </div>
-                    </div>
-                    <DialogFooter className="self-end">
-                        <Button type="submit" onClick={handleQnACreation}>
-                            Підтвердити
-                        </Button>
-                    </DialogFooter>
+                            <DialogFooter className="self-end">
+                                <Button type="submit">Підтвердити</Button>
+                            </DialogFooter>
+                        </form>
+                    </Form>
                 </DialogContent>
             </Dialog>
         </Layout>
