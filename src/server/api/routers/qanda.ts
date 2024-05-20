@@ -156,7 +156,7 @@ export const qandaRouter = createTRPCRouter({
                 },
             });
 
-            if (deletedQanda?.authorEmail) {
+            if (deletedQanda?.authorEmail && !deletedQanda?.answer) {
                 await sendQandaDeleteEmail(
                     deletedQanda?.authorEmail,
                     deletedQanda?.authorName ?? 'Анонім',
