@@ -13,7 +13,7 @@ import {
     publicProcedure,
 } from '~/server/api/trpc';
 import { SearchableExerciseFields } from '~/utils/types';
-import { getFullAccessConstraint } from '~/utils/auth';
+import { getFullAccessConstraintWithAuthor } from '~/utils/auth';
 
 export const exerciseRouter = createTRPCRouter({
     list: publicProcedure
@@ -61,7 +61,7 @@ export const exerciseRouter = createTRPCRouter({
                     ...(query && {
                         where: {
                             ...containsQuery,
-                            ...getFullAccessConstraint(ctx),
+                            ...getFullAccessConstraintWithAuthor(ctx),
                         },
                     }),
                 };
@@ -96,7 +96,7 @@ export const exerciseRouter = createTRPCRouter({
         return ctx.db.exercise.findUnique({
             where: {
                 id: input,
-                ...getFullAccessConstraint(ctx),
+                ...getFullAccessConstraintWithAuthor(ctx),
             },
             include: {
                 author: {

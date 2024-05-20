@@ -22,7 +22,7 @@ export function getIsFullAccess(
     );
 }
 
-export function getFullAccessConstraint(
+export function getFullAccessConstraintWithAuthor(
     ctx: Awaited<ReturnType<typeof createTRPCContext>>,
 ) {
     return (

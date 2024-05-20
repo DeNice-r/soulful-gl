@@ -15,7 +15,7 @@ import { archiveChat } from '~/server/api/routers/common';
 import { randomUUID } from 'crypto';
 import bcrypt from 'bcrypt';
 import { env } from '~/env';
-import { sendRegEmail } from '~/utils/email';
+import { sendRegEmail } from '~/utils/email/templates';
 import { SearchableUserFields } from '~/utils/types';
 
 export const userRouter = createTRPCRouter({

@@ -94,7 +94,7 @@ export const SortablePostFields = {
     CREATED_AT: 'createdAt',
     UPDATED_AT: 'updatedAt',
     PUBLISHED: 'published',
-};
+} as const;
 
 export const SearchableRecommendationFields = {
     ID: 'id',
@@ -103,13 +103,26 @@ export const SearchableRecommendationFields = {
 } as const;
 
 export const SortableRecommendationFields = {
-    ID: 'id',
-    TITLE: 'title',
-    DESCRIPTION: 'description',
+    ...SearchableRecommendationFields,
     CREATED_AT: 'createdAt',
     UPDATED_AT: 'updatedAt',
     PUBLISHED: 'published',
-};
+} as const;
+
+export const SearchableQnAFields = {
+    ID: 'id',
+    QUESTION: 'question',
+    ANSWER: 'answer',
+    AUTHOR_EMAIL: 'authorEmail',
+    AUTHOR_NAME: 'authorName',
+} as const;
+
+export const SortableQnAFields = {
+    ...SearchableQnAFields,
+    CREATED_AT: 'createdAt',
+    UPDATED_AT: 'updatedAt',
+    PUBLISHED: 'published',
+} as const;
 
 export const SearchableExerciseFields = {
     ID: 'id',
@@ -123,7 +136,7 @@ export const SortableExerciseFields = {
     CREATED_AT: 'createdAt',
     UPDATED_AT: 'updatedAt',
     PUBLISHED: 'published',
-};
+} as const;
 
 export const Order = {
     ASC: 'asc',

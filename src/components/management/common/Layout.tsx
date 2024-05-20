@@ -10,6 +10,7 @@ import { Operators } from '~/components/management/User/Operators';
 import Posts from '~/components/management/Post';
 import Recommendations from '~/components/management/Recommendation';
 import Exercises from '~/components/management/Exercise';
+import QnA from '~/components/management/QnA';
 import { PageProvider } from '../Exercise/PageProvider';
 
 const pages = {
@@ -22,7 +23,7 @@ const pages = {
     [ManagementPageName.KNOWLEDGE]: `<Knowledge />`,
     [ManagementPageName.ACHIEVEMENTS]: `<Achievements />`,
     [ManagementPageName.DONATIONS]: `<Donations />`,
-    [ManagementPageName.QnA]: `<QnA />`,
+    [ManagementPageName.QnA]: <QnA />,
 };
 
 export const Layout: React.FC<{ entity?: ManagementPageName }> = ({

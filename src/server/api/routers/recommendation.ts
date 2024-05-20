@@ -12,7 +12,7 @@ import {
     SetBooleanSchema,
 } from '~/utils/schemas';
 import { SearchableRecommendationFields } from '~/utils/types';
-import { getFullAccessConstraint } from '~/utils/auth';
+import { getFullAccessConstraintWithAuthor } from '~/utils/auth';
 
 export const recommendationRouter = createTRPCRouter({
     list: publicProcedure
@@ -58,7 +58,7 @@ export const recommendationRouter = createTRPCRouter({
                     ...(query && {
                         where: {
                             ...containsQuery,
-                            ...getFullAccessConstraint(ctx),
+                            ...getFullAccessConstraintWithAuthor(ctx),
                         },
                     }),
                 };
@@ -91,7 +91,7 @@ export const recommendationRouter = createTRPCRouter({
 
     get: publicProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
         return ctx.db.recommendation.findUnique({
-            where: { id: input, ...getFullAccessConstraint(ctx) },
+            where: { id: input, ...getFullAccessConstraintWithAuthor(ctx) },
             include: {
                 author: {
                     select: { name: true },

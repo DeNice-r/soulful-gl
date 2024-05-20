@@ -1,6 +1,7 @@
 import {
     createTRPCRouter,
     permissionProcedure,
+    publicPermissionProcedure,
     publicProcedure,
 } from '~/server/api/trpc';
 import {
@@ -11,10 +12,10 @@ import {
     SetBooleanSchema,
 } from '~/utils/schemas';
 import { SearchablePostFields } from '~/utils/types';
-import { getFullAccessConstraint } from '~/utils/auth';
+import { getFullAccessConstraintWithAuthor } from '~/utils/auth';
 
 export const postRouter = createTRPCRouter({
-    list: publicProcedure
+    list: publicPermissionProcedure
         .input(PageSchema)
         .query(
             async ({ input: { page, limit, query, orderBy, order }, ctx }) => {
@@ -57,7 +58,7 @@ export const postRouter = createTRPCRouter({
                     ...(query && {
                         where: {
                             ...containsQuery,
-                            ...getFullAccessConstraint(ctx),
+                            ...getFullAccessConstraintWithAuthor(ctx),
                         },
                     }),
                 };
@@ -90,7 +91,7 @@ export const postRouter = createTRPCRouter({
 
     get: publicProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
         return ctx.db.post.findUnique({
-            where: { id: input, ...getFullAccessConstraint(ctx) },
+            where: { id: input, ...getFullAccessConstraintWithAuthor(ctx) },
             include: {
                 author: {
                     select: { name: true },

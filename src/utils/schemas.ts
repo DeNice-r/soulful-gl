@@ -24,7 +24,7 @@ export const CUIDSchema = z.string().cuid();
 export const CUIDObjectSchema = z.object({ id: CUIDSchema });
 export const EmailSchema = z.string().email();
 
-export const ShortStringSchema = z.string().min(1).max(100);
+export const ShortStringSchema = z.string().min(1).max(200);
 export const MessageTextSchema = z.string().min(1).max(4096);
 
 export const BusynessSchema = z.number().int().min(0).max(4);
@@ -75,6 +75,12 @@ export const UpdateUserSchema = z.object({
 
 export const SetBooleanSchema = z.object({
     id: z.string(),
+
+    value: z.boolean(),
+});
+
+export const SetBooleanNumberIdSchema = z.object({
+    id: NumberIdSchema,
 
     value: z.boolean(),
 });
@@ -163,11 +169,20 @@ export const ExerciseUpdateSchema = TDIUpdateSchema.extend({
     steps: z.array(ExerciseStepSchema).min(1).max(100).optional(),
 });
 
-export const QandASchema = z.object({
-    question: RichTextSchema,
+export const UserQandASchema = z.object({
+    question: ShortStringSchema,
 
     authorEmail: z.string().email(),
     authorName: ShortStringSchema,
+});
+
+export const FullQandASchema = UserQandASchema.extend({
+    answer: ShortStringSchema.optional(),
+});
+
+export const AdminQandASchema = z.object({
+    question: ShortStringSchema,
+    answer: ShortStringSchema,
 });
 
 export const QandAUdateSchema = z.object({
