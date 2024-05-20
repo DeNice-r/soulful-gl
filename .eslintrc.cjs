@@ -51,6 +51,7 @@ const config = {
                 "argsIgnorePattern": "^_"
             }
         ],
+        "unused-imports/no-unused-imports": "error",
         "no-undef": "off",  // Recommended to turn off for TypeScript https://typescript-eslint.io/troubleshooting/#i-get-errors-from-the-no-undef-rule-about-global-variables-not-being-defined-even-though-there-are-no-typescript-errors
         "indent": "off"
     }

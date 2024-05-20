@@ -13,20 +13,12 @@ import {
     TableHeader,
     TableRow,
 } from '~/components/ui/table';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '~/components/ui/select';
 import { CustomPagination } from '~/components/utils/CustomPagination';
 import { TableCell } from '@mui/material';
 import { Spinner } from '~/components/ui/spinner';
-import { AmountPerPageOptions, SortablePostFields } from '~/utils/types';
+import { SortablePostFields } from '~/utils/types';
 import { Single } from '~/components/management/Post/Single';
 import { XForm } from '~/components/management/Post/XForm';
-import { Label } from '@mui/icons-material';
 import { AmountSelect } from '~/components/management/common/AmountSelect';
 
 const TableHeaders: Record<string, string> = {

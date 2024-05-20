@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import { Layout } from '~/components/common/Layout';
@@ -11,7 +10,7 @@ import { Spinner } from '~/components/ui/spinner';
 
 const Post: React.FC = () => {
     const router = useRouter();
-    const { data: session, status } = useSession();
+    const { data: session } = useSession();
     const deleteMutation = api.post.delete.useMutation();
     const updateMutation = api.post.update.useMutation();
 

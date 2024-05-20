@@ -52,7 +52,7 @@ export const XForm: React.FC<{
     const {
         pages,
         currentPage,
-        savePageData,
+        // savePageData,
         goToPreviousPage,
         goToNextPage,
         deletePage,

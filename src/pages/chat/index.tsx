@@ -9,7 +9,7 @@ import { ChatBar } from '~/components/chat/ChatBar';
 import { ChatMessageWindow } from '~/components/chat/ChatMessageWindow';
 import { Cross1Icon } from '@radix-ui/react-icons';
 import { Button } from '@mui/material';
-import { LoaderIcon, Trash2Icon } from 'lucide-react';
+import { LoaderIcon } from 'lucide-react';
 
 type FullChats = NonNullable<RouterOutputs['chat']['listFull']>;
 

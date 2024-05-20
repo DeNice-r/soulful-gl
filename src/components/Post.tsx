@@ -3,10 +3,6 @@ import Router from 'next/router';
 import Image from 'next/image';
 import { type RouterOutputs } from '~/utils/api';
 import { truncateString } from '~/utils';
-import {
-    MAX_LANDING_POSTS_DESCRIPTION_LENGTH,
-    MAX_POSTS_DESCRIPTION_LENGTH,
-} from '~/utils/constants';
 import { cn } from '~/lib/utils';
 import { defaultFormatDt } from '~/utils/dates';
 
