@@ -1,5 +1,5 @@
 import { createTRPCRouter, spaProcedure } from '~/server/api/trpc';
-import { BusynessSchema, CUIDSchema, NumberIdSchema } from '~/utils/schemas';
+import { BusynessSchema, NumberIdSchema } from '~/utils/schemas';
 import { archiveChat } from '~/server/api/routers/common';
 
 export const chatRouter = createTRPCRouter({

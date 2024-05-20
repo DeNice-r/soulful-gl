@@ -4,6 +4,7 @@ import {
     ExerciseStepSchema,
     ExerciseUpdateSchema,
     PageSchema,
+    SetBooleanSchema,
 } from '~/utils/schemas';
 
 import {
@@ -11,13 +12,98 @@ import {
     permissionProcedure,
     publicProcedure,
 } from '~/server/api/trpc';
+import { SearchableExerciseFields } from '~/utils/types';
+import { getFullAccessConstraintWithAuthor } from '~/utils/auth';
 
 export const exerciseRouter = createTRPCRouter({
-    get: publicProcedure.input(PageSchema).query(async ({ input, ctx }) => {
-        return ctx.db.exercise.findMany({
-            orderBy: { createdAt: 'desc' },
-            skip: (input.page - 1) * input.limit,
-            take: input.limit,
+    list: publicProcedure
+        .input(PageSchema)
+        .query(
+            async ({ input: { page, limit, query, orderBy, order }, ctx }) => {
+                const contains = {
+                    contains: query,
+                    mode: 'insensitive',
+                };
+
+                if (orderBy === 'author') orderBy = 'authorId';
+
+                const containsQuery: object = {
+                    OR: [
+                        ...Object.values(SearchableExerciseFields).map(
+                            (field) => ({
+                                [field]: contains,
+                            }),
+                        ),
+
+                        {
+                            author: {
+                                name: {
+                                    contains: query,
+                                    mode: 'insensitive',
+                                },
+                            },
+                        },
+
+                        {
+                            tags: {
+                                some: {
+                                    title: {
+                                        contains: query,
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                };
+
+                const where: object = {
+                    ...(query && {
+                        where: {
+                            ...containsQuery,
+                            ...getFullAccessConstraintWithAuthor(ctx),
+                        },
+                    }),
+                };
+
+                const [count, values] = await ctx.db.$transaction([
+                    ctx.db.exercise.count(where),
+                    ctx.db.exercise.findMany({
+                        where,
+                        include: {
+                            author: {
+                                select: { name: true },
+                            },
+                        },
+                        orderBy: {
+                            [orderBy ? orderBy : 'createdAt']: order
+                                ? order
+                                : 'desc',
+                        },
+                        skip: (page - 1) * limit,
+                        take: limit,
+                    }),
+                ]);
+
+                return {
+                    count,
+                    values,
+                };
+            },
+        ),
+
+    get: publicProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
+        return ctx.db.exercise.findUnique({
+            where: {
+                id: input,
+                ...getFullAccessConstraintWithAuthor(ctx),
+            },
+            include: {
+                author: {
+                    select: { name: true },
+                },
+                steps: true,
+            },
         });
     }),
 
@@ -104,6 +190,20 @@ export const exerciseRouter = createTRPCRouter({
                     title: input.title,
                     description: input.description,
                     image: input.image,
+                },
+            });
+        }),
+
+    publish: permissionProcedure
+        .input(SetBooleanSchema)
+        .mutation(async ({ ctx, input: { id, value } }) => {
+            return ctx.db.exercise.update({
+                where: {
+                    id,
+                    ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
+                },
+                data: {
+                    published: value,
                 },
             });
         }),

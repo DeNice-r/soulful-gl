@@ -186,7 +186,7 @@ model Recommendation {
 
   title       String
   description String
-  image       String?
+  // image       String?
 
   published Boolean @default(false)
 
@@ -271,8 +271,8 @@ model QandA {
 model Document {
   id String @id @default(cuid())
 
-  folder   DocumentFolder? @relation(fields: [folderId], references: [id])
-  folderId String?
+  parentId String?
+  parent   DocumentFolder?  @relation(fields: [parentId], references: [id])
 
   title       String
   description String

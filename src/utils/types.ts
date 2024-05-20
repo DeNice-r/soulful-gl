@@ -43,9 +43,8 @@ export enum ManagementPageName {
     USERS = 'users',
     OPERATORS = 'operators',
     POSTS = 'posts',
-    EXCERCISES = 'excercises',
-    KNOWLEDGE = 'knowledge',
-    ACHIEVEMENTS = 'achievements',
+    RECOMMENDATIONS = 'recommendations',
+    EXERCISES = 'exercises',
     DONATIONS = 'donations',
     QnA = 'QnA',
 }
@@ -55,9 +54,89 @@ export const PageTitleMap = {
     [ManagementPageName.USERS]: 'Користувачі',
     [ManagementPageName.OPERATORS]: 'Оператори',
     [ManagementPageName.POSTS]: 'Дописи',
-    [ManagementPageName.EXCERCISES]: 'Вправи',
-    [ManagementPageName.KNOWLEDGE]: 'База знань',
-    [ManagementPageName.ACHIEVEMENTS]: 'Досягнення',
+    [ManagementPageName.RECOMMENDATIONS]: 'Рекомендації',
+    [ManagementPageName.EXERCISES]: 'Вправи',
     [ManagementPageName.DONATIONS]: 'Пожертви',
     [ManagementPageName.QnA]: 'Запитання та відповіді',
 };
+
+export const SearchableUserFields = {
+    ID: 'id',
+    EMAIL: 'email',
+    NAME: 'name',
+    DESCRIPTION: 'description',
+    NOTES: 'notes',
+} as const;
+
+export const SortableUserFields = {
+    ID: 'id',
+    EMAIL: 'email',
+    NAME: 'name',
+    CREATED_AT: 'createdAt',
+    UPDATED_AT: 'updatedAt',
+    REPORT_COUNT: 'reportCount',
+    SUSPENDED: 'suspended',
+} as const;
+
+export const SearchablePostFields = {
+    ID: 'id',
+    TITLE: 'title',
+    DESCRIPTION: 'description',
+} as const;
+
+export const SortablePostFields = {
+    ID: 'id',
+    TITLE: 'title',
+    CREATED_AT: 'createdAt',
+    UPDATED_AT: 'updatedAt',
+    PUBLISHED: 'published',
+} as const;
+
+export const SearchableRecommendationFields = {
+    ID: 'id',
+    TITLE: 'title',
+    DESCRIPTION: 'description',
+} as const;
+
+export const SortableRecommendationFields = {
+    ...SearchableRecommendationFields,
+    CREATED_AT: 'createdAt',
+    UPDATED_AT: 'updatedAt',
+    PUBLISHED: 'published',
+} as const;
+
+export const SearchableQnAFields = {
+    ID: 'id',
+    QUESTION: 'question',
+    ANSWER: 'answer',
+    AUTHOR_EMAIL: 'authorEmail',
+    AUTHOR_NAME: 'authorName',
+} as const;
+
+export const SortableQnAFields = {
+    ...SearchableQnAFields,
+    CREATED_AT: 'createdAt',
+    UPDATED_AT: 'updatedAt',
+    PUBLISHED: 'published',
+} as const;
+
+export const SearchableExerciseFields = {
+    ID: 'id',
+    TITLE: 'title',
+    DESCRIPTION: 'description',
+} as const;
+
+export const SortableExerciseFields = {
+    ID: 'id',
+    TITLE: 'title',
+    CREATED_AT: 'createdAt',
+    UPDATED_AT: 'updatedAt',
+    PUBLISHED: 'published',
+} as const;
+
+export const Order = {
+    ASC: 'asc',
+    DESC: 'desc',
+};
+
+export const AmountPerPageOptions = [10, 20, 50, 100];

@@ -5,10 +5,9 @@ import {
 } from '~/server/api/trpc';
 import {
     CreateUserSchema,
-    CUIDSchema,
     SearchUsersSchema,
     SetNotesSchema,
-    SetSuspendedSchema,
+    SetBooleanSchema,
     StringIdSchema,
     UpdateUserSchema,
 } from '~/utils/schemas';
@@ -16,20 +15,24 @@ import { archiveChat } from '~/server/api/routers/common';
 import { randomUUID } from 'crypto';
 import bcrypt from 'bcrypt';
 import { env } from '~/env';
-import { sendRegEmail } from '~/utils/email';
+import { sendRegEmail } from '~/utils/email/templates';
+import { SearchableUserFields } from '~/utils/types';
 
 export const userRouter = createTRPCRouter({
     list: permissionProcedure
         .input(SearchUsersSchema)
-        .query(async ({ input: { page, limit, permissions }, ctx }) => {
-            const p = ['*:*', '*:*:*'];
-            for (const permission of permissions || []) {
-                p.push(permission);
-                p.push(`${permission}:*`);
-            }
+        .query(
+            async ({
+                input: { page, limit, query, orderBy, order, permissions },
+                ctx,
+            }) => {
+                const p = ['*:*', '*:*:*'];
+                for (const permission of permissions || []) {
+                    p.push(permission);
+                    p.push(`${permission}:*`);
+                }
 
-            const where = permissions && {
-                where: {
+                let where: Record<string, object> | undefined = permissions && {
                     permissions: {
                         some: {
                             title: {
@@ -48,32 +51,51 @@ export const userRouter = createTRPCRouter({
                             },
                         },
                     },
-                },
-            };
+                };
 
-            const [count, values] = await ctx.db.$transaction([
-                ctx.db.user.count(where),
-                ctx.db.user.findMany({
-                    where: {
-                        ...where?.where,
-                    },
-                    select: getProjection(ctx.isFullAccess),
-                    orderBy: { createdAt: 'desc' },
-                    skip: (page - 1) * limit,
-                    take: limit,
-                }),
-            ]);
+                const contains = {
+                    contains: query,
+                    mode: 'insensitive',
+                };
 
-            return {
-                count,
-                values,
-            };
-        }),
+                const containsQuery = {
+                    OR: Object.values(SearchableUserFields).map((field) => ({
+                        [field]: contains,
+                    })),
+                };
 
-    // todo: get users with permission to chat
+                if (query) {
+                    where
+                        ? (where = {
+                              AND: [where, containsQuery],
+                          })
+                        : (where = containsQuery);
+                }
 
-    getById: permissionProcedure
-        .input(CUIDSchema)
+                const [count, values] = await ctx.db.$transaction([
+                    ctx.db.user.count({ where }),
+                    ctx.db.user.findMany({
+                        where,
+                        select: getProjection(ctx.isFullAccess),
+                        orderBy: {
+                            [orderBy ? orderBy : 'createdAt']: order
+                                ? order
+                                : 'desc',
+                        },
+                        skip: (page - 1) * limit,
+                        take: limit,
+                    }),
+                ]);
+
+                return {
+                    count,
+                    values,
+                };
+            },
+        ),
+
+    get: permissionProcedure
+        .input(StringIdSchema)
         .query(async ({ input, ctx }) => {
             return ctx.db.user.findUnique({
                 where: {
@@ -102,6 +124,10 @@ export const userRouter = createTRPCRouter({
     create: permissionProcedure
         .input(CreateUserSchema)
         .mutation(async ({ ctx, input: data }) => {
+            if (!data.email) {
+                throw new Error('Email is required');
+            }
+
             const password = randomUUID();
 
             const user = await ctx.db.user.create({
@@ -142,9 +168,8 @@ export const userRouter = createTRPCRouter({
         }),
 
     suspend: permissionProcedure
-        .input(SetSuspendedSchema)
+        .input(SetBooleanSchema)
         .mutation(async ({ ctx, input: { id, value } }) => {
-            // todo: archive all user's chats if any upon suspension
             if (ctx.session.user.id === id) {
                 throw new Error('Неможливо змінити статус власного запису');
             }

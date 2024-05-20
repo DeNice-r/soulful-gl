@@ -1,9 +1,4 @@
-import {
-    format,
-    formatDistance,
-    formatDuration,
-    intervalToDuration,
-} from 'date-fns';
+import { format, formatDuration, intervalToDuration } from 'date-fns';
 import { uk } from 'date-fns/locale';
 
 export function defaultFormatDate(date: Date): string {

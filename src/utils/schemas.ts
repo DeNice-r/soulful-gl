@@ -1,17 +1,20 @@
 import { z } from '~/utils/zod';
-import { BackgroundPattern } from '~/utils/types';
-import { env } from '~/env';
+import { BackgroundPattern, Order } from '~/utils/types';
+import { MAX_ASSET_LIMIT } from '~/utils/constants';
 
 const FirstPage = 1;
 const DefaultLimit = 10;
 const PaginationDefault = { page: FirstPage, limit: DefaultLimit };
 
-const NoDefaultPageSchema = z.object({
+const NoDefaultPageSearchSchema = z.object({
     page: z.number().min(1).default(FirstPage),
-    limit: z.number().min(1).max(100).default(DefaultLimit),
+    limit: z.number().min(1).max(MAX_ASSET_LIMIT).default(DefaultLimit),
+    query: z.string().optional(),
+    orderBy: z.string().optional(),
+    order: z.nativeEnum(Order).optional(),
 });
-export const PageSchema = NoDefaultPageSchema.default(PaginationDefault);
-export const SearchUsersSchema = NoDefaultPageSchema.extend({
+export const PageSchema = NoDefaultPageSearchSchema.default(PaginationDefault);
+export const SearchUsersSchema = NoDefaultPageSearchSchema.extend({
     permissions: z.array(z.string()).optional(),
 }).default(PaginationDefault);
 
@@ -19,8 +22,9 @@ export const NumberIdSchema = z.number().int().nonnegative();
 export const StringIdSchema = z.string().min(1).max(100);
 export const CUIDSchema = z.string().cuid();
 export const CUIDObjectSchema = z.object({ id: CUIDSchema });
+export const EmailSchema = z.string().email();
 
-export const ShortStringSchema = z.string().min(1).max(100);
+export const ShortStringSchema = z.string().min(1).max(200);
 export const MessageTextSchema = z.string().min(1).max(4096);
 
 export const BusynessSchema = z.number().int().min(0).max(4);
@@ -29,13 +33,13 @@ export const TitleSchema = z.string().min(1).max(200);
 export const QuerySchema = z.string().min(1).max(200);
 export const RichTextSchema = z.string().max(15000);
 
-const ImageBucketRegex = new RegExp(
-    `https://${env.NEXT_PUBLIC_AWS_S3_BUCKET}\\.s3(?:\\.${env.NEXT_PUBLIC_AWS_REGION})?\\.amazonaws\\.com/.+`,
-);
+// const ImageBucketRegex = new RegExp(
+//     `https://${env.NEXT_PUBLIC_AWS_S3_BUCKET}\\.s3(?:\\.${env.NEXT_PUBLIC_AWS_REGION})?\\.amazonaws\\.com/.+`,
+// );
 export const ImageSchema = z.string();
 // .refine((value) => ImageBucketRegex.test(value));
 
-export const SearchSchema = NoDefaultPageSchema.extend({
+export const SearchSchema = NoDefaultPageSearchSchema.extend({
     query: QuerySchema.optional(),
 
     published: z.boolean().optional(),
@@ -53,7 +57,7 @@ export const TDIUpdateSchema = z.object({
 });
 
 export const CreateUserSchema = z.object({
-    email: z.string().email(),
+    email: z.union([EmailSchema, z.string().length(0)]),
     name: ShortStringSchema,
     image: ImageSchema.optional(),
     description: RichTextSchema.optional(),
@@ -61,15 +65,22 @@ export const CreateUserSchema = z.object({
 });
 
 export const UpdateUserSchema = z.object({
-    id: CUIDSchema,
+    id: StringIdSchema,
 
     name: ShortStringSchema.optional(),
     image: ImageSchema.optional(),
     description: RichTextSchema.optional(),
+    notes: z.string().optional(),
 });
 
-export const SetSuspendedSchema = z.object({
+export const SetBooleanSchema = z.object({
     id: z.string(),
+
+    value: z.boolean(),
+});
+
+export const SetBooleanNumberIdSchema = z.object({
+    id: NumberIdSchema,
 
     value: z.boolean(),
 });
@@ -103,7 +114,9 @@ export const MultiPermissionRoleSchema = z.object({
 });
 
 export const RecommendationSchema = TDISchema.extend({
-    published: z.boolean(),
+    title: z.string().min(3).max(100),
+    description: z.string().min(3).max(250),
+    published: z.boolean().optional().default(false),
 });
 
 export const RecommendationUpdateSchema = TDIUpdateSchema.extend({
@@ -112,8 +125,10 @@ export const RecommendationUpdateSchema = TDIUpdateSchema.extend({
     published: z.boolean().optional(),
 });
 
+export const CountSchema = z.number().min(1).max(MAX_ASSET_LIMIT).default(4);
+
 export const PostSchema = TDISchema.extend({
-    tags: z.array(z.string()).min(1).max(25).default([]),
+    tags: z.array(z.string()).min(1).max(25).default([]).optional(),
     published: z.boolean().default(false),
 });
 
@@ -154,11 +169,20 @@ export const ExerciseUpdateSchema = TDIUpdateSchema.extend({
     steps: z.array(ExerciseStepSchema).min(1).max(100).optional(),
 });
 
-export const QandASchema = z.object({
-    question: RichTextSchema,
+export const UserQandASchema = z.object({
+    question: ShortStringSchema,
 
     authorEmail: z.string().email(),
     authorName: ShortStringSchema,
+});
+
+export const FullQandASchema = UserQandASchema.extend({
+    answer: ShortStringSchema.optional(),
+});
+
+export const AdminQandASchema = z.object({
+    question: ShortStringSchema,
+    answer: ShortStringSchema,
 });
 
 export const QandAUdateSchema = z.object({
@@ -171,25 +195,25 @@ export const QandAUdateSchema = z.object({
 });
 
 export const DocumentSchema = TDISchema.extend({
-    folderId: CUIDSchema.optional(),
+    parentId: CUIDSchema.nullable().optional(),
 
-    tags: z.array(z.string()).min(1).max(25).default([]),
+    tags: z.array(z.string()).max(25).default([]),
 });
 
 export const DocumentUpdateSchema = TDIUpdateSchema.extend({
     id: z.string().cuid(),
 
-    folderId: CUIDSchema.optional(),
+    parentId: CUIDSchema.nullable().optional(),
 
     tags: z.array(z.string()).min(1).max(25).optional(),
 });
 
 export const DocumentFolderSchema = z.object({
-    parentId: CUIDSchema.optional(),
+    parentId: CUIDSchema.nullable().optional(),
 
     title: ShortStringSchema,
 
-    tags: z.array(z.string()).min(1).max(25).default([]),
+    tags: z.array(z.string()).max(25).default([]),
 });
 
 export const DocumentFolderUpdateSchema = z.object({
@@ -197,7 +221,7 @@ export const DocumentFolderUpdateSchema = z.object({
 
     title: ShortStringSchema.optional(),
 
-    parentId: CUIDSchema.optional(),
+    parentId: CUIDSchema.nullable().optional(),
 
     tags: z.array(z.string()).min(1).max(25).optional(),
 });
