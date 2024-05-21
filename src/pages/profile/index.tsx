@@ -1,4 +1,4 @@
-import React, { type ChangeEvent, useState } from 'react';
+import React, { type ChangeEvent, useState, useEffect } from 'react';
 import { Layout } from '~/components/common/Layout';
 import { Button } from '~/components/ui/button';
 import {
@@ -24,6 +24,14 @@ import { useSession } from 'next-auth/react';
 import { Editor } from '~/components/management/common/Editor';
 import { X } from 'lucide-react';
 import { Spinner } from '~/components/ui/spinner';
+import { toast } from '~/components/ui/use-toast';
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '~/components/ui/dialog';
 
 const Profile: React.FC = () => {
     const update = api.user.update.useMutation();
@@ -35,25 +43,52 @@ const Profile: React.FC = () => {
         null,
     );
 
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+    function changeDialogState() {
+        setIsDialogOpen(!isDialogOpen);
+    }
+
     const { data: session } = useSession();
 
     const entity = session?.user;
-    // const entity = api.user.get.useQuery(user.id);
+
+    // const user = api.user.get.useQuery(entity.id);
 
     const form = useForm<z.infer<typeof CreateUserSchema>>({
         resolver: zodResolver(CreateUserSchema),
         defaultValues: {
-            name: entity?.name ?? '',
+            name: '',
             // description: entity?.description ?? '',
-            email: entity?.email ?? '',
-            image: entity?.image ?? '',
+            email: '',
+            image: '',
         },
     });
+
+    function handleFormReset() {
+        if (entity) {
+            form.setValue('name', entity.name);
+            form.setValue('image', entity.image);
+            form.setValue('email', entity.email);
+            //form.setValue("description", entity.description);
+        }
+    }
+
+    useEffect(() => {
+        if (entity) {
+            handleFormReset();
+        }
+    }, [entity]);
+
     async function onSubmit(values: z.infer<typeof CreateUserSchema>) {
         if (!entity?.id) {
             return;
         }
         await update.mutateAsync({ id: entity.id, ...values });
+        toast({
+            title: 'Успішно відредаговано',
+            duration: 2000,
+        });
     }
 
     function createSetValue(field: keyof z.infer<typeof CreateUserSchema>) {
@@ -97,175 +132,241 @@ const Profile: React.FC = () => {
         }
     };
 
+    function handlePasswordChange() {
+        changeDialogState();
+        toast({
+            title: 'Пароль успішно змінено',
+            duration: 2000,
+        });
+    }
+
     return (
         <Layout className="w-full">
             {session ? (
-                <Form {...form}>
-                    <form
-                        onSubmit={form.handleSubmit(onSubmit)}
-                        className="flex w-2/3 flex-col items-start justify-between gap-6 py-10"
-                    >
-                        <FormField
-                            control={form.control}
-                            name="image"
-                            render={({ field }) => (
-                                <FormItem className="flex w-full flex-col items-center gap-1">
-                                    <label
-                                        className="cursor-pointer"
-                                        htmlFor="image-upload"
-                                    >
-                                        <div
-                                            style={{
-                                                '--image-url': `url(${field.value ? field.value : entity?.image})`,
-                                            }}
-                                            className={`flex h-24 w-24 items-center justify-center rounded-full border-2 border-gray-400 bg-white bg-[image:var(--image-url)] bg-cover transition-all hover:opacity-80 dark:bg-gray-700`}
+                <>
+                    <Form {...form}>
+                        <form
+                            onSubmit={form.handleSubmit(onSubmit)}
+                            className="flex w-2/3 flex-col items-start justify-between gap-6 py-16"
+                        >
+                            <FormField
+                                control={form.control}
+                                name="image"
+                                render={({ field }) => (
+                                    <FormItem className="flex w-full flex-col items-center gap-1">
+                                        <label
+                                            className="cursor-pointer"
+                                            htmlFor="image-upload"
                                         >
-                                            {!entity?.image && (
-                                                <UploadIcon className="h-8 w-8 text-gray-500 dark:text-gray-400" />
-                                            )}
-                                        </div>
-                                        <Input
-                                            accept="image/*"
-                                            id="image-upload"
-                                            className="sr-only w-0"
-                                            type="file"
-                                            onInput={onFileChange}
-                                        />
-                                    </label>
-                                    <Modal
-                                        isOpen={!!imageSrc}
-                                        overlayClassName="z-20 fixed inset-0 bg-white/75"
-                                        className="flex h-full w-full items-center justify-center"
-                                    >
-                                        <div className="flex h-4/5 w-2/5 flex-col items-center gap-10 rounded-lg bg-gray-300 outline outline-1 outline-neutral-400">
-                                            <div className="flex h-10 w-full items-center justify-between rounded-t-lg border-b-2 border-gray-500 bg-gray-400">
-                                                <span className="px-5">
-                                                    Обріжте новий аватар
-                                                </span>
-                                                <button
-                                                    onClick={onClose}
-                                                    className="flex items-center justify-center px-5  dark:text-gray-400"
-                                                >
-                                                    <X />
-                                                </button>
+                                            <div
+                                                style={{
+                                                    '--image-url': `url(${field.value ? field.value : entity?.image})`,
+                                                }}
+                                                className={`flex h-24 w-24 items-center justify-center rounded-full border-2 border-gray-400 bg-white bg-[image:var(--image-url)] bg-cover transition-all hover:opacity-80 dark:bg-gray-700`}
+                                            >
+                                                {!entity?.image && (
+                                                    <UploadIcon className="h-8 w-8 text-gray-500 dark:text-gray-400" />
+                                                )}
                                             </div>
-                                            <div className="flex h-4/5 w-4/5 flex-col justify-between">
-                                                <div className="relative h-96 w-full">
-                                                    <Cropper
-                                                        image={imageSrc ?? ''}
-                                                        crop={crop}
-                                                        zoom={zoom}
-                                                        aspect={1 / 1}
-                                                        cropShape="round"
-                                                        onCropChange={setCrop}
-                                                        onCropComplete={
-                                                            onCropComplete
-                                                        }
-                                                        onZoomChange={setZoom}
-                                                    />
+                                            <Input
+                                                accept="image/*"
+                                                id="image-upload"
+                                                className="sr-only w-0"
+                                                type="file"
+                                                onInput={onFileChange}
+                                            />
+                                        </label>
+                                        <Modal
+                                            isOpen={!!imageSrc}
+                                            overlayClassName="z-20 fixed inset-0 bg-white/75"
+                                            className="flex h-full w-full items-center justify-center"
+                                        >
+                                            <div className="flex h-4/5 w-2/5 flex-col items-center gap-10 rounded-lg bg-gray-300 outline outline-1 outline-neutral-400">
+                                                <div className="flex h-10 w-full items-center justify-between rounded-t-lg border-b-2 border-gray-500 bg-gray-400">
+                                                    <span className="px-5">
+                                                        Обріжте новий аватар
+                                                    </span>
+                                                    <button
+                                                        onClick={onClose}
+                                                        className="flex items-center justify-center px-5  dark:text-gray-400"
+                                                    >
+                                                        <X />
+                                                    </button>
                                                 </div>
-                                                <Button
-                                                    onClick={uploadCroppedImage}
-                                                >
-                                                    Зберегти
-                                                </Button>
+                                                <div className="flex h-4/5 w-4/5 flex-col justify-between">
+                                                    <div className="relative h-96 w-full">
+                                                        <Cropper
+                                                            image={
+                                                                imageSrc ?? ''
+                                                            }
+                                                            crop={crop}
+                                                            zoom={zoom}
+                                                            aspect={1 / 1}
+                                                            cropShape="round"
+                                                            onCropChange={
+                                                                setCrop
+                                                            }
+                                                            onCropComplete={
+                                                                onCropComplete
+                                                            }
+                                                            onZoomChange={
+                                                                setZoom
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <Button
+                                                        onClick={
+                                                            uploadCroppedImage
+                                                        }
+                                                    >
+                                                        Зберегти
+                                                    </Button>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </Modal>
-                                    <FormControl>
-                                        <Input
-                                            accept="text"
-                                            className="hidden"
-                                            type="text"
-                                            {...field}
+                                        </Modal>
+                                        <FormControl>
+                                            <Input
+                                                accept="text"
+                                                className="hidden"
+                                                type="text"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="name"
+                                render={({ field }) => (
+                                    <FormItem className="">
+                                        <FormLabel className="text-xl">
+                                            Ім&apos;я
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                className=" outline outline-1 outline-neutral-400"
+                                                placeholder="Антон"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="email"
+                                render={({ field }) => (
+                                    <FormItem className="w-1/2">
+                                        <FormLabel className="text-xl">
+                                            Електронна пошта
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                className="outline outline-1 outline-neutral-400"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="description"
+                                render={({ field }) => (
+                                    <FormItem className="w-full">
+                                        <FormLabel className="text-xl">
+                                            Опис
+                                        </FormLabel>
+                                        <Editor
+                                            // defaultValue={
+                                            //     entity?.description ?? ''
+                                            // }
+                                            onChange={createSetValue(
+                                                'description',
+                                            )}
                                         />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem className="">
-                                    <FormLabel className="text-xl">
-                                        Ім&apos;я
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            className=" outline outline-1 outline-neutral-400"
-                                            placeholder="Антон"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem className="w-1/2">
-                                    <FormLabel className="text-xl">
-                                        Електронна пошта
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            className="outline outline-1 outline-neutral-400"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="description"
-                            render={({ field }) => (
-                                <FormItem className="w-full">
-                                    <FormLabel className="text-xl">
-                                        Опис
-                                    </FormLabel>
-                                    <Editor
-                                        // defaultValue={
-                                        //     entity?.description ?? ''
-                                        // }
-                                        onChange={createSetValue('description')}
-                                    />
-                                    <style>
-                                        {`
+                                        <style>
+                                            {`
                                             .ql-editor {
                                                 max-height: 100px;
                                             }`}
-                                    </style>
-                                    <FormControl>
-                                        <Input className="hidden" {...field} />
-                                    </FormControl>
-                                    <FormDescription>
-                                        Опис вашого профілю (видимий для всіх)
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                                        </style>
+                                        <FormControl>
+                                            <Input
+                                                className="hidden"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormDescription>
+                                            Опис вашого профілю (видимий для
+                                            всіх)
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
-                        <div className="flex gap-8 self-end">
-                            <Button className=" px-7 py-6" type="submit">
-                                Редагувати
-                            </Button>
-                            <Button
-                                className="px-7 py-6"
-                                variant="destructive"
-                                onClick={() => form.reset}
-                            >
-                                Відмінити
-                            </Button>
-                        </div>
-                    </form>
-                </Form>
+                            <div className="flex w-full justify-between">
+                                <Button
+                                    className="px-7 py-6"
+                                    type="button"
+                                    onClick={changeDialogState}
+                                >
+                                    Змінити пароль
+                                </Button>
+                                <div className="flex gap-8 self-end">
+                                    <Button className="px-7 py-6" type="submit">
+                                        Редагувати
+                                    </Button>
+                                    <Button
+                                        className="px-7 py-6"
+                                        type="reset"
+                                        variant="destructive"
+                                        onClick={handleFormReset}
+                                    >
+                                        Відмінити
+                                    </Button>
+                                </div>
+                            </div>
+                        </form>
+                    </Form>
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Змінненя пароля</DialogTitle>
+                            </DialogHeader>
+                            <div className="flex w-full flex-col items-center gap-4 py-4">
+                                <div className="flex w-5/6 flex-col gap-2">
+                                    <label className="text-base font-normal">
+                                        Введіть cтарий пароль
+                                    </label>
+                                    <Input
+                                        className=" outline outline-1 outline-neutral-400"
+                                        type="password"
+                                    />
+                                </div>
+                                <div className="flex w-5/6 flex-col gap-2">
+                                    <label className="text-base font-normal">
+                                        Введіть новий пароль
+                                    </label>
+                                    <Input
+                                        className=" outline outline-1 outline-neutral-400"
+                                        type="password"
+                                    />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button onClick={handlePasswordChange}>
+                                    Підтвердити
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                </>
             ) : (
                 <Spinner />
             )}
