@@ -90,7 +90,7 @@ export const Header: React.FC = () => {
                                     <div className="grid gap-1 p-3">
                                         <Link
                                             className="flex items-center gap-2 hover:text-slate-600"
-                                            href="#"
+                                            href="/profile"
                                         >
                                             <UserIcon className="h-4 w-4" />
                                             Профіль
