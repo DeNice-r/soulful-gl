@@ -39,6 +39,7 @@ import { ScrollArea } from '~/components/ui/scroll-area';
 import { cn } from '~/lib/utils';
 import { Editor } from '~/components/management/common/Editor';
 import { Spinner } from '~/components/ui/spinner';
+import { Pencil } from 'lucide-react';
 
 const CURRENT_PATH = 'knowledge';
 const ENTITY_TYPE = {
@@ -283,13 +284,16 @@ const Knowledge: React.FC<{ chat?: boolean }> = ({ chat = false }) => {
                                         {document.title}
                                     </h3>
                                 ) : (
-                                    <Input
-                                        className="h-9 w-40 text-2xl font-semibold"
-                                        defaultValue={document.title}
-                                        onChange={(e) => {
-                                            document.title = e.target.value;
-                                        }}
-                                    ></Input>
+                                    <div className="relative">
+                                        <Pencil className="pointer-events-none absolute bottom-2 end-0 mr-2 flex h-4 w-4 items-center text-neutral-500" />
+                                        <Input
+                                            className="h-9 w-40 rounded-none border-0 border-b border-neutral-900 bg-neutral-200 px-1 py-0 text-3xl font-semibold focus:rounded-md focus:border-b-0 focus-visible:ring-transparent"
+                                            defaultValue={document.title}
+                                            onChange={(e) => {
+                                                document.title = e.target.value;
+                                            }}
+                                        />
+                                    </div>
                                 )}
                                 <Button onClick={handleDocumentEdit}>
                                     {!isEditing ? 'Редагувати' : 'Зберегти'}
