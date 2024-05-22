@@ -35,6 +35,7 @@ import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { ScrollArea } from '~/components/ui/scroll-area';
 
 const CURRENT_PATH = 'knowledge';
 const ENTITY_TYPE = {
@@ -189,15 +190,6 @@ const Knowledge: React.FC = () => {
                 await apiClient.document.get.query(currentEntityId);
             setDocument(document);
         })();
-
-        if (document !== null) {
-            return (
-                <div>
-                    <h3>{document.title}</h3>
-                    {document.description}
-                </div>
-            );
-        }
     }
 
     return (
@@ -251,127 +243,144 @@ const Knowledge: React.FC = () => {
                             )}
                         </BreadcrumbList>
                     </Breadcrumb>
-                    <ContextMenu>
-                        <ContextMenuTrigger asChild>
-                            <div
-                                onContextMenu={handleChangeId}
-                                onClick={(e) => {
-                                    handleClickRenameCancel(e) ||
-                                        handleGoToEntity(e);
-                                }}
-                                onKeyDown={handleRenameCancel}
-                                className="grid w-full grid-cols-auto grid-rows-6 flex-wrap justify-between gap-8 text-slate-800 2xl:grid-cols-4"
-                            >
-                                {!!documentFolders?.data?.folders?.length &&
-                                    documentFolders?.data?.folders?.map(
-                                        (entity) => (
-                                            <FSEntity
-                                                key={entity.id}
-                                                {...{
-                                                    type: 'folder',
-                                                    entity,
-                                                    handleTitleChange,
-                                                    currentEntity,
-                                                    isEditing,
-                                                }}
-                                            />
-                                        ),
-                                    )}
-                                {!!documentFolders?.data?.documents?.length &&
-                                    documentFolders?.data?.documents?.map(
-                                        (entity) => (
-                                            <FSEntity
-                                                key={entity.id}
-                                                {...{
-                                                    type: 'document',
-                                                    entity,
-                                                    handleTitleChange,
-                                                    currentEntity:
+                    {document ? (
+                        <div className="bg-[repeating-linear-gradient(white 0px, white 24px, teal 25px)] flex h-full flex-col items-center gap-4 rounded-2xl bg-yellow-50 py-6 shadow-inner">
+                            <h2 className="font-semibold">{document.title}</h2>
+                            <ScrollArea className="h-5/6 w-5/6 scroll-auto">
+                                <div
+                                    className="pr-4 text-justify"
+                                    dangerouslySetInnerHTML={{
+                                        __html: document.description,
+                                    }}
+                                ></div>
+                            </ScrollArea>
+                        </div>
+                    ) : (
+                        <ContextMenu>
+                            <ContextMenuTrigger asChild>
+                                <div
+                                    onContextMenu={handleChangeId}
+                                    onClick={(e) => {
+                                        handleClickRenameCancel(e) ||
+                                            handleGoToEntity(e);
+                                    }}
+                                    onKeyDown={handleRenameCancel}
+                                    className="grid w-full grid-cols-auto grid-rows-6 flex-wrap justify-between gap-8 text-slate-800 2xl:grid-cols-4"
+                                >
+                                    {!!documentFolders?.data?.folders?.length &&
+                                        documentFolders?.data?.folders?.map(
+                                            (entity) => (
+                                                <FSEntity
+                                                    key={entity.id}
+                                                    {...{
+                                                        type: 'folder',
+                                                        entity,
+                                                        handleTitleChange,
                                                         currentEntity,
-                                                    isEditing,
-                                                }}
-                                            />
-                                        ),
-                                    )}
+                                                        isEditing,
+                                                    }}
+                                                />
+                                            ),
+                                        )}
+                                    {!!documentFolders?.data?.documents
+                                        ?.length &&
+                                        documentFolders?.data?.documents?.map(
+                                            (entity) => (
+                                                <FSEntity
+                                                    key={entity.id}
+                                                    {...{
+                                                        type: 'document',
+                                                        entity,
+                                                        handleTitleChange,
+                                                        currentEntity:
+                                                            currentEntity,
+                                                        isEditing,
+                                                    }}
+                                                />
+                                            ),
+                                        )}
 
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button className="flex h-14 w-14 rounded-full bg-neutral-300 text-slate-800 drop-shadow-md hover:bg-neutral-400/40 active:drop-shadow-none">
-                                            <Plus />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent
-                                        align="start"
-                                        className="max-w-40 p-2 text-sm"
-                                    >
-                                        <div className="flex flex-col text-slate-800">
-                                            <p
-                                                onClick={() =>
-                                                    openCreateEntityWindow(
-                                                        'folder',
-                                                    )
-                                                }
-                                                className="cursor-pointer rounded-t-md p-1 hover:bg-neutral-100"
-                                            >
-                                                Створити папку
-                                            </p>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button className="flex h-14 w-14 rounded-full bg-neutral-300 text-slate-800 drop-shadow-md hover:bg-neutral-400/40 active:drop-shadow-none">
+                                                <Plus />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent
+                                            align="start"
+                                            className="max-w-40 p-2 text-sm"
+                                        >
+                                            <div className="flex flex-col text-slate-800">
+                                                <p
+                                                    onClick={() =>
+                                                        openCreateEntityWindow(
+                                                            'folder',
+                                                        )
+                                                    }
+                                                    className="cursor-pointer rounded-t-md p-1 hover:bg-neutral-100"
+                                                >
+                                                    Створити папку
+                                                </p>
 
-                                            <p
-                                                onClick={() =>
-                                                    openCreateEntityWindow(
-                                                        'document',
-                                                    )
-                                                }
-                                                className="cursor-pointer rounded-b-md p-1 hover:bg-neutral-100"
-                                            >
-                                                Створити файл
-                                            </p>
-                                        </div>
-                                    </PopoverContent>
-                                </Popover>
-                            </div>
-                        </ContextMenuTrigger>
+                                                <p
+                                                    onClick={() =>
+                                                        openCreateEntityWindow(
+                                                            'document',
+                                                        )
+                                                    }
+                                                    className="cursor-pointer rounded-b-md p-1 hover:bg-neutral-100"
+                                                >
+                                                    Створити файл
+                                                </p>
+                                            </div>
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                            </ContextMenuTrigger>
+                            <ContextMenuContent>
+                                {currentEntity ? (
+                                    <>
+                                        <ContextMenuItem
+                                            className="cursor-pointer"
+                                            onClick={() => {
+                                                setIsEditing(true);
+                                            }}
+                                        >
+                                            Перейменувати
+                                        </ContextMenuItem>
+                                        <ContextMenuItem
+                                            onClick={handleDelete}
+                                            className="cursor-pointer text-red-500 focus:text-red-600"
+                                        >
+                                            Видалити
+                                        </ContextMenuItem>
+                                    </>
+                                ) : (
+                                    <>
+                                        <ContextMenuItem
+                                            onClick={() =>
+                                                openCreateEntityWindow('folder')
+                                            }
+                                            className="cursor-pointer"
+                                        >
+                                            Створити папку
+                                        </ContextMenuItem>
+                                        <ContextMenuItem
+                                            onClick={() =>
+                                                openCreateEntityWindow(
+                                                    'document',
+                                                )
+                                            }
+                                            className="cursor-pointer"
+                                        >
+                                            Створити файл
+                                        </ContextMenuItem>
+                                    </>
+                                )}
+                            </ContextMenuContent>
+                        </ContextMenu>
+                    )}
 
-                        <ContextMenuContent>
-                            {currentEntity ? (
-                                <>
-                                    <ContextMenuItem
-                                        className="cursor-pointer"
-                                        onClick={() => {
-                                            setIsEditing(true);
-                                        }}
-                                    >
-                                        Перейменувати
-                                    </ContextMenuItem>
-                                    <ContextMenuItem
-                                        onClick={handleDelete}
-                                        className="cursor-pointer text-red-500 focus:text-red-600"
-                                    >
-                                        Видалити
-                                    </ContextMenuItem>
-                                </>
-                            ) : (
-                                <>
-                                    <ContextMenuItem
-                                        onClick={() =>
-                                            openCreateEntityWindow('folder')
-                                        }
-                                        className="cursor-pointer"
-                                    >
-                                        Створити папку
-                                    </ContextMenuItem>
-                                    <ContextMenuItem
-                                        onClick={() =>
-                                            openCreateEntityWindow('document')
-                                        }
-                                        className="cursor-pointer"
-                                    >
-                                        Створити файл
-                                    </ContextMenuItem>
-                                </>
-                            )}
-                        </ContextMenuContent>
-                    </ContextMenu>
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogContent>
                             <DialogHeader>
