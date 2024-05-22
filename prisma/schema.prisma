@@ -70,6 +70,7 @@ model User {
   emailVerified DateTime?
   image         String?   @default("/images/default_avatar.png")
 
+  isOauth Boolean @default(true)
   password String?
 
   notes String?

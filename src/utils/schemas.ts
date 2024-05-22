@@ -73,6 +73,17 @@ export const UpdateUserSchema = z.object({
     notes: z.string().optional(),
 });
 
+export const ChangePasswordSchema = z
+    .object({
+        oldPassword: z.string(),
+        newPassword: z.string().min(8).max(200),
+        newPasswordRepeat: z.string(),
+    })
+    .refine((values) => values.newPassword === values.newPasswordRepeat, {
+        message: 'Паролі не співпадають',
+        path: ['newPasswordRepeat'],
+    });
+
 export const SetBooleanSchema = z.object({
     id: z.string(),
 

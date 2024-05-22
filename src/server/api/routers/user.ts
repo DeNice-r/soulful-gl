@@ -11,6 +11,7 @@ import {
     SetBooleanSchema,
     StringIdSchema,
     UpdateUserSchema,
+    ChangePasswordSchema,
 } from '~/utils/schemas';
 import { archiveChat } from '~/server/api/routers/common';
 import { randomUUID } from 'crypto';
@@ -141,16 +142,13 @@ export const userRouter = createTRPCRouter({
     create: permissionProcedure
         .input(CreateUserSchema)
         .mutation(async ({ ctx, input: data }) => {
-            if (!data.email) {
-                throw new Error('Email is required');
-            }
-
             const password = randomUUID();
 
             const user = await ctx.db.user.create({
                 data: {
                     ...data,
                     password: await bcrypt.hash(password, env.SALT_ROUNDS),
+                    isOauth: false,
                 },
             });
 
@@ -225,6 +223,46 @@ export const userRouter = createTRPCRouter({
             return true;
         }),
 
+    changePassword: protectedProcedure
+        .input(ChangePasswordSchema)
+        .mutation(async ({ ctx, input: { oldPassword, newPassword } }) => {
+            const checkUser = await ctx.db.user.findUnique({
+                where: {
+                    id: ctx.session.user.id,
+                    isOauth: false,
+                },
+                select: {
+                    password: true,
+                    email: true,
+                },
+            });
+
+            if (!checkUser || !checkUser.password || !checkUser.email) {
+                throw new Error('Користувач не використовує пароль для входу');
+            }
+
+            if (!(await bcrypt.compare(oldPassword, checkUser.password))) {
+                throw new Error('Неправильний старий пароль');
+            }
+
+            const user = await ctx.db.user.update({
+                where: {
+                    id: ctx.session.user.id,
+                    isOauth: false,
+                },
+                data: {
+                    password: await bcrypt.hash(newPassword, env.SALT_ROUNDS),
+                },
+            });
+
+            await sendPasswordUpdateEmail(
+                user.email!, // checked above
+                user.name ?? 'Анонім',
+                newPassword,
+                ctx.host,
+            );
+        }),
+
     suspend: permissionProcedure
         .input(SetBooleanSchema)
         .mutation(async ({ ctx, input: { id, value } }) => {
@@ -287,6 +325,7 @@ function getProjection(isFullAccess: boolean) {
         name: true,
         image: true,
         description: true,
+        isOauth: true,
         notes: isFullAccess,
         createdAt: true,
         updatedAt: true,

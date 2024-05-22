@@ -15,7 +15,7 @@ import type * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '~/components/ui/input';
 import { api } from '~/utils/api';
-import { CreateUserSchema } from '~/utils/schemas';
+import { ChangePasswordSchema, CreateUserSchema } from '~/utils/schemas';
 import getCroppedImg from '~/components/utils/cropImage';
 import Cropper, { type Area, type Point } from 'react-easy-crop';
 import { uploadImage } from '~/utils/s3/frontend';
@@ -27,9 +27,17 @@ import { Spinner } from '~/components/ui/spinner';
 import { toast } from '~/components/ui/use-toast';
 
 import { NO_REFETCH } from '~/utils/constants';
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '~/components/ui/dialog';
 
 const Profile: React.FC = () => {
     const update = api.user.update.useMutation();
+    const changePassword = api.user.changePassword.useMutation();
 
     const [imageSrc, setImageSrc] = useState<string | null>(null);
     const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
@@ -52,7 +60,7 @@ const Profile: React.FC = () => {
 
     // const user = api.user.get.useQuery(entity.id);
 
-    const form = useForm<z.infer<typeof CreateUserSchema>>({
+    const mainForm = useForm<z.infer<typeof CreateUserSchema>>({
         resolver: zodResolver(CreateUserSchema),
         defaultValues: {
             name: '',
@@ -62,12 +70,21 @@ const Profile: React.FC = () => {
         },
     });
 
+    const passwordForm = useForm<z.infer<typeof ChangePasswordSchema>>({
+        resolver: zodResolver(ChangePasswordSchema),
+        defaultValues: {
+            oldPassword: '',
+            newPassword: '',
+            newPasswordRepeat: '',
+        },
+    });
+
     function handleFormReset() {
         if (entity.data) {
-            form.setValue('name', entity.data.name ?? '');
-            form.setValue('image', entity.data.image ?? '');
-            form.setValue('email', entity.data.email ?? '');
-            form.setValue('description', entity.data.description ?? '');
+            mainForm.setValue('name', entity.data.name ?? '');
+            mainForm.setValue('image', entity.data.image ?? '');
+            mainForm.setValue('email', entity.data.email ?? '');
+            mainForm.setValue('description', entity.data.description ?? '');
         }
     }
 
@@ -89,9 +106,21 @@ const Profile: React.FC = () => {
         });
     }
 
+    // todo @Anton: add password change logic
+    async function onPasswordSubmit(
+        values: z.infer<typeof ChangePasswordSchema>,
+    ) {
+        await changePassword.mutateAsync(values);
+        await entity.refetch();
+        toast({
+            title: 'Пароль успішно змінено',
+            duration: 2000,
+        });
+    }
+
     function createSetValue(field: keyof z.infer<typeof CreateUserSchema>) {
         return async function setDescription(value: string) {
-            form.setValue(field, value);
+            mainForm.setValue(field, value);
         };
     }
 
@@ -109,7 +138,7 @@ const Profile: React.FC = () => {
             );
             const imageUrl = await uploadImage(croppedImage);
             if (imageUrl) {
-                form.setValue('image', imageUrl);
+                mainForm.setValue('image', imageUrl);
             }
             setImageSrc(null);
         } catch (e) {
@@ -142,13 +171,13 @@ const Profile: React.FC = () => {
         <Layout className="w-full">
             {session ? (
                 <>
-                    <Form {...form}>
+                    <Form {...mainForm}>
                         <form
-                            onSubmit={form.handleSubmit(onSubmit)}
+                            onSubmit={mainForm.handleSubmit(onSubmit)}
                             className="flex w-2/3 flex-col items-start justify-between gap-6 py-16"
                         >
                             <FormField
-                                control={form.control}
+                                control={mainForm.control}
                                 name="image"
                                 render={({ field }) => (
                                     <FormItem className="flex w-full flex-col items-center gap-1">
@@ -236,7 +265,7 @@ const Profile: React.FC = () => {
                             />
                             <div className="flex w-full justify-between gap-4">
                                 <FormField
-                                    control={form.control}
+                                    control={mainForm.control}
                                     name="email"
                                     render={({ field }) => (
                                         <FormItem className="basis-1/2">
@@ -255,7 +284,7 @@ const Profile: React.FC = () => {
                                     )}
                                 />
                                 <FormField
-                                    control={form.control}
+                                    control={mainForm.control}
                                     name="name"
                                     render={({ field }) => (
                                         <FormItem className="basis-1/2">
@@ -275,7 +304,7 @@ const Profile: React.FC = () => {
                                 />
                             </div>
                             <FormField
-                                control={form.control}
+                                control={mainForm.control}
                                 name="description"
                                 render={({ field }) => (
                                     <FormItem className="w-full">
@@ -313,13 +342,16 @@ const Profile: React.FC = () => {
                             />
 
                             <div className="flex w-full justify-between">
-                                {/*<Button*/}
-                                {/*    className="px-7 py-6"*/}
-                                {/*    type="button"*/}
-                                {/*    onClick={changeDialogState}*/}
-                                {/*>*/}
-                                {/*    Змінити пароль*/}
-                                {/*</Button>*/}
+                                {/* Collision with `undefined` is unwanted, hence the === false*/}
+                                {entity.data?.isOauth === false && (
+                                    <Button
+                                        className="px-7 py-6"
+                                        type="button"
+                                        onClick={changeDialogState}
+                                    >
+                                        Змінити пароль
+                                    </Button>
+                                )}
                                 <span />
                                 <div className="flex gap-8 self-end">
                                     <Button className="px-7 py-6" type="submit">
@@ -337,47 +369,47 @@ const Profile: React.FC = () => {
                             </div>
                         </form>
                     </Form>
-                    {/*<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>*/}
-                    {/*    <DialogContent>*/}
-                    {/*        <DialogHeader>*/}
-                    {/*            <DialogTitle>Змінненя пароля</DialogTitle>*/}
-                    {/*        </DialogHeader>*/}
-                    {/*        <div className="flex w-full flex-col items-center gap-4 py-4">*/}
-                    {/*            <div className="mb-6 flex w-5/6 flex-col gap-2">*/}
-                    {/*                <label className="text-base font-normal">*/}
-                    {/*                    Введіть cтарий пароль*/}
-                    {/*                </label>*/}
-                    {/*                <Input*/}
-                    {/*                    className=" outline outline-1 outline-neutral-400"*/}
-                    {/*                    type="password"*/}
-                    {/*                />*/}
-                    {/*            </div>*/}
-                    {/*            <div className="flex w-5/6 flex-col gap-2">*/}
-                    {/*                <label className="text-base font-normal">*/}
-                    {/*                    Введіть новий пароль*/}
-                    {/*                </label>*/}
-                    {/*                <Input*/}
-                    {/*                    className=" outline outline-1 outline-neutral-400"*/}
-                    {/*                    type="password"*/}
-                    {/*                />*/}
-                    {/*            </div>*/}
-                    {/*            <div className="flex w-5/6 flex-col gap-2">*/}
-                    {/*                <label className="text-base font-normal">*/}
-                    {/*                    Повторіть новий пароль*/}
-                    {/*                </label>*/}
-                    {/*                <Input*/}
-                    {/*                    className=" outline outline-1 outline-neutral-400"*/}
-                    {/*                    type="password"*/}
-                    {/*                />*/}
-                    {/*            </div>*/}
-                    {/*        </div>*/}
-                    {/*        <DialogFooter>*/}
-                    {/*            <Button onClick={handlePasswordChange}>*/}
-                    {/*                Підтвердити*/}
-                    {/*            </Button>*/}
-                    {/*        </DialogFooter>*/}
-                    {/*    </DialogContent>*/}
-                    {/*</Dialog>*/}
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Змінненя пароля</DialogTitle>
+                            </DialogHeader>
+                            <div className="flex w-full flex-col items-center gap-4 py-4">
+                                <div className="mb-6 flex w-5/6 flex-col gap-2">
+                                    <label className="text-base font-normal">
+                                        Введіть cтарий пароль
+                                    </label>
+                                    <Input
+                                        className=" outline outline-1 outline-neutral-400"
+                                        type="password"
+                                    />
+                                </div>
+                                <div className="flex w-5/6 flex-col gap-2">
+                                    <label className="text-base font-normal">
+                                        Введіть новий пароль
+                                    </label>
+                                    <Input
+                                        className=" outline outline-1 outline-neutral-400"
+                                        type="password"
+                                    />
+                                </div>
+                                <div className="flex w-5/6 flex-col gap-2">
+                                    <label className="text-base font-normal">
+                                        Повторіть новий пароль
+                                    </label>
+                                    <Input
+                                        className=" outline outline-1 outline-neutral-400"
+                                        type="password"
+                                    />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button onClick={handlePasswordChange}>
+                                    Підтвердити
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </>
             ) : (
                 <Spinner />
