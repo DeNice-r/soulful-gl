@@ -16,7 +16,7 @@ import { archiveChat } from '~/server/api/routers/common';
 import { randomUUID } from 'crypto';
 import bcrypt from 'bcrypt';
 import { env } from '~/env';
-import { sendRegEmail } from '~/utils/email/templates';
+import { sendPasswordUpdateEmail, sendRegEmail } from '~/utils/email/templates';
 import { AccessType, SearchableUserFields } from '~/utils/types';
 import { getAccessType } from '~/utils/auth';
 
@@ -182,6 +182,47 @@ export const userRouter = createTRPCRouter({
                 },
                 data,
             });
+        }),
+
+    resetPassword: permissionProcedure
+        .input(StringIdSchema)
+        .mutation(async ({ ctx, input: id }) => {
+            const checkUser = await ctx.db.user.findUnique({
+                where: {
+                    id,
+                },
+                select: {
+                    password: true,
+                },
+            });
+
+            if (!checkUser || !checkUser.password) {
+                throw new Error('Користувач не використовує пароль для входу');
+            }
+
+            const password = randomUUID();
+
+            const user = await ctx.db.user.update({
+                where: {
+                    id,
+                },
+                data: {
+                    password: await bcrypt.hash(password, env.SALT_ROUNDS),
+                },
+            });
+
+            if (!user || !user.email) {
+                throw new Error('Користувач не має електронної пошти');
+            }
+
+            await sendPasswordUpdateEmail(
+                user.email,
+                user.name ?? 'Анонім',
+                password,
+                ctx.host,
+            );
+
+            return true;
         }),
 
     suspend: permissionProcedure

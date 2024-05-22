@@ -20,6 +20,7 @@ import { Editor } from '../common/Editor';
 import Modal from 'react-modal';
 import getCroppedImg from '../../utils/cropImage';
 import Cropper, { type Area, type Point } from 'react-easy-crop';
+import { useToast } from '~/components/ui/use-toast';
 
 declare module 'react' {
     interface CSSProperties {
@@ -42,6 +43,15 @@ export const XForm: React.FC<{
         null,
     );
 
+    const { toast } = useToast();
+
+    function successToast(description: string) {
+        toast({
+            title: 'Успіх',
+            description,
+        });
+    }
+
     const form = useForm<z.infer<typeof CreateUserSchema>>({
         resolver: zodResolver(CreateUserSchema),
         defaultValues: {
@@ -55,8 +65,10 @@ export const XForm: React.FC<{
     async function onSubmit(values: z.infer<typeof CreateUserSchema>) {
         if (entity) {
             await update.mutateAsync({ id: entity.id, ...values });
+            successToast('Користувача оновлено');
         } else {
             await create.mutateAsync(values);
+            successToast('Користувача створено');
         }
         changeModalState();
     }
