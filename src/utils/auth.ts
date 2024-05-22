@@ -12,14 +12,18 @@ export async function getServerSession(
     return await unstable_getServerSession(...requestWrapper(req, res));
 }
 
+export function getAccessType(
+    ctx: Awaited<ReturnType<typeof createTRPCContext>>,
+) {
+    return ctx.session
+        ? isPermitted(ctx.session?.user?.permissions, ctx.entity, ctx.action)
+        : AccessType.NONE;
+}
+
 export function getIsFullAccess(
     ctx: Awaited<ReturnType<typeof createTRPCContext>>,
 ) {
-    return !!(
-        ctx.session &&
-        isPermitted(ctx.session?.user?.permissions, ctx.entity, ctx.action) ===
-            AccessType.ALL
-    );
+    return getAccessType(ctx) === AccessType.ALL;
 }
 
 export function getFullAccessConstraintWithAuthor(

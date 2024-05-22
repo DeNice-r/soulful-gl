@@ -2,6 +2,7 @@ import {
     createTRPCRouter,
     permissionProcedure,
     protectedProcedure,
+    publicPermissionProcedure,
 } from '~/server/api/trpc';
 import {
     CreateUserSchema,
@@ -16,7 +17,8 @@ import { randomUUID } from 'crypto';
 import bcrypt from 'bcrypt';
 import { env } from '~/env';
 import { sendRegEmail } from '~/utils/email/templates';
-import { SearchableUserFields } from '~/utils/types';
+import { AccessType, SearchableUserFields } from '~/utils/types';
+import { getAccessType } from '~/utils/auth';
 
 export const userRouter = createTRPCRouter({
     list: permissionProcedure
@@ -94,14 +96,29 @@ export const userRouter = createTRPCRouter({
             },
         ),
 
-    get: permissionProcedure
-        .input(StringIdSchema)
+    get: publicPermissionProcedure
+        .input(StringIdSchema.optional())
         .query(async ({ input, ctx }) => {
+            const accessType = getAccessType(ctx);
+            if (
+                input &&
+                input !== ctx.session?.user?.id &&
+                accessType !== AccessType.NONE
+            ) {
+                throw new Error('Access denied');
+            }
+
+            const id = input || ctx.session?.user?.id;
+
+            if (!id) {
+                throw new Error('User not found');
+            }
+
             return ctx.db.user.findUnique({
                 where: {
-                    id: input,
+                    id,
                 },
-                select: getProjection(ctx.isFullAccess),
+                select: getProjection(accessType === AccessType.ALL),
             });
         }),
 

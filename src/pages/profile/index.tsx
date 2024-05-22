@@ -1,4 +1,4 @@
-import React, { type ChangeEvent, useState, useEffect } from 'react';
+import React, { type ChangeEvent, useEffect, useState } from 'react';
 import { Layout } from '~/components/common/Layout';
 import { Button } from '~/components/ui/button';
 import {
@@ -25,13 +25,8 @@ import { Editor } from '~/components/management/common/Editor';
 import { X } from 'lucide-react';
 import { Spinner } from '~/components/ui/spinner';
 import { toast } from '~/components/ui/use-toast';
-import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '~/components/ui/dialog';
+
+import { NO_REFETCH } from '~/utils/constants';
 
 const Profile: React.FC = () => {
     const update = api.user.update.useMutation();
@@ -51,7 +46,9 @@ const Profile: React.FC = () => {
 
     const { data: session } = useSession();
 
-    const entity = session?.user;
+    const entity = api.user.get.useQuery(undefined, {
+        ...NO_REFETCH,
+    });
 
     // const user = api.user.get.useQuery(entity.id);
 
@@ -59,32 +56,33 @@ const Profile: React.FC = () => {
         resolver: zodResolver(CreateUserSchema),
         defaultValues: {
             name: '',
-            // description: entity?.description ?? '',
+            description: '',
             email: '',
             image: '',
         },
     });
 
     function handleFormReset() {
-        if (entity) {
-            form.setValue('name', entity.name);
-            form.setValue('image', entity.image);
-            form.setValue('email', entity.email);
-            //form.setValue("description", entity.description);
+        if (entity.data) {
+            form.setValue('name', entity.data.name ?? '');
+            form.setValue('image', entity.data.image ?? '');
+            form.setValue('email', entity.data.email ?? '');
+            form.setValue('description', entity.data.description ?? '');
         }
     }
 
     useEffect(() => {
-        if (entity) {
+        if (entity.data) {
             handleFormReset();
         }
-    }, [entity]);
+    }, [entity.data]);
 
     async function onSubmit(values: z.infer<typeof CreateUserSchema>) {
-        if (!entity?.id) {
+        if (!entity.data?.id) {
             return;
         }
-        await update.mutateAsync({ id: entity.id, ...values });
+        await update.mutateAsync({ id: entity.data?.id, ...values });
+        await entity.refetch();
         toast({
             title: 'Успішно відредаговано',
             duration: 2000,
@@ -160,11 +158,11 @@ const Profile: React.FC = () => {
                                         >
                                             <div
                                                 style={{
-                                                    '--image-url': `url(${field.value ? field.value : entity?.image})`,
+                                                    '--image-url': `url(${field.value ? field.value : entity.data?.image})`,
                                                 }}
                                                 className={`flex h-24 w-24 items-center justify-center rounded-full border-2 border-gray-400 bg-white bg-[image:var(--image-url)] bg-cover transition-all hover:opacity-80 dark:bg-gray-700`}
                                             >
-                                                {!entity?.image && (
+                                                {!entity.data?.image && (
                                                     <UploadIcon className="h-8 w-8 text-gray-500 dark:text-gray-400" />
                                                 )}
                                             </div>
@@ -236,43 +234,46 @@ const Profile: React.FC = () => {
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name="name"
-                                render={({ field }) => (
-                                    <FormItem className="">
-                                        <FormLabel className="text-xl">
-                                            Ім&apos;я
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                className=" outline outline-1 outline-neutral-400"
-                                                placeholder="Антон"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="email"
-                                render={({ field }) => (
-                                    <FormItem className="w-1/2">
-                                        <FormLabel className="text-xl">
-                                            Електронна пошта
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                className="outline outline-1 outline-neutral-400"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            <div className="flex w-full justify-between gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="email"
+                                    render={({ field }) => (
+                                        <FormItem className="basis-1/2">
+                                            <FormLabel className="text-xl">
+                                                Електронна пошта
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    className="flex-grow outline outline-1 outline-neutral-400"
+                                                    disabled
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="name"
+                                    render={({ field }) => (
+                                        <FormItem className="basis-1/2">
+                                            <FormLabel className="text-xl">
+                                                Ім&apos;я
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    className="flex-grow outline outline-1 outline-neutral-400"
+                                                    placeholder="Антон"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
                             <FormField
                                 control={form.control}
                                 name="description"
@@ -282,9 +283,10 @@ const Profile: React.FC = () => {
                                             Опис
                                         </FormLabel>
                                         <Editor
-                                            // defaultValue={
-                                            //     entity?.description ?? ''
-                                            // }
+                                            value={field.value}
+                                            defaultValue={
+                                                entity.data?.description ?? ''
+                                            }
                                             onChange={createSetValue(
                                                 'description',
                                             )}
@@ -311,61 +313,71 @@ const Profile: React.FC = () => {
                             />
 
                             <div className="flex w-full justify-between">
-                                <Button
-                                    className="px-7 py-6"
-                                    type="button"
-                                    onClick={changeDialogState}
-                                >
-                                    Змінити пароль
-                                </Button>
+                                {/*<Button*/}
+                                {/*    className="px-7 py-6"*/}
+                                {/*    type="button"*/}
+                                {/*    onClick={changeDialogState}*/}
+                                {/*>*/}
+                                {/*    Змінити пароль*/}
+                                {/*</Button>*/}
+                                <span />
                                 <div className="flex gap-8 self-end">
                                     <Button className="px-7 py-6" type="submit">
-                                        Редагувати
+                                        Зберегти
                                     </Button>
-                                    <Button
-                                        className="px-7 py-6"
-                                        type="reset"
-                                        variant="destructive"
-                                        onClick={handleFormReset}
-                                    >
-                                        Відмінити
-                                    </Button>
+                                    {/*<Button*/}
+                                    {/*    className="px-7 py-6"*/}
+                                    {/*    type="reset"*/}
+                                    {/*    variant="destructive"*/}
+                                    {/*    onClick={handleFormReset}*/}
+                                    {/*>*/}
+                                    {/*    Відмінити*/}
+                                    {/*</Button>*/}
                                 </div>
                             </div>
                         </form>
                     </Form>
-                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Змінненя пароля</DialogTitle>
-                            </DialogHeader>
-                            <div className="flex w-full flex-col items-center gap-4 py-4">
-                                <div className="flex w-5/6 flex-col gap-2">
-                                    <label className="text-base font-normal">
-                                        Введіть cтарий пароль
-                                    </label>
-                                    <Input
-                                        className=" outline outline-1 outline-neutral-400"
-                                        type="password"
-                                    />
-                                </div>
-                                <div className="flex w-5/6 flex-col gap-2">
-                                    <label className="text-base font-normal">
-                                        Введіть новий пароль
-                                    </label>
-                                    <Input
-                                        className=" outline outline-1 outline-neutral-400"
-                                        type="password"
-                                    />
-                                </div>
-                            </div>
-                            <DialogFooter>
-                                <Button onClick={handlePasswordChange}>
-                                    Підтвердити
-                                </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
+                    {/*<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>*/}
+                    {/*    <DialogContent>*/}
+                    {/*        <DialogHeader>*/}
+                    {/*            <DialogTitle>Змінненя пароля</DialogTitle>*/}
+                    {/*        </DialogHeader>*/}
+                    {/*        <div className="flex w-full flex-col items-center gap-4 py-4">*/}
+                    {/*            <div className="mb-6 flex w-5/6 flex-col gap-2">*/}
+                    {/*                <label className="text-base font-normal">*/}
+                    {/*                    Введіть cтарий пароль*/}
+                    {/*                </label>*/}
+                    {/*                <Input*/}
+                    {/*                    className=" outline outline-1 outline-neutral-400"*/}
+                    {/*                    type="password"*/}
+                    {/*                />*/}
+                    {/*            </div>*/}
+                    {/*            <div className="flex w-5/6 flex-col gap-2">*/}
+                    {/*                <label className="text-base font-normal">*/}
+                    {/*                    Введіть новий пароль*/}
+                    {/*                </label>*/}
+                    {/*                <Input*/}
+                    {/*                    className=" outline outline-1 outline-neutral-400"*/}
+                    {/*                    type="password"*/}
+                    {/*                />*/}
+                    {/*            </div>*/}
+                    {/*            <div className="flex w-5/6 flex-col gap-2">*/}
+                    {/*                <label className="text-base font-normal">*/}
+                    {/*                    Повторіть новий пароль*/}
+                    {/*                </label>*/}
+                    {/*                <Input*/}
+                    {/*                    className=" outline outline-1 outline-neutral-400"*/}
+                    {/*                    type="password"*/}
+                    {/*                />*/}
+                    {/*            </div>*/}
+                    {/*        </div>*/}
+                    {/*        <DialogFooter>*/}
+                    {/*            <Button onClick={handlePasswordChange}>*/}
+                    {/*                Підтвердити*/}
+                    {/*            </Button>*/}
+                    {/*        </DialogFooter>*/}
+                    {/*    </DialogContent>*/}
+                    {/*</Dialog>*/}
                 </>
             ) : (
                 <Spinner />
