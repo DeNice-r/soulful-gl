@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Layout } from '~/components/common/Layout';
 import {
     Breadcrumb,
@@ -36,6 +36,9 @@ import { Label } from '~/components/ui/label';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { ScrollArea } from '~/components/ui/scroll-area';
+import { cn } from '~/lib/utils';
+import { Editor } from '~/components/management/common/Editor';
+import { Spinner } from '~/components/ui/spinner';
 
 const CURRENT_PATH = 'knowledge';
 const ENTITY_TYPE = {
@@ -43,7 +46,7 @@ const ENTITY_TYPE = {
     DOCUMENT: 'd',
 };
 
-const Knowledge: React.FC = () => {
+const Knowledge: React.FC<{ chat?: boolean }> = ({ chat = false }) => {
     const [currentEntity, setCurrentEntity] = useState<{
         id: string;
         type: 'folder' | 'document';
@@ -184,19 +187,45 @@ const Knowledge: React.FC = () => {
         }
     }
 
-    if (currentEntityType === ENTITY_TYPE.DOCUMENT && currentEntityId) {
-        void (async () => {
-            const document =
-                await apiClient.document.get.query(currentEntityId);
-            setDocument(document);
-        })();
-    }
+    useEffect(() => {
+        if (
+            currentEntityType === ENTITY_TYPE.DOCUMENT &&
+            currentEntityId &&
+            !document
+        ) {
+            void (async () => {
+                const document =
+                    await apiClient.document.get.query(currentEntityId);
+                setDocument(document);
+            })();
+        }
+        if (currentEntityType !== ENTITY_TYPE.DOCUMENT) {
+            setDocument(null);
+            setIsEditing(false);
+        }
+    }, [currentEntityType, currentEntityId]);
+
+    const handleDocumentEdit = async () => {
+        setIsEditing((val) => !val);
+        if (isEditing && currentEntityId && document) {
+            await updateMutation['document'].mutateAsync({
+                id: currentEntityId,
+                title: document.title,
+                description: document.description,
+            });
+        }
+    };
 
     return (
         <Layout footer={false} className="bg-knowledge-cover">
             <div className="flex w-2/3 flex-col items-center gap-10 py-12 text-slate-800">
-                <h3 className="font-bold">База знань</h3>
-                <div className="flex h-full w-full flex-col gap-8 rounded-2xl bg-neutral-200 px-16 py-10 drop-shadow-lg">
+                {!document && <h3 className="font-bold">База знань</h3>}
+                <div
+                    className={cn(
+                        'flex h-full w-full flex-col rounded-2xl bg-neutral-200 px-16 py-10 drop-shadow-lg',
+                        !document && 'gap-8',
+                    )}
+                >
                     <Breadcrumb>
                         <BreadcrumbList className="text-lg">
                             <BreadcrumbItem>
@@ -243,17 +272,86 @@ const Knowledge: React.FC = () => {
                             )}
                         </BreadcrumbList>
                     </Breadcrumb>
+                    {!document && !documentFolders.data && (
+                        <Spinner size="large"></Spinner>
+                    )}
                     {document ? (
-                        <div className="bg-[repeating-linear-gradient(white 0px, white 24px, teal 25px)] flex h-full flex-col items-center gap-4 rounded-2xl bg-yellow-50 py-6 shadow-inner">
-                            <h2 className="font-semibold">{document.title}</h2>
-                            <ScrollArea className="h-5/6 w-5/6 scroll-auto">
-                                <div
-                                    className="pr-4 text-justify"
-                                    dangerouslySetInnerHTML={{
-                                        __html: document.description,
-                                    }}
-                                ></div>
-                            </ScrollArea>
+                        <div className="flex h-full flex-col items-center">
+                            <div className="flex w-full items-center justify-between py-4">
+                                {!isEditing ? (
+                                    <h3 className="font-semibold">
+                                        {document.title}
+                                    </h3>
+                                ) : (
+                                    <Input
+                                        className="h-9 w-40 text-2xl font-semibold"
+                                        defaultValue={document.title}
+                                        onChange={(e) => {
+                                            document.title = e.target.value;
+                                        }}
+                                    ></Input>
+                                )}
+                                <Button onClick={handleDocumentEdit}>
+                                    {!isEditing ? 'Редагувати' : 'Зберегти'}
+                                </Button>
+                            </div>
+
+                            {!isEditing ? (
+                                <div className="flex h-full flex-col items-center gap-4 rounded-2xl bg-neutral-50 shadow-inner">
+                                    {chat ? (
+                                        <ScrollArea className="h-5/6 w-5/6 scroll-smooth">
+                                            <div
+                                                className="pr-4 text-justify"
+                                                dangerouslySetInnerHTML={{
+                                                    __html: document.description,
+                                                }}
+                                            ></div>
+                                        </ScrollArea>
+                                    ) : (
+                                        <div
+                                            className="ql-editor !px-8 !text-justify"
+                                            dangerouslySetInnerHTML={{
+                                                __html: document.description,
+                                            }}
+                                        ></div>
+                                    )}
+                                </div>
+                            ) : (
+                                <Editor
+                                    defaultValue={document.description}
+                                    onChange={(description: string) =>
+                                        setDocument({
+                                            ...document,
+                                            description,
+                                        })
+                                    }
+                                ></Editor>
+                            )}
+                            <style>
+                                {`
+                                    .text-editor{
+                                        width: 100%;
+                                    }
+                                    .quill {
+                                        border-radius: 1rem;
+                                    }
+                                    .ql-toolbar {
+                                        border-top-left-radius: 1rem;
+                                        border-top-right-radius: 1rem;
+                                    }
+                                    .ql-container {
+                                        border-bottom-left-radius: 1rem;
+                                        border-bottom-right-radius: 1rem;
+                                    }
+                                    .ql-editor {
+                                        font-size: 1rem;
+                                        line-height: 1.5;
+                                        padding-left: 2rem;
+                                        padding-right: 2rem;
+                                        text-align: justify;
+                                    }
+                                `}
+                            </style>
                         </div>
                     ) : (
                         <ContextMenu>
@@ -262,7 +360,7 @@ const Knowledge: React.FC = () => {
                                     onContextMenu={handleChangeId}
                                     onClick={(e) => {
                                         handleClickRenameCancel(e) ||
-                                            handleGoToEntity(e);
+                                            (!isEditing && handleGoToEntity(e));
                                     }}
                                     onKeyDown={handleRenameCancel}
                                     className="grid w-full grid-cols-auto grid-rows-6 flex-wrap justify-between gap-8 text-slate-800 2xl:grid-cols-4"
@@ -301,11 +399,17 @@ const Knowledge: React.FC = () => {
                                         )}
 
                                     <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button className="flex h-14 w-14 rounded-full bg-neutral-300 text-slate-800 drop-shadow-md hover:bg-neutral-400/40 active:drop-shadow-none">
-                                                <Plus />
-                                            </Button>
-                                        </PopoverTrigger>
+                                        {!(
+                                            currentEntityType ===
+                                            ENTITY_TYPE.DOCUMENT
+                                        ) &&
+                                            documentFolders.data && (
+                                                <PopoverTrigger asChild>
+                                                    <Button className="flex h-14 w-14 rounded-full bg-neutral-300 text-slate-800 drop-shadow-md hover:bg-neutral-400/40 active:drop-shadow-none">
+                                                        <Plus />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                            )}
                                         <PopoverContent
                                             align="start"
                                             className="max-w-40 p-2 text-sm"
