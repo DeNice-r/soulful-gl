@@ -140,3 +140,27 @@ export const Order = {
 };
 
 export const AmountPerPageOptions = [10, 20, 50, 100];
+
+export enum PaymentAction {
+    // PAY = 'pay',
+    // HOLD = 'hold',
+    SUBSCRIBE = 'subscribe',
+    PAYDONATE = 'paydonate',
+}
+
+export enum PaymentCurrency {
+    UAH = 'UAH',
+    USD = 'USD',
+    EUR = 'EUR',
+}
+
+export enum PaymentLanguage {
+    UK = 'uk',
+    EN = 'en',
+}
+
+export enum LiqpayPeriodicity {
+    DAY = 'day',
+    MONTH = 'month',
+    YEAR = 'year',
+}

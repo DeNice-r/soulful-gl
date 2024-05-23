@@ -1,6 +1,14 @@
 import { z } from '~/utils/zod';
-import { BackgroundPattern, Order } from '~/utils/types';
+import {
+    BackgroundPattern,
+    LiqpayPeriodicity,
+    Order,
+    PaymentAction,
+    PaymentCurrency,
+    PaymentLanguage,
+} from '~/utils/types';
 import { MAX_ASSET_LIMIT } from '~/utils/constants';
+import { env } from '~/env';
 
 const FirstPage = 1;
 const DefaultLimit = 10;
@@ -32,6 +40,51 @@ export const BusynessSchema = z.number().int().min(0).max(4);
 export const TitleSchema = z.string().min(1).max(200);
 export const QuerySchema = z.string().min(1).max(200);
 export const RichTextSchema = z.string().max(15000);
+
+export const MaybeStringifiedNumberSchema = z.union([
+    z
+        .string()
+        .transform((value) => {
+            return Number(value);
+        })
+        .refine((value) => !isNaN(value)),
+    z.number(),
+]);
+export const AnyToStringSchema = z
+    .union([z.string(), z.number()])
+    .transform((value) => String(value));
+
+export const LiqpayAPIVersionSchema = z.number().int().min(1).max(3).default(3);
+export const LiqpayAmountSchema = z
+    .number()
+    .int()
+    .min(1)
+    .max(10000)
+    .default(20);
+
+export const CNBSchema = z.object({
+    public_key: z
+        .string()
+        .refine((value) => value === env.NEXT_PUBLIC_LIQPAY_PUBLIC_KEY)
+        .default(env.NEXT_PUBLIC_LIQPAY_PUBLIC_KEY),
+    version: MaybeStringifiedNumberSchema.default(3).refine((value) => {
+        const r = LiqpayAPIVersionSchema.safeParse(value);
+        return r.success;
+    }),
+    amount: MaybeStringifiedNumberSchema.default(20).refine((value) => {
+        const r = LiqpayAmountSchema.safeParse(value);
+        return r.success;
+    }),
+    currency: z.nativeEnum(PaymentCurrency).default(PaymentCurrency.UAH),
+    description: ShortStringSchema.default('Пожертва команді Soulful'),
+    language: z.nativeEnum(PaymentLanguage).default(PaymentLanguage.UK),
+
+    action: z.nativeEnum(PaymentAction).default(PaymentAction.PAYDONATE),
+    subscribe_periodicity: z
+        .nativeEnum(LiqpayPeriodicity)
+        .default(LiqpayPeriodicity.MONTH),
+    subscribe_date_start: z.string().default('2024-01-01 00:00:00'),
+});
 
 // const ImageBucketRegex = new RegExp(
 //     `https://${env.NEXT_PUBLIC_AWS_S3_BUCKET}\\.s3(?:\\.${env.NEXT_PUBLIC_AWS_REGION})?\\.amazonaws\\.com/.+`,

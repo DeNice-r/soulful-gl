@@ -51,6 +51,8 @@ export const env = createEnv({
             .refine((value) => !isNaN(value)),
 
         AWS_S3_BUCKET: z.string(),
+
+        LIQPAY_PRIVATE_KEY: z.string(),
     },
 
     /**
@@ -62,6 +64,7 @@ export const env = createEnv({
         NEXT_PUBLIC_WSS_ENDPOINT: z.string().url(),
         NEXT_PUBLIC_AWS_S3_BUCKET: z.string(),
         NEXT_PUBLIC_AWS_REGION: z.string(),
+        NEXT_PUBLIC_LIQPAY_PUBLIC_KEY: z.string(),
     },
 
     /**
@@ -98,9 +101,13 @@ export const env = createEnv({
 
         AWS_S3_BUCKET: process.env.AWS_S3_BUCKET,
 
+        LIQPAY_PRIVATE_KEY: process.env.LIQPAY_PRIVATE_KEY,
+
         NEXT_PUBLIC_WSS_ENDPOINT: process.env.NEXT_PUBLIC_WSS_ENDPOINT,
         NEXT_PUBLIC_AWS_S3_BUCKET: process.env.NEXT_PUBLIC_AWS_S3_BUCKET,
         NEXT_PUBLIC_AWS_REGION: process.env.NEXT_PUBLIC_AWS_REGION,
+        NEXT_PUBLIC_LIQPAY_PUBLIC_KEY:
+            process.env.NEXT_PUBLIC_LIQPAY_PUBLIC_KEY,
     },
     /**
      * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
