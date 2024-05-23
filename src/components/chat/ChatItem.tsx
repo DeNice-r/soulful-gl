@@ -1,4 +1,4 @@
-import { Box, ButtonBase, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { type ExtendedChat } from '~/utils/types';
 import React from 'react';
 
@@ -9,29 +9,20 @@ interface ChatItemProps {
 
 const ChatItem: React.FC<ChatItemProps> = ({ onClick, chat }) => {
     return (
-        <ButtonBase
+        <div
+            className="flex cursor-pointer flex-col gap-2 p-4 transition-colors hover:bg-neutral-200"
             onClick={onClick}
-            sx={{ width: 1, justifyContent: 'flex-start' }}
         >
-            <Box sx={{ mb: 2 }}>
-                <Typography
-                    variant="h6"
-                    gutterBottom
-                    sx={{ textAlign: 'left' }}
-                >
-                    Чат #{chat.id}
-                </Typography>
-                <Typography
-                    variant="body1"
-                    color="text.secondary"
-                    sx={{ textAlign: 'left' }}
-                >
-                    {/*{chat.lastMessage}*/}
-                    {chat?.messages?.length > 0 &&
-                        chat.messages.slice(-1)[0].text}
-                </Typography>
-            </Box>
-        </ButtonBase>
+            <h1 className="font-medium">Чат #{chat.id}</h1>
+            <Typography
+                variant="body1"
+                color="text.secondary"
+                sx={{ textAlign: 'left' }}
+            >
+                {/*{chat.lastMessage}*/}
+                {chat?.messages?.length > 0 && chat.messages.slice(-1)[0].text}
+            </Typography>
+        </div>
     );
 };
 

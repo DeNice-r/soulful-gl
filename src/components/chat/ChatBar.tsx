@@ -1,5 +1,4 @@
 import type { RouterOutputs } from '~/utils/api';
-import { Box, Grid } from '@mui/material';
 import ChatItem from '~/components/chat/ChatItem';
 import * as React from 'react';
 import { Busyness } from '~/components/chat/Busyness';
@@ -12,18 +11,10 @@ export const ChatBar = ({
     chats: RouterOutputs['chat']['listFull'];
     changeChat: (index: number) => void;
 }) => (
-    <Grid item xs={2}>
-        <Box
-            className="m-0 overflow-auto"
-            sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                bgcolor: 'grey.300',
-                height: 'calc(100vh - 4rem)',
-            }}
-        >
+    <aside className="h-full">
+        <div className="space-y-4">
             <Busyness />
-            <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
+            <div>
                 {Object.values(chats).map((chat, index) => (
                     <ChatItem
                         key={index}
@@ -34,7 +25,7 @@ export const ChatBar = ({
                 {Object.values(chats).length === 0 && (
                     <Spinner size="large"></Spinner>
                 )}
-            </Box>
-        </Box>
-    </Grid>
+            </div>
+        </div>
+    </aside>
 );

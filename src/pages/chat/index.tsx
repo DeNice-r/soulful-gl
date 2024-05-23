@@ -1,15 +1,23 @@
 import * as React from 'react';
 import { useEffect, useRef } from 'react';
 import { type Message } from '@prisma/client';
-import { Alert, Fade, Grid } from '@mui/material';
-import { Layout } from '~/components/common/Layout';
+import { Alert } from '~/components/ui/alert';
 import { useSession } from 'next-auth/react';
 import { api, type RouterOutputs } from '~/utils/api';
 import { ChatBar } from '~/components/chat/ChatBar';
 import { ChatMessageWindow } from '~/components/chat/ChatMessageWindow';
-import { Cross1Icon } from '@radix-ui/react-icons';
-import { Button } from '@mui/material';
-import { LoaderIcon } from 'lucide-react';
+import { Button } from '~/components/ui/button';
+import { LoaderIcon, TriangleAlert } from 'lucide-react';
+import { Logo } from '~/components/common/Logo';
+import {
+    ResizableHandle,
+    ResizablePanel,
+    ResizablePanelGroup,
+} from '~/components/ui/resizable';
+
+//todo: fix types
+// import useSound from 'use-sound';
+import { cn } from '~/lib/utils';
 
 type FullChats = NonNullable<RouterOutputs['chat']['listFull']>;
 
@@ -39,11 +47,26 @@ const ChatUI = () => {
     const [error, setError] = React.useState(false);
     const [currentChat, setCurrentChat] = React.useState<number>(-1);
 
-    const inputRef = React.useRef<{ value: string; focus: () => void }>();
+    const inputRef = React.useRef<HTMLInputElement | null>();
     const messageEndRef = React.useRef();
 
     const wsRef = React.useRef<WebSocket>();
     const wsReconnectInterval = React.useRef<NodeJS.Timeout>();
+
+    //todo: fix types
+
+    // const [notification] = useSound('/sounds/notification.mp3', {
+    //     volume: 0.3,
+    // });
+
+    const [messageText, setMessageText] = React.useState<string | null>();
+
+    // useEffect(() => {
+    //     if (audioPlayer.current) {
+    //         console.log(audioPlayer.current);
+    //         audioPlayer.current.play();
+    //     }
+    // }, [audioPlayer.current]);
 
     useEffect(() => {
         if (
@@ -157,12 +180,14 @@ const ChatUI = () => {
     async function wsOnMessage(event: MessageEvent<string>) {
         const message = JSON.parse(event.data) as Message;
         await pushMessage(message);
+        //todo: fix types
+
+        // notification();
     }
 
     const handleSend = () => {
-        if (!session || !inputRef.current || !wsRef.current) return;
-        const message = inputRef.current.value;
-        if (message.trim() !== '') {
+        if (!session || !messageText || !wsRef.current) return;
+        if (messageText.trim() !== '') {
             if (wsRef.current && wsRef.current.readyState !== WebSocket.OPEN) {
                 setError(true);
                 setTimeout(() => {
@@ -176,15 +201,14 @@ const ChatUI = () => {
             const chat = chatsRef.current[currentChat];
             wsRef.current.send(
                 JSON.stringify({
-                    text: message,
+                    text: messageText,
                     userId: chat.userId,
                     chatId: chat.id,
                     isFromUser: false,
                 }),
             );
         }
-        inputRef.current.value = '';
-        inputRef.current.focus();
+        setMessageText('');
         scrollToBottom();
     };
 
@@ -225,62 +249,76 @@ const ChatUI = () => {
     }
 
     return (
-        <Layout footer={false}>
-            <Fade in={error}>
+        <ResizablePanelGroup
+            direction="horizontal"
+            className="flex max-h-screen min-h-screen"
+        >
+            {error && (
                 <Alert
-                    variant="filled"
-                    severity="warning"
-                    sx={{ position: 'absolute', 'z-index': 1 }}
+                    className={cn(
+                        'absolute left-1/2 flex w-96 gap-2 rounded-t-none border-none bg-amber-600 text-white',
+                        currentChat !== -1 ? 'top-[60px]' : 'top-0',
+                    )}
                 >
+                    <div>
+                        <TriangleAlert className="stroke-white" />
+                    </div>
                     Встановлення з&apos;єднання з сервером...
                 </Alert>
-            </Fade>
-            {currentChat !== -1 && (
-                <>
-                    <Button
-                        variant="contained"
-                        className="top-15 absolute right-0 z-20"
-                        color="error"
-                        onClick={closeCurrentChat}
-                    >
-                        <Cross1Icon />
-                    </Button>
-                    <Button
-                        variant="contained"
-                        className="absolute bottom-0 left-0 z-20"
-                        color="error"
-                        onClick={closeCurrentChatAndReport}
-                    >
-                        {/*<Trash2Icon />*/}
-                        Report
-                    </Button>
-                </>
             )}
-            {unassignedChatsRef.current.length > 0 && (
-                <Button
-                    variant="contained"
-                    className="top-15 absolute left-0 z-20"
-                    color="success"
-                    onClick={() =>
-                        takeUnassignedChat(unassignedChatsRef.current[0].id)
-                    }
-                >
-                    <LoaderIcon />
-                </Button>
-            )}
-            <Grid container spacing={0}>
+            <ResizablePanel
+                className="flex h-full flex-col"
+                defaultSize={17}
+                minSize={14}
+                maxSize={50}
+            >
+                {/* {currentChat !== -1 && (
+                    <>
+                        <Button
+                            variant={'destructive'}
+                            className=""
+                            color="error"
+                            onClick={closeCurrentChat}
+                        >
+                            <Cross1Icon />
+                        </Button>
+                        <Button
+                            variant={'destructive'}
+                            className=""
+                            color="error"
+                            onClick={closeCurrentChatAndReport}
+                        >
+                            Report
+                        </Button>
+                    </>
+                )} */}
+                <Logo className="h-16 flex-grow px-4 transition-opacity delay-300" />
                 <ChatBar chats={chatsRef.current} changeChat={changeChat} />
+                {unassignedChatsRef.current.length > 0 && (
+                    <Button
+                        className="rounded-none bg-green-800"
+                        color="success"
+                        onClick={() =>
+                            takeUnassignedChat(unassignedChatsRef.current[0].id)
+                        }
+                    >
+                        <LoaderIcon />
+                    </Button>
+                )}
+            </ResizablePanel>
+            <ResizableHandle />
+            <ResizablePanel>
                 <ChatMessageWindow
                     chats={chatsRef.current}
                     {...{
                         currentChat,
                         handleSend,
-                        inputRef,
+                        setMessageText,
                         messageEndRef,
                     }}
                 />
-            </Grid>
-        </Layout>
+            </ResizablePanel>
+        </ResizablePanelGroup>
     );
 };
 
