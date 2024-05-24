@@ -36,6 +36,8 @@ export const XForm: React.FC<{
     const create = api.user.create.useMutation();
     const update = api.user.update.useMutation();
 
+    const permissions = api.permission.list.useQuery();
+
     const [imageSrc, setImageSrc] = useState<string | null>(null);
     const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
@@ -317,6 +319,11 @@ export const XForm: React.FC<{
                                     </FormItem>
                                 )}
                             />
+                            {/*{permissions.data?.map((permission) => (*/}
+                            {/*    <span key={permission.id}>*/}
+                            {/*        {permission.title}*/}
+                            {/*    </span>*/}
+                            {/*))}*/}
                         </div>
                         {/* todo: userRole */}
                         {/* <FormField
