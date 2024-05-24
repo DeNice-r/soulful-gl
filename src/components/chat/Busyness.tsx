@@ -19,7 +19,7 @@ export const Busyness = () => {
     }
 
     return (
-        <div className="flex justify-between px-4">
+        <div className="flex h-10 justify-between px-4">
             {Object.keys(BusynessEmoji).map((emoji, index) => (
                 <button
                     key={index}

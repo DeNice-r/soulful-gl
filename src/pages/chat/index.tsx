@@ -221,10 +221,10 @@ const ChatUI = () => {
         inputRef.current.focus();
     }
 
-    async function closeCurrentChat() {
-        await apiClient.chat.archive.mutate(currentChat);
+    async function closeChat(chatID: number) {
+        await apiClient.chat.archive.mutate(chatID);
         setCurrentChat(-1);
-        delete chatsRef.current[currentChat];
+        delete chatsRef.current[chatID];
         rerender();
     }
 
@@ -267,10 +267,10 @@ const ChatUI = () => {
                 </Alert>
             )}
             <ResizablePanel
-                className="flex h-full flex-col"
+                className="relative flex h-screen min-w-56 flex-col"
                 defaultSize={17}
                 minSize={14}
-                maxSize={50}
+                maxSize={33}
             >
                 {/* {currentChat !== -1 && (
                     <>
@@ -292,12 +292,16 @@ const ChatUI = () => {
                         </Button>
                     </>
                 )} */}
-                <Logo className="h-16 flex-grow px-4 transition-opacity delay-300" />
-                <ChatBar chats={chatsRef.current} changeChat={changeChat} />
+                <Logo className="min-h-16 px-4" />
+                <ChatBar
+                    chats={chatsRef.current}
+                    changeChat={changeChat}
+                    closeChat={closeChat}
+                    currentChat={currentChat}
+                />
                 {unassignedChatsRef.current.length > 0 && (
                     <Button
-                        className="rounded-none bg-green-800"
-                        color="success"
+                        className="absolute bottom-0 w-full rounded-none bg-green-800 hover:bg-green-700"
                         onClick={() =>
                             takeUnassignedChat(unassignedChatsRef.current[0].id)
                         }
@@ -315,6 +319,8 @@ const ChatUI = () => {
                         handleSend,
                         setMessageText,
                         messageEndRef,
+                        closeCurrentChatAndReport,
+                        setCurrentChat,
                     }}
                 />
             </ResizablePanel>

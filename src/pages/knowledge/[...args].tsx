@@ -301,7 +301,7 @@ const Knowledge: React.FC<{ chat?: boolean }> = ({ chat = false }) => {
                             </div>
 
                             {!isEditing ? (
-                                <div className="flex h-full flex-col items-center gap-4 rounded-2xl bg-neutral-50 shadow-inner">
+                                <div className="flex h-full w-full flex-col items-center gap-4 rounded-2xl bg-neutral-50 shadow-inner">
                                     {chat ? (
                                         <ScrollArea className="h-5/6 w-5/6 scroll-smooth">
                                             <div

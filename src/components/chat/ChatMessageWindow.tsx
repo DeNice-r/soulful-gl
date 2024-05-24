@@ -3,6 +3,7 @@ import * as React from 'react';
 import { ChatMesssage } from '~/components/chat/ChatMessage';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import { OctagonAlert, X } from 'lucide-react';
 
 export const ChatMessageWindow = ({
     chats,
@@ -10,6 +11,8 @@ export const ChatMessageWindow = ({
     handleSend,
     setMessageText,
     messageEndRef,
+    closeCurrentChatAndReport,
+    setCurrentChat,
 }: {
     chats: RouterOutputs['chat']['listFull'];
     currentChat: number;
@@ -18,14 +21,24 @@ export const ChatMessageWindow = ({
         React.SetStateAction<string | null | undefined>
     >;
     messageEndRef: React.MutableRefObject<unknown>;
+    closeCurrentChatAndReport: () => Promise<void>;
+    setCurrentChat: React.Dispatch<React.SetStateAction<number>>;
 }) => (
     <section className="flex h-full w-full flex-col">
         {currentChat !== -1 && (
             <>
-                <header className="border-b p-4 dark:border-zinc-700">
-                    <h2 className="flex items-center gap-2 text-xl font-bold">
+                <header className="flex items-center justify-between border-b p-4 dark:border-zinc-700">
+                    <h2 className="flex items-center gap-4 text-xl font-bold">
                         {chats[currentChat]?.userId}
+                        <OctagonAlert
+                            onClick={() => closeCurrentChatAndReport}
+                            className="w-5 cursor-pointer text-red-600"
+                        />
                     </h2>
+                    <X
+                        className="cursor-pointer"
+                        onClick={() => setCurrentChat(-1)}
+                    />
                 </header>
 
                 <main className="relative flex-1 overflow-auto p-4">
