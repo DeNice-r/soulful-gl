@@ -12,12 +12,17 @@ import {
     StringIdSchema,
     UpdateUserSchema,
     ChangePasswordSchema,
+    SelfUpdateUserSchema,
 } from '~/utils/schemas';
 import { archiveChat } from '~/server/api/routers/common';
 import { randomUUID } from 'crypto';
 import bcrypt from 'bcrypt';
 import { env } from '~/env';
-import { sendPasswordUpdateEmail, sendRegEmail } from '~/utils/email/templates';
+import {
+    sendChangeEmailEmail,
+    sendPasswordUpdateEmail,
+    sendRegEmail,
+} from '~/utils/email/templates';
 import { AccessType, SearchableUserFields } from '~/utils/types';
 import { getAccessType } from '~/utils/auth';
 
@@ -102,9 +107,8 @@ export const userRouter = createTRPCRouter({
         .query(async ({ input, ctx }) => {
             const accessType = getAccessType(ctx);
             if (
-                input &&
                 input !== ctx.session?.user?.id &&
-                accessType !== AccessType.NONE
+                accessType === AccessType.NONE
             ) {
                 throw new Error('Access denied');
             }
@@ -170,13 +174,52 @@ export const userRouter = createTRPCRouter({
             });
         }),
 
+    selfUpdate: protectedProcedure
+        .input(SelfUpdateUserSchema)
+        .mutation(async ({ ctx, input: data }) => {
+            return ctx.db.user.update({
+                where: {
+                    id: ctx.session.user.id,
+                },
+                data,
+            });
+        }),
+
     update: permissionProcedure
         .input(UpdateUserSchema)
         .mutation(async ({ ctx, input: { id, ...data } }) => {
+            const user = await ctx.db.user.findUnique({
+                where: {
+                    id,
+                },
+                select: {
+                    isOauth: true,
+                    name: true,
+                    email: true,
+                },
+            });
+
+            if (!user) {
+                throw new Error('Користувач не знайдений');
+            }
+
+            if (data.email && user.email && data.email !== user.email) {
+                if (user.isOauth) {
+                    throw new Error(
+                        'Неможливо змінити адресу електронної пошти для OAuth користувача',
+                    );
+                }
+
+                await sendChangeEmailEmail(
+                    user.name ?? 'Анонім',
+                    user.email,
+                    data.email,
+                );
+            }
+
             return ctx.db.user.update({
                 where: {
                     id,
-                    ...(!ctx.isFullAccess && { id: ctx.session.user.id }),
                 },
                 data,
             });

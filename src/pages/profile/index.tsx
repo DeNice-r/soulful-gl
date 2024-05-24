@@ -25,7 +25,6 @@ import { Editor } from '~/components/management/common/Editor';
 import { X } from 'lucide-react';
 import { Spinner } from '~/components/ui/spinner';
 import { toast } from '~/components/ui/use-toast';
-
 import { NO_REFETCH } from '~/utils/constants';
 import {
     Dialog,
@@ -36,7 +35,7 @@ import {
 } from '~/components/ui/dialog';
 
 const Profile: React.FC = () => {
-    const update = api.user.update.useMutation();
+    const update = api.user.selfUpdate.useMutation();
     const changePassword = api.user.changePassword.useMutation();
 
     const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -98,7 +97,7 @@ const Profile: React.FC = () => {
         if (!entity.data?.id) {
             return;
         }
-        await update.mutateAsync({ id: entity.data?.id, ...values });
+        await update.mutateAsync(values);
         await entity.refetch();
         toast({
             title: 'Успішно відредаговано',

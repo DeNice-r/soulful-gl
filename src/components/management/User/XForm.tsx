@@ -227,7 +227,6 @@ export const XForm: React.FC<{
                                             <FormControl>
                                                 <Input
                                                     className="flex-grow outline outline-1 outline-neutral-400"
-                                                    disabled={!!entity}
                                                     placeholder={
                                                         !entity || entity.email
                                                             ? 'anton@gmail.com'
