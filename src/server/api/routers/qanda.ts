@@ -1,7 +1,7 @@
 import {
     createTRPCRouter,
+    publicMultilevelSpaProcedure,
     publicProcedure,
-    publicSpaProcedure,
     spaProcedure,
 } from '~/server/api/trpc';
 import {
@@ -17,7 +17,7 @@ import { SearchableQnAFields } from '~/utils/types';
 import { sendQandaDeleteEmail, sendQandaEmail } from '~/utils/email/templates';
 
 export const qandaRouter = createTRPCRouter({
-    list: publicSpaProcedure
+    list: publicMultilevelSpaProcedure
         .input(PageSchema)
         .query(
             async ({ input: { page, limit, query, orderBy, order }, ctx }) => {

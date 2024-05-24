@@ -1,8 +1,9 @@
 import {
     createTRPCRouter,
+    multilevelPermissionProcedure,
     permissionProcedure,
     protectedProcedure,
-    publicPermissionProcedure,
+    publicMultilevelPermissionProcedure,
 } from '~/server/api/trpc';
 import {
     CreateUserSchema,
@@ -27,7 +28,7 @@ import { AccessType, SearchableUserFields } from '~/utils/types';
 import { getAccessType } from '~/utils/auth';
 
 export const userRouter = createTRPCRouter({
-    list: permissionProcedure
+    list: multilevelPermissionProcedure
         .input(SearchUsersSchema)
         .query(
             async ({
@@ -102,7 +103,7 @@ export const userRouter = createTRPCRouter({
             },
         ),
 
-    get: publicPermissionProcedure
+    get: publicMultilevelPermissionProcedure
         .input(StringIdSchema.optional())
         .query(async ({ input, ctx }) => {
             const accessType = getAccessType(ctx);

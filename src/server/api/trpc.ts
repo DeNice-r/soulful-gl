@@ -84,6 +84,8 @@ const t = initTRPC
         },
         defaultMeta: {
             hasPermissionProtection: false,
+            hasSpaProtection: false,
+            hasMultilevelProtection: false,
         },
     });
 
@@ -97,9 +99,19 @@ export const publicPermissionProcedure = publicProcedure.meta({
     hasPermissionProtection: true,
 });
 
+export const publicMultilevelPermissionProcedure =
+    publicPermissionProcedure.meta({
+        hasMultilevelProtection: true,
+    });
+
 export const publicSpaProcedure = publicProcedure.meta({
     hasSpaProtection: true,
 });
+
+export const publicMultilevelSpaProcedure =
+    publicMultilevelPermissionProcedure.meta({
+        hasSpaProtection: true,
+    });
 
 export const protectedProcedure = publicProcedure.use(({ ctx, next }) => {
     if (!ctx.session || !ctx.session.user) {
@@ -132,7 +144,15 @@ export const permissionProcedure = protectedProcedure
         hasPermissionProtection: true,
     });
 
+export const multilevelPermissionProcedure = permissionProcedure.meta({
+    hasMultilevelProtection: true,
+});
+
 // Single permission access
 export const spaProcedure = permissionProcedure.meta({
+    hasSpaProtection: true,
+});
+
+export const multilevelSpaProcedure = multilevelPermissionProcedure.meta({
     hasSpaProtection: true,
 });
