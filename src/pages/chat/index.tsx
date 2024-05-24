@@ -268,7 +268,7 @@ const ChatUI = () => {
             )}
             <ResizablePanel
                 className="relative flex h-screen min-w-56 flex-col"
-                defaultSize={17}
+                defaultSize={33}
                 minSize={14}
                 maxSize={33}
             >
