@@ -4,6 +4,7 @@ import 'react-quill/dist/quill.snow.css';
 import { uploadImage } from '~/utils/s3/frontend';
 import { type ReactQuillProps } from 'react-quill';
 import { useToast } from '~/components/ui/use-toast';
+import { cn } from '~/lib/utils';
 
 const ReactQuill = dynamic(
     async () => {
@@ -45,10 +46,14 @@ export const Editor = ({
     defaultValue,
     onChange,
     value,
+    className,
+    containerClassName,
 }: {
     defaultValue?: string;
     onChange: (value: string) => void;
     value?: string;
+    className?: string;
+    containerClassName?: string;
 }) => {
     const { toast } = useToast();
     const quillRef = useRef<ActualReactQuill>(null);
@@ -145,9 +150,9 @@ export const Editor = ({
     ];
 
     return (
-        <div className="text-editor">
+        <div className={cn('text-editor', containerClassName)}>
             <ReactQuill
-                className="rounded-md bg-neutral-50"
+                className={cn('rounded-md bg-neutral-50', className)}
                 theme="snow"
                 modules={modules}
                 formats={formats}

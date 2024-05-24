@@ -49,6 +49,12 @@ export enum ManagementPageName {
     QnA = 'QnA',
 }
 
+export enum ChatTabName {
+    NOTES = 'notes',
+    KNOWLEDGE = 'knowledge',
+    AI = 'ai',
+}
+
 export const PageTitleMap = {
     [ManagementPageName.STATISTICS]: 'Головна',
     [ManagementPageName.USERS]: 'Користувачі',

@@ -268,30 +268,10 @@ const ChatUI = () => {
             )}
             <ResizablePanel
                 className="relative flex h-screen min-w-56 flex-col"
-                defaultSize={33}
+                defaultSize={20}
                 minSize={14}
                 maxSize={33}
             >
-                {/* {currentChat !== -1 && (
-                    <>
-                        <Button
-                            variant={'destructive'}
-                            className=""
-                            color="error"
-                            onClick={closeCurrentChat}
-                        >
-                            <Cross1Icon />
-                        </Button>
-                        <Button
-                            variant={'destructive'}
-                            className=""
-                            color="error"
-                            onClick={closeCurrentChatAndReport}
-                        >
-                            Report
-                        </Button>
-                    </>
-                )} */}
                 <Logo className="min-h-16 px-4" />
                 <ChatBar
                     chats={chatsRef.current}
@@ -301,7 +281,7 @@ const ChatUI = () => {
                 />
                 {unassignedChatsRef.current.length > 0 && (
                     <Button
-                        className="absolute bottom-0 w-full rounded-none bg-green-800 hover:bg-green-700"
+                        className="absolute bottom-0 w-full rounded-none bg-green-800 py-6 hover:bg-green-700"
                         onClick={() =>
                             takeUnassignedChat(unassignedChatsRef.current[0].id)
                         }

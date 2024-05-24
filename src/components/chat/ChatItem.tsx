@@ -1,7 +1,6 @@
-import { Typography } from '@mui/material';
 import { type ExtendedChat } from '~/utils/types';
 import React from 'react';
-import { X } from 'lucide-react';
+import { ArchiveX } from 'lucide-react';
 import { cn } from '~/lib/utils';
 
 interface ChatItemProps {
@@ -29,15 +28,11 @@ const ChatItem: React.FC<ChatItemProps> = ({
                 onClick={onClick}
             >
                 <h1 className="font-medium">Чат #{chat.id}</h1>
-                <Typography
-                    variant="body1"
-                    color="text.secondary"
-                    sx={{ textAlign: 'left' }}
-                >
+                <p>
                     {/*{chat.lastMessage}*/}
                     {chat?.messages?.length > 0 &&
                         chat.messages.slice(-1)[0].text}
-                </Typography>
+                </p>
             </div>
             <div
                 onClick={() => closeChat(chat.id)}
@@ -46,7 +41,7 @@ const ChatItem: React.FC<ChatItemProps> = ({
                     currentChat === chat.id && 'visible',
                 )}
             >
-                <X />
+                <ArchiveX />
             </div>
         </div>
     );
