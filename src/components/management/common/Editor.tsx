@@ -147,7 +147,7 @@ export const Editor = ({
     return (
         <div className="text-editor">
             <ReactQuill
-                className="bg-slate-50"
+                className="rounded-md bg-neutral-50"
                 theme="snow"
                 modules={modules}
                 formats={formats}
