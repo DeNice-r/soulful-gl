@@ -1,6 +1,5 @@
 import { api, type RouterOutputs } from '~/utils/api';
-import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { ChatMesssage } from '~/components/chat/ChatMessage';
 import { Button } from '../ui/button';
@@ -34,6 +33,7 @@ import {
 } from '../ui/resizable';
 import { Editor } from '../management/common/Editor';
 import { ChatTabName as ChatTabType } from '~/utils/types';
+import Knowledge from '../knowledge/Knowledge';
 
 export const ChatMessageWindow: React.FC<{
     chats: RouterOutputs['chat']['listFull'];
@@ -62,6 +62,11 @@ export const ChatMessageWindow: React.FC<{
     );
 
     const [notes, setNotes] = useState<string | undefined>();
+
+    const [currentEntity, setCurrentEntity] = useState<{
+        id: string | null;
+        type: 'folder' | 'document';
+    } | null>(null);
 
     // const userNotes = api.user.
 
@@ -291,11 +296,12 @@ export const ChatMessageWindow: React.FC<{
                             </>
                         )}
                         {tabType === ChatTabType.KNOWLEDGE && (
-                            <Editor
-                                className="h-full max-h-[calc(100vh-42.84px)] rounded-none border-0 border-none bg-neutral-300"
-                                containerClassName="h-full"
-                                defaultValue={notes}
-                                onChange={(note: string) => setNotes(note)}
+                            <Knowledge
+                                chat={true}
+                                {...{
+                                    currentEntity,
+                                    setCurrentEntity,
+                                }}
                             />
                         )}
                         {tabType === ChatTabType.AI && <div>AI</div>}

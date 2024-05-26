@@ -55,6 +55,21 @@ export enum ChatTabName {
     AI = 'ai',
 }
 
+export enum EntityType {
+    FOLDER = 'folder',
+    DOCUMENT = 'document',
+}
+
+export const EntityTypeToPath = {
+    f: EntityType.FOLDER,
+    d: EntityType.DOCUMENT,
+};
+
+export type EntityData = {
+    id: string | null;
+    type: 'folder' | 'document';
+} | null;
+
 export const PageTitleMap = {
     [ManagementPageName.STATISTICS]: 'Головна',
     [ManagementPageName.USERS]: 'Користувачі',

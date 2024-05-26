@@ -3,15 +3,13 @@ import React from 'react';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { type RouterOutputs } from '~/utils/api';
+import { type EntityData } from '~/utils/types';
 
 export const FSEntity: React.FC<{
     entity: RouterOutputs['documentFolder']['list'][
         | 'folders'
         | 'documents'][number];
-    currentEntity: {
-        id: string;
-        type: 'folder' | 'document';
-    } | null;
+    currentEntity: EntityData;
     isEditing: boolean;
     handleTitleChange: (
         e: React.KeyboardEvent<HTMLInputElement>,
