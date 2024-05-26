@@ -1,6 +1,6 @@
-import type { RouterOutputs } from '~/utils/api';
+import { api, type RouterOutputs } from '~/utils/api';
 import * as React from 'react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { ChatMesssage } from '~/components/chat/ChatMessage';
 import { Button } from '../ui/button';
@@ -12,6 +12,7 @@ import {
     NotebookPen,
     Bot,
     BookOpen,
+    SendHorizonal,
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import {
@@ -46,7 +47,27 @@ export const ChatMessageWindow: React.FC<{
         'notes',
     );
 
-    const [note, setNote] = useState('');
+    const [notes, setNotes] = useState<string | undefined>();
+
+    // const userNotes = api.user.
+
+    const userNotesMutation = api.user.setNotes.useMutation();
+
+    const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        if (chats[currentChat]?.userId && notes) {
+            const localNotes = notes;
+            const localUserId = chats[currentChat].userId;
+            debounce(() => {
+                console.log('notes added');
+                void userNotesMutation.mutateAsync({
+                    id: localUserId,
+                    notes: localNotes,
+                });
+            }, 2000);
+        }
+    }, [notes]);
 
     function handleHelpClick() {
         setIsWindowOpened(!isWindowOpened);
@@ -62,6 +83,14 @@ export const ChatMessageWindow: React.FC<{
             setTabType(name);
         };
     }
+
+    function debounce(fn: () => void, ms: number) {
+        if (debounceRef.current) {
+            clearTimeout(debounceRef.current);
+        }
+        debounceRef.current = setTimeout(fn, ms);
+    }
+
     return (
         <ResizablePanelGroup direction="horizontal" className="h-screen">
             <ResizablePanel minSize={30} defaultSize={50}>
@@ -101,6 +130,14 @@ export const ChatMessageWindow: React.FC<{
                             </main>
                             <footer className="border-t p-4 dark:border-zinc-700">
                                 <div className="flex items-center gap-2">
+                                    {/* <Button
+                                        onClick={() =>
+                                            setIsExerciseDialog(true)
+                                        }
+                                        className="rounded-full bg-neutral-50 px-1.5 text-neutral-800 shadow-none hover:bg-neutral-200"
+                                    >
+                                        <Plus />
+                                    </Button> */}
                                     <Input
                                         className="flex-1"
                                         placeholder="Введіть повідомлення..."
@@ -118,7 +155,7 @@ export const ChatMessageWindow: React.FC<{
                                     />
                                     {/* <ChatInput {...{ handleSend, inputRef }} /> */}
                                     <Button onClick={handleSend}>
-                                        Відправити
+                                        <SendHorizonal />
                                     </Button>
                                 </div>
                             </footer>
@@ -186,7 +223,32 @@ export const ChatMessageWindow: React.FC<{
                                 <Editor
                                     className="h-full max-h-[calc(100vh-42.84px)] rounded-none border-0 border-none bg-neutral-300"
                                     containerClassName="h-full"
-                                    onChange={(note: string) => setNote(note)}
+                                    defaultValue={notes}
+                                    onChange={(note: string) => setNotes(note)}
+                                />
+                                <style>
+                                    {`
+                                        .ql-toolbar {
+                                            background-color: rgb(229 229 229 / var(--tw-bg-opacity));
+                                        }
+                                        .ql-container {
+                                            border-width: 0px !important;
+                                        }
+                                        .ql-toolbar {
+                                            border-width: 0px !important;
+                                            border-bottom: 1px solid #ccc !important;
+                                            border-left: 1px solid #ccc !important;
+                                        }
+                                    `}
+                                </style>
+                            </>
+                        )}
+                        {tabType === ChatTabType.KNOWLEDGE && (
+                            <>
+                                <Editor
+                                    className="h-full max-h-[calc(100vh-42.84px)] rounded-none border-0 border-none bg-neutral-300"
+                                    containerClassName="h-full"
+                                    onChange={(note: string) => setNotes(note)}
                                 />
                                 <style>
                                     {`
@@ -211,6 +273,13 @@ export const ChatMessageWindow: React.FC<{
                         {tabType === ChatTabType.AI && <div>AI</div>}
                     </div>
                 </div>
+                {/* <Label className="relative">
+                            <Input
+                                className="w-full"
+                                placeholder="Введіть назву вправи..."
+                            />
+                            <Search className="absolute end-3 top-0 h-full w-5 text-neutral-400" />
+                        </Label> */}
                 <style>
                     {`
                         html {
