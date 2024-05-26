@@ -13,13 +13,9 @@ const l10n: Record<string, Record<string, string>> = {
         messengerUserCount: 'Користувачі з месенджерів',
         userCount: 'Користувачі платформи',
         operatorCount: 'З них оператори',
-        ongoingCount: 'Активні чати',
-        ongoingMsgCount: 'Повідомлення в активних чатах',
-        recentCount: 'Чати за останні 24 години',
     },
     diffs: {
         avgDuration: 'Середня тривалість активних чатів',
-        recentAvgDuration: 'Середня тривалість чатів за останні 24 години',
     },
 };
 
@@ -31,6 +27,7 @@ export const Statistics: React.FC = () => {
 
     return (
         <>
+            {/* todo: interval name and number select*/}
             <div className="flex flex-row flex-wrap md:flex-nowrap">
                 <div className="flex-1 p-2">
                     <LineChart

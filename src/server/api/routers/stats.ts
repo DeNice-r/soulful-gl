@@ -1,5 +1,4 @@
 import { createTRPCRouter, spaProcedure } from '~/server/api/trpc';
-import { DAY_MS } from '~/utils/constants';
 import { z } from '~/utils/zod';
 import { IntervalMs } from '~/utils/types';
 
@@ -18,7 +17,6 @@ export const statsRouter = createTRPCRouter({
                 messengerUserCount,
                 userCount,
                 operatorCount,
-                recentChats,
                 messageCount,
                 recentMessageCount,
                 recentArchivedMessageCount,
@@ -46,17 +44,6 @@ export const statsRouter = createTRPCRouter({
                                 },
                             },
                         },
-                    },
-                }),
-                ctx.db.archivedChat.findMany({
-                    where: {
-                        createdAt: {
-                            gt: new Date(Date.now() - DAY_MS * 7),
-                        },
-                    },
-                    select: {
-                        createdAt: true,
-                        endedAt: true,
                     },
                 }),
                 ctx.db.$queryRawUnsafe(`
@@ -140,26 +127,15 @@ export const statsRouter = createTRPCRouter({
                     (acc, chat) => acc + Date.now() - chat.createdAt.getTime(),
                     0,
                 ) / ongoingChats.length;
-            const recentAvgDuration =
-                recentChats.reduce(
-                    (acc, chat) =>
-                        acc +
-                        (chat.endedAt.getTime() - chat.createdAt.getTime()),
-                    0,
-                ) / recentChats.length;
 
             return {
                 numbers: {
                     messengerUserCount,
                     userCount,
                     operatorCount,
-                    ongoingCount: ongoingChats.length,
-                    ongoingMsgCount: recentMessageCount,
-                    recentCount: recentChats.length,
                 },
                 diffs: {
                     avgDuration,
-                    recentAvgDuration,
                 },
                 graphs: {
                     dailyMessageCount: messageCount,
