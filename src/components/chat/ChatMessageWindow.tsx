@@ -13,7 +13,19 @@ import {
     Bot,
     BookOpen,
     SendHorizonal,
+    ArchiveX,
 } from 'lucide-react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '~/components/ui/alert-dialog';
 import { cn } from '~/lib/utils';
 import {
     ResizableHandle,
@@ -33,6 +45,7 @@ export const ChatMessageWindow: React.FC<{
     messageEndRef: React.MutableRefObject<unknown>;
     closeCurrentChatAndReport: () => Promise<void>;
     setCurrentChat: React.Dispatch<React.SetStateAction<number>>;
+    closeChat: (chatID: number) => Promise<void>;
 }> = ({
     chats,
     currentChat,
@@ -41,6 +54,7 @@ export const ChatMessageWindow: React.FC<{
     messageEndRef,
     closeCurrentChatAndReport,
     setCurrentChat,
+    closeChat,
 }) => {
     const [isWindowOpened, setIsWindowOpened] = useState(false);
     const [tabType, setTabType] = useState<'notes' | 'knowledge' | 'ai'>(
@@ -108,6 +122,38 @@ export const ChatMessageWindow: React.FC<{
                                     />
                                 </h2>
                                 <div className="flex items-center gap-4">
+                                    <AlertDialog>
+                                        <AlertDialogTrigger>
+                                            <ArchiveX className="cursor-pointer text-red-600" />
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>
+                                                    Ви впевнені, що бажаєте
+                                                    заархівувати чат?
+                                                </AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Ця дія є незворотною. Після
+                                                    підтвердження чат буде
+                                                    заархівовано та до нього не
+                                                    буде доступу.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>
+                                                    Відмінити
+                                                </AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    className="bg-red-700"
+                                                    onClick={() =>
+                                                        closeChat(currentChat)
+                                                    }
+                                                >
+                                                    Заархівувати
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                     <X
                                         className="cursor-pointer"
                                         onClick={handleChatClosing}
@@ -220,6 +266,7 @@ export const ChatMessageWindow: React.FC<{
                     <div className="h-full w-full">
                         {tabType === ChatTabType.NOTES && (
                             <>
+                                {/* todo: parse notes */}
                                 <Editor
                                     className="h-full max-h-[calc(100vh-42.84px)] rounded-none border-0 border-none bg-neutral-300"
                                     containerClassName="h-full"
@@ -244,42 +291,16 @@ export const ChatMessageWindow: React.FC<{
                             </>
                         )}
                         {tabType === ChatTabType.KNOWLEDGE && (
-                            <>
-                                <Editor
-                                    className="h-full max-h-[calc(100vh-42.84px)] rounded-none border-0 border-none bg-neutral-300"
-                                    containerClassName="h-full"
-                                    onChange={(note: string) => setNotes(note)}
-                                />
-                                <style>
-                                    {`
-                                        .ql-toolbar {
-                                            background-color: rgb(229 229 229 / var(--tw-bg-opacity));
-                                        }
-                                        .ql-container {
-                                            border-width: 0px !important;
-                                        }
-                                        .ql-toolbar {
-                                            border-width: 0px !important;
-                                            border-bottom: 1px solid #ccc !important;
-                                            border-left: 1px solid #ccc !important;
-                                        }
-                                    `}
-                                </style>
-                            </>
-                        )}
-                        {tabType === ChatTabType.KNOWLEDGE && (
-                            <div>knowledge</div>
+                            <Editor
+                                className="h-full max-h-[calc(100vh-42.84px)] rounded-none border-0 border-none bg-neutral-300"
+                                containerClassName="h-full"
+                                defaultValue={notes}
+                                onChange={(note: string) => setNotes(note)}
+                            />
                         )}
                         {tabType === ChatTabType.AI && <div>AI</div>}
                     </div>
                 </div>
-                {/* <Label className="relative">
-                            <Input
-                                className="w-full"
-                                placeholder="Введіть назву вправи..."
-                            />
-                            <Search className="absolute end-3 top-0 h-full w-5 text-neutral-400" />
-                        </Label> */}
                 <style>
                     {`
                         html {

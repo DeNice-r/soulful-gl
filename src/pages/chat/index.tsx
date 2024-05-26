@@ -275,9 +275,7 @@ const ChatUI = () => {
                 <Logo className="min-h-16 px-4" />
                 <ChatBar
                     chats={chatsRef.current}
-                    changeChat={changeChat}
-                    closeChat={closeChat}
-                    currentChat={currentChat}
+                    {...{ changeChat, closeChat, currentChat }}
                 />
                 {unassignedChatsRef.current.length > 0 && (
                     <Button
@@ -301,6 +299,7 @@ const ChatUI = () => {
                         messageEndRef,
                         closeCurrentChatAndReport,
                         setCurrentChat,
+                        closeChat,
                     }}
                 />
             </ResizablePanel>
