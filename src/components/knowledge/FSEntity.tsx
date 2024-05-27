@@ -9,14 +9,14 @@ export const FSEntity: React.FC<{
     entity: RouterOutputs['documentFolder']['list'][
         | 'folders'
         | 'documents'][number];
-    currentEntity: EntityData;
+    editingEntity: EntityData;
     isEditing: boolean;
     handleTitleChange: (
         e: React.KeyboardEvent<HTMLInputElement>,
         id: string,
     ) => Promise<void>;
     type: 'folder' | 'document';
-}> = ({ entity, currentEntity, isEditing, handleTitleChange, type }) => {
+}> = ({ entity, editingEntity, isEditing, handleTitleChange, type }) => {
     return (
         <Button
             id={entity.id}
@@ -29,7 +29,7 @@ export const FSEntity: React.FC<{
                 ) : (
                     <FileText className="min-h-6 min-w-6" />
                 )}
-                {currentEntity?.id === entity.id && isEditing ? (
+                {editingEntity?.id === entity.id && isEditing ? (
                     <Input
                         className="flex-grow p-0"
                         defaultValue={entity.title}

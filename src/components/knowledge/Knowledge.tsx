@@ -55,6 +55,8 @@ const Knowledge: React.FC<{
         description: string;
     } | null>(null);
 
+    const [editingEntity, setEditingEntity] = useState<EntityData>(null);
+
     const { client: apiClient } = api.useUtils();
 
     const documentFolders = api.documentFolder.list.useQuery(currentEntity?.id);
@@ -85,20 +87,20 @@ const Knowledge: React.FC<{
         const buttonId = button?.getAttribute('id');
         setIsEditing(false);
         if (button && buttonId) {
-            setCurrentEntity({
+            setEditingEntity({
                 id: buttonId,
                 type: button.getAttribute('name') as 'folder' | 'document',
             });
         } else {
-            setCurrentEntity(null);
+            setEditingEntity(null);
         }
     }
 
     const handleDelete = async () => {
-        if (!currentEntity || !currentEntity.id) {
+        if (!editingEntity || !editingEntity.id) {
             return;
         }
-        await deleteMutation[currentEntity.type].mutateAsync(currentEntity.id);
+        await deleteMutation[editingEntity.type].mutateAsync(editingEntity.id);
         await documentFolders.refetch();
     };
 
@@ -107,8 +109,8 @@ const Knowledge: React.FC<{
         id: string,
     ) => {
         const inputElement = e.target as HTMLInputElement;
-        if (e.key === 'Enter' && currentEntity?.id === id) {
-            await updateMutation[currentEntity.type].mutateAsync({
+        if (e.key === 'Enter' && editingEntity?.id === id) {
+            await updateMutation[editingEntity.type].mutateAsync({
                 id: id,
                 title: inputElement.value,
             });
@@ -146,10 +148,10 @@ const Knowledge: React.FC<{
         const element = e.target as HTMLElement;
         const button = element.closest('button');
         if (
-            currentEntity?.id &&
-            currentEntity?.id !== button?.getAttribute('id')
+            editingEntity?.id &&
+            editingEntity?.id !== button?.getAttribute('id')
         ) {
-            setCurrentEntity(null);
+            setEditingEntity(null);
             setIsEditing(false);
             return true;
         }
@@ -177,9 +179,9 @@ const Knowledge: React.FC<{
 
     const handleDocumentEdit = async () => {
         setIsEditing((val) => !val);
-        if (isEditing && currentEntity?.id && document) {
+        if (isEditing && editingEntity?.id && document) {
             await updateMutation['document'].mutateAsync({
-                id: currentEntity?.id,
+                id: editingEntity?.id,
                 title: document.title,
                 description: document.description,
             });
@@ -217,9 +219,10 @@ const Knowledge: React.FC<{
                 >
                     <BreadcrumbItem>
                         <button
-                            onClick={() =>
-                                setCurrentEntity({ id: null, type: 'folder' })
-                            }
+                            onClick={() => {
+                                setEditingEntity({ id: null, type: 'folder' });
+                                setCurrentEntity({ id: null, type: 'folder' });
+                            }}
                         >
                             Головна
                         </button>
@@ -349,7 +352,6 @@ const Knowledge: React.FC<{
                         <div
                             onContextMenu={handleChangeId}
                             onClick={(e) => {
-                                //denys
                                 isEditing
                                     ? handleClickRenameCancel(e)
                                     : handleGoToEntity(e);
@@ -369,7 +371,7 @@ const Knowledge: React.FC<{
                                                 type: 'folder',
                                                 entity,
                                                 handleTitleChange,
-                                                currentEntity,
+                                                editingEntity,
                                                 isEditing,
                                             }}
                                         />
@@ -384,7 +386,7 @@ const Knowledge: React.FC<{
                                                 type: 'document',
                                                 entity,
                                                 handleTitleChange,
-                                                currentEntity,
+                                                editingEntity,
                                                 isEditing,
                                             }}
                                         />
@@ -431,7 +433,7 @@ const Knowledge: React.FC<{
                         </div>
                     </ContextMenuTrigger>
                     <ContextMenuContent>
-                        {currentEntity ? (
+                        {editingEntity ? (
                             <>
                                 <ContextMenuItem
                                     className="cursor-pointer"

@@ -372,11 +372,11 @@ export const ChatMessageWindow: React.FC<{
                         {tabType === ChatTabType.EXERCISES && <p>Exercises</p>}
                         {tabType === ChatTabType.POSTS && (
                             <div className="flex h-full w-full flex-col gap-4 overflow-y-auto p-8">
-                                <div className="flex flex-grow flex-wrap gap-4">
+                                <div className="flex flex-grow flex-wrap justify-center gap-4">
                                     {posts?.data?.values.map((post) => (
                                         <div
                                             key={post.id}
-                                            className="flex w-full min-w-52 max-w-[25rem] flex-grow justify-center rounded-md bg-neutral-200 shadow-md outline-2 outline-neutral-200 transition-shadow duration-100 ease-in hover:cursor-pointer hover:shadow-xl hover:outline xl:w-5/12"
+                                            className="flex max-h-[26rem] w-full min-w-52 max-w-[25rem] flex-grow justify-center rounded-md bg-neutral-200 shadow-md outline-2 outline-neutral-200 transition-shadow duration-100 ease-in hover:cursor-pointer hover:shadow-xl hover:outline xl:w-5/12"
                                         >
                                             <Post variant="chat" post={post} />
                                         </div>
