@@ -22,7 +22,7 @@ export const statsRouter = createTRPCRouter({
                 recentArchivedMessageCount,
                 chatCount,
                 ongoingChats,
-            ] = await Promise.all([
+            ] = await ctx.db.$transaction([
                 ctx.db.user.count({
                     where: {
                         email: null,
