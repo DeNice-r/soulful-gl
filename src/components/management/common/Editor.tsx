@@ -48,18 +48,29 @@ export const Editor = ({
     value,
     className,
     containerClassName,
+    emitOnOutsideChanges = true,
 }: {
     defaultValue?: string;
     onChange: (value: string) => void;
     value?: string;
     className?: string;
     containerClassName?: string;
+    emitOnOutsideChanges?: boolean;
 }) => {
     const { toast } = useToast();
     const quillRef = useRef<ActualReactQuill>(null);
+    const lastChangeOutsideRef = useRef<number>(0);
     const [text, setText] = useState(defaultValue);
     function changeValue(newValue: string) {
         setText(newValue);
+        console.log(
+            'lastChangeOutsideRef.current',
+            lastChangeOutsideRef.current,
+        );
+        if (!emitOnOutsideChanges && lastChangeOutsideRef.current) {
+            lastChangeOutsideRef.current--;
+            return;
+        }
         onChange(newValue);
     }
 
@@ -109,6 +120,7 @@ export const Editor = ({
     useEffect(() => {
         if (value !== undefined) {
             setText(value);
+            lastChangeOutsideRef.current += emitOnOutsideChanges ? 0 : 1;
         }
     }, [value]);
 

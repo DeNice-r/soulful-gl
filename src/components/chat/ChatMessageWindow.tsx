@@ -41,6 +41,7 @@ import { Spinner } from '../ui/spinner';
 import { Post } from '../Post';
 import { useRouter } from 'next/router';
 import { CHAT_POSTS_LAYOUT_LIMIT } from '~/utils/constants';
+import { useToast } from '~/components/ui/use-toast';
 
 export const ChatMessageWindow: React.FC<{
     chats: RouterOutputs['chat']['listFull'];
@@ -77,24 +78,11 @@ export const ChatMessageWindow: React.FC<{
 
     const [_, setState] = useState(0);
 
-    // const userNotes = api.user.
+    const { toast } = useToast();
 
-    const userNotesMutation = api.user.setNotes.useMutation();
+    const userNotesMutation = api.user.notes.useMutation();
 
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
-
-    useEffect(() => {
-        if (chats[currentChat]?.userId && notes) {
-            const localNotes = notes;
-            const localUserId = chats[currentChat].userId;
-            debounce(() => {
-                void userNotesMutation.mutateAsync({
-                    id: localUserId,
-                    notes: localNotes,
-                });
-            }, 2000);
-        }
-    }, [notes]);
 
     function handleHelpClick() {
         setIsWindowOpened(!isWindowOpened);
@@ -119,7 +107,7 @@ export const ChatMessageWindow: React.FC<{
         debounceRef.current = setTimeout(fn, ms);
     }
 
-    const limit = router.query.limit
+    const limit = !isNaN(Number(router.query.limit))
         ? Number(router.query.limit)
         : CHAT_POSTS_LAYOUT_LIMIT;
 
@@ -142,9 +130,41 @@ export const ChatMessageWindow: React.FC<{
         });
     };
 
+    const debounceNotes = (value: string) => {
+        if (!value || !notes || value === notes) return;
+        setNotes(value);
+        debounce(() => {
+            void userNotesMutation.mutateAsync({
+                id: chats[currentChat].userId,
+                notes: notes,
+            });
+            toast({ title: '✅ Нотатки збережено' });
+        }, 1000);
+    };
+
     useEffect(() => {
         if (posts.data) rerender();
     }, [posts.data]);
+
+    useEffect(() => {
+        if (debounceRef.current) {
+            clearTimeout(debounceRef.current);
+        }
+        void (async () => {
+            if (currentChat === -1) {
+                setNotes('');
+                return;
+            }
+            setNotes(undefined);
+            setNotes(
+                (
+                    await userNotesMutation.mutateAsync({
+                        id: chats[currentChat].userId,
+                    })
+                ).notes ?? '',
+            );
+        })();
+    }, [currentChat]);
 
     return (
         <ResizablePanelGroup direction="horizontal" className="h-screen">
@@ -330,12 +350,19 @@ export const ChatMessageWindow: React.FC<{
                         {tabType === ChatTabType.NOTES && (
                             <>
                                 {/* todo: parse notes */}
-                                <Editor
-                                    className="h-full max-h-[calc(100vh-42.84px)] rounded-none border-0 border-none bg-neutral-300"
-                                    containerClassName="h-full"
-                                    defaultValue={notes}
-                                    onChange={(note: string) => setNotes(note)}
-                                />
+                                {notes ? (
+                                    <Editor
+                                        className="fadeIn h-full max-h-[calc(100vh-42.84px)] rounded-none border-0 border-none bg-neutral-300"
+                                        containerClassName="h-full"
+                                        value={notes}
+                                        onChange={debounceNotes}
+                                        emitOnOutsideChanges={false}
+                                    />
+                                ) : (
+                                    <div className="flex h-full w-full items-center justify-center">
+                                        <Spinner size="large" />
+                                    </div>
+                                )}
                                 <style>
                                     {`
                                         .ql-container {

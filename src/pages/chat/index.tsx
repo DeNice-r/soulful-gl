@@ -18,6 +18,7 @@ import {
 //todo: fix types
 // import useSound from 'use-sound';
 import { cn } from '~/lib/utils';
+import { Toaster } from '~/components/ui/toaster';
 
 type FullChats = NonNullable<RouterOutputs['chat']['listFull']>;
 
@@ -253,6 +254,7 @@ const ChatUI = () => {
             direction="horizontal"
             className="flex max-h-screen min-h-screen"
         >
+            <Toaster />
             {error && (
                 <Alert
                     className={cn(
