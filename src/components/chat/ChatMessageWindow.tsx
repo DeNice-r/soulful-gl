@@ -13,6 +13,8 @@ import {
     BookOpen,
     SendHorizonal,
     ArchiveX,
+    CalendarDays,
+    Newspaper,
 } from 'lucide-react';
 import {
     AlertDialog,
@@ -34,6 +36,11 @@ import {
 import { Editor } from '../management/common/Editor';
 import { ChatTabName as ChatTabType } from '~/utils/types';
 import Knowledge from '../knowledge/Knowledge';
+import { CustomPagination } from '../utils/CustomPagination';
+import { Spinner } from '../ui/spinner';
+import { Post } from '../Post';
+import { useRouter } from 'next/router';
+import { CHAT_POSTS_LAYOUT_LIMIT } from '~/utils/constants';
 
 export const ChatMessageWindow: React.FC<{
     chats: RouterOutputs['chat']['listFull'];
@@ -56,10 +63,10 @@ export const ChatMessageWindow: React.FC<{
     setCurrentChat,
     closeChat,
 }) => {
+    const router = useRouter();
+
     const [isWindowOpened, setIsWindowOpened] = useState(false);
-    const [tabType, setTabType] = useState<'notes' | 'knowledge' | 'ai'>(
-        'notes',
-    );
+    const [tabType, setTabType] = useState<ChatTabType>(ChatTabType.NOTES);
 
     const [notes, setNotes] = useState<string | undefined>();
 
@@ -67,6 +74,8 @@ export const ChatMessageWindow: React.FC<{
         id: string | null;
         type: 'folder' | 'document';
     } | null>(null);
+
+    const [_, setState] = useState(0);
 
     // const userNotes = api.user.
 
@@ -79,7 +88,6 @@ export const ChatMessageWindow: React.FC<{
             const localNotes = notes;
             const localUserId = chats[currentChat].userId;
             debounce(() => {
-                console.log('notes added');
                 void userNotesMutation.mutateAsync({
                     id: localUserId,
                     notes: localNotes,
@@ -93,6 +101,7 @@ export const ChatMessageWindow: React.FC<{
     }
 
     function handleChatClosing() {
+        isWindowOpened && setIsWindowOpened(false);
         setCurrentChat(-1);
     }
 
@@ -109,6 +118,33 @@ export const ChatMessageWindow: React.FC<{
         }
         debounceRef.current = setTimeout(fn, ms);
     }
+
+    const limit = router.query.limit
+        ? Number(router.query.limit)
+        : CHAT_POSTS_LAYOUT_LIMIT;
+
+    const page = router.query.page ? Number(router.query.page) : 1;
+
+    const posts = api.post.list.useQuery({ limit, page });
+
+    const total = posts.data?.count ? Math.ceil(posts.data.count / limit) : 0;
+
+    function rerender() {
+        setState((prev) => prev + 1);
+    }
+
+    const goToPage = (page: number) => {
+        const currentPath = router.pathname;
+        const currentQuery = { ...router.query, page };
+        void router.push({
+            pathname: currentPath,
+            query: currentQuery,
+        });
+    };
+
+    useEffect(() => {
+        if (posts.data) rerender();
+    }, [posts.data]);
 
     return (
         <ResizablePanelGroup direction="horizontal" className="h-screen">
@@ -260,6 +296,28 @@ export const ChatMessageWindow: React.FC<{
                             className={cn(
                                 'flex h-16 w-full cursor-pointer items-center justify-center transition-all',
                                 isWindowOpened &&
+                                    tabType === ChatTabType.EXERCISES &&
+                                    'my-2 h-12 w-4/5 rounded-s-xl bg-neutral-300',
+                            )}
+                            onClick={handleTabClick(ChatTabType.EXERCISES)}
+                        >
+                            <CalendarDays />
+                        </div>
+                        <div
+                            className={cn(
+                                'flex h-16 w-full cursor-pointer items-center justify-center transition-all',
+                                isWindowOpened &&
+                                    tabType === ChatTabType.POSTS &&
+                                    'my-2 h-12 w-4/5 rounded-s-xl bg-neutral-300',
+                            )}
+                            onClick={handleTabClick(ChatTabType.POSTS)}
+                        >
+                            <Newspaper />
+                        </div>
+                        <div
+                            className={cn(
+                                'flex h-16 w-full cursor-pointer items-center justify-center transition-all',
+                                isWindowOpened &&
                                     tabType === ChatTabType.AI &&
                                     'my-2 h-12 w-4/5 rounded-s-xl bg-neutral-300',
                             )}
@@ -280,9 +338,6 @@ export const ChatMessageWindow: React.FC<{
                                 />
                                 <style>
                                     {`
-                                        .ql-toolbar {
-                                            background-color: rgb(229 229 229 / var(--tw-bg-opacity));
-                                        }
                                         .ql-container {
                                             border-width: 0px !important;
                                         }
@@ -290,12 +345,21 @@ export const ChatMessageWindow: React.FC<{
                                             border-width: 0px !important;
                                             border-bottom: 1px solid #ccc !important;
                                             border-left: 1px solid #ccc !important;
+                                            background-color: rgb(229 229 229 / var(--tw-bg-opacity));
                                         }
                                     `}
                                 </style>
                             </>
                         )}
                         {tabType === ChatTabType.KNOWLEDGE && (
+                            // <div className="h-full w-full">
+                            //     <Label className="relative">
+                            //         <Input
+                            //             placeholder="Введіть назву файлу..."
+                            //             className="rounded-none border-0 border-b border-l border-neutral-500 bg-neutral-200 text-neutral-800 focus-visible:ring-0 focus-visible:ring-offset-0"
+                            //         />
+                            //         <Search className="absolute end-4 top-0 flex h-full items-center text-neutral-500" />
+                            //     </Label>
                             <Knowledge
                                 chat={true}
                                 {...{
@@ -303,6 +367,32 @@ export const ChatMessageWindow: React.FC<{
                                     setCurrentEntity,
                                 }}
                             />
+                            // </div>
+                        )}
+                        {tabType === ChatTabType.EXERCISES && <p>Exercises</p>}
+                        {tabType === ChatTabType.POSTS && (
+                            <div className="flex h-full w-full flex-col gap-4 overflow-y-auto p-8">
+                                <div className="flex flex-grow flex-wrap gap-4">
+                                    {posts?.data?.values.map((post) => (
+                                        <div
+                                            key={post.id}
+                                            className="flex w-full min-w-52 max-w-[25rem] flex-grow justify-center rounded-md bg-neutral-200 shadow-md outline-2 outline-neutral-200 transition-shadow duration-100 ease-in hover:cursor-pointer hover:shadow-xl hover:outline xl:w-5/12"
+                                        >
+                                            <Post variant="chat" post={post} />
+                                        </div>
+                                    ))}
+                                    {!posts.data && (
+                                        <div className="h-full w-full">
+                                            <Spinner size="large" />
+                                        </div>
+                                    )}
+                                </div>
+                                <CustomPagination
+                                    page={page}
+                                    total={total}
+                                    goToPage={goToPage}
+                                />
+                            </div>
                         )}
                         {tabType === ChatTabType.AI && <div>AI</div>}
                     </div>

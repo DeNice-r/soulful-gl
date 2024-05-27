@@ -52,6 +52,8 @@ export enum ManagementPageName {
 export enum ChatTabName {
     NOTES = 'notes',
     KNOWLEDGE = 'knowledge',
+    EXERCISES = 'exercises',
+    POSTS = 'posts',
     AI = 'ai',
 }
 

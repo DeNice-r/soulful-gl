@@ -61,7 +61,7 @@ const ProfilePopup: React.FC = () => {
                     <div className="grid gap-1 p-3">
                         <Link
                             className="flex items-center gap-2 hover:text-slate-600"
-                            href="#"
+                            href="/profile"
                         >
                             <User className="w-4" />
                             Профіль

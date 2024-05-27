@@ -204,7 +204,8 @@ const Knowledge: React.FC<{
             className={cn(
                 'flex h-full w-full flex-col rounded-2xl bg-neutral-200 px-16 py-10 drop-shadow-lg',
                 !document && 'gap-8',
-                chat && 'rounded-none bg-neutral-300 drop-shadow-none',
+                chat &&
+                    'overflow-y-auto rounded-none bg-neutral-300 px-8 drop-shadow-none',
             )}
         >
             <Breadcrumb>
@@ -389,7 +390,6 @@ const Knowledge: React.FC<{
                                         />
                                     ),
                                 )}
-
                             <Popover>
                                 {!(
                                     currentEntity?.type === EntityType.DOCUMENT
