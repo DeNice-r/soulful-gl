@@ -1,14 +1,19 @@
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { CustomPagination } from '~/components/utils/CustomPagination';
 import { Post } from '~/components/Post';
 import { Layout } from '~/components/common/Layout';
 import { Spinner } from '~/components/ui/spinner';
 import { api, type RouterOutputs } from '~/utils/api';
 import { DEFAULT_POSTS_LAYOUT_LIMIT } from '~/utils/constants';
+import { Input } from '~/components/ui/input';
 
 const Posts: React.FC = () => {
     const router = useRouter();
+
+    const [query, setQuery] = useState<string | undefined>(
+        router.query.query as string,
+    );
 
     const limit = router.query.limit
         ? Number(router.query.limit)
@@ -16,7 +21,7 @@ const Posts: React.FC = () => {
 
     const page = router.query.page ? Number(router.query.page) : 1;
 
-    const posts = api.post.list.useQuery({ limit, page });
+    const posts = api.post.list.useQuery({ limit, page, query });
 
     const total = posts.data?.count ? Math.ceil(posts.data.count / limit) : 0;
 
@@ -45,6 +50,15 @@ const Posts: React.FC = () => {
         );
     };
 
+    const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+    function debounce(fn: () => void, ms: number) {
+        if (debounceRef.current) {
+            clearTimeout(debounceRef.current);
+        }
+        debounceRef.current = setTimeout(fn, ms);
+    }
+
     return (
         <Layout className="bg-homepage-cover">
             <div className="flex w-full flex-col items-center pb-8 md:w-2/3">
@@ -52,6 +66,17 @@ const Posts: React.FC = () => {
                     <h3 className="w-full pb-4 text-center font-bold">
                         Дописи з порадами щодо ментального здоров&apos;я
                     </h3>
+                    <Input
+                        type="search"
+                        name="query"
+                        id="default-search"
+                        className="w-full ps-10"
+                        placeholder="Шукати дописи"
+                        defaultValue={query}
+                        onChange={(e) =>
+                            debounce(() => setQuery(e.target.value), 1000)
+                        }
+                    />
                     {posts?.data?.values
                         .slice(0, Math.ceil(limit / 2))
                         .map((post) => PostHelper(post))}
