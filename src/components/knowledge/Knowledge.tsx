@@ -1,4 +1,4 @@
-import React, { useEffect, useState, type MouseEvent } from 'react';
+import React, { type MouseEvent, useEffect, useState } from 'react';
 import {
     Breadcrumb,
     BreadcrumbEllipsis,
@@ -8,7 +8,7 @@ import {
     BreadcrumbSeparator,
 } from '~/components/ui/breadcrumb';
 import { Button } from '~/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Pencil, Plus } from 'lucide-react';
 import {
     ContextMenu,
     ContextMenuContent,
@@ -27,16 +27,14 @@ import {
     DialogHeader,
     DialogTitle,
 } from '~/components/ui/dialog';
-import { api } from '~/utils/api';
+import { api, type RouterOutputs } from '~/utils/api';
 import { FSEntity } from '~/components/knowledge/FSEntity';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
-import Link from 'next/link';
 import { ScrollArea } from '~/components/ui/scroll-area';
 import { cn } from '~/lib/utils';
 import { Editor } from '~/components/management/common/Editor';
 import { Spinner } from '~/components/ui/spinner';
-import { Pencil } from 'lucide-react';
 import { type EntityData, EntityType } from '~/utils/types';
 
 const Knowledge: React.FC<{
@@ -50,10 +48,8 @@ const Knowledge: React.FC<{
     const [creationEntity, setCreationEntity] = useState<'folder' | 'document'>(
         'folder',
     );
-    const [document, setDocument] = useState<{
-        title: string;
-        description: string;
-    } | null>(null);
+    const [document, setDocument] =
+        useState<RouterOutputs['document']['get']>(null);
 
     const [editingEntity, setEditingEntity] = useState<EntityData>(null);
 
@@ -89,7 +85,7 @@ const Knowledge: React.FC<{
         if (button && buttonId) {
             setEditingEntity({
                 id: buttonId,
-                type: button.getAttribute('name') as 'folder' | 'document',
+                type: button.getAttribute('name') as EntityType,
             });
         } else {
             setEditingEntity(null);
@@ -193,13 +189,26 @@ const Knowledge: React.FC<{
         const button = element.closest('button');
         const buttonId = button && button?.getAttribute('id');
         const type = button && button.getAttribute('name');
-        if (button && buttonId && (type === 'document' || type === 'folder')) {
+        if (
+            button &&
+            buttonId &&
+            (type === EntityType.DOCUMENT || type === EntityType.FOLDER)
+        ) {
             setCurrentEntity({
                 type,
                 id: buttonId,
             });
         }
     }
+
+    const topParentId =
+        documentFolders.data?.parent?.parentId ??
+        (document?.parent?.parentId || null);
+    const parentId =
+        documentFolders.data?.parent?.id ?? document?.parent?.id ?? null;
+    const parentTitle =
+        documentFolders.data?.parent?.title ?? document?.parent?.title ?? null;
+    const title = documentFolders.data?.title ?? document?.title ?? null;
 
     return (
         <div
@@ -210,7 +219,7 @@ const Knowledge: React.FC<{
                     'overflow-y-auto rounded-none bg-neutral-300 px-8 drop-shadow-none',
             )}
         >
-            <Breadcrumb>
+            <Breadcrumb className="select-none">
                 <BreadcrumbList
                     className={cn(
                         'text-lg transition-colors hover:text-neutral-950',
@@ -218,16 +227,19 @@ const Knowledge: React.FC<{
                     )}
                 >
                     <BreadcrumbItem>
-                        <button
-                            onClick={() => {
-                                setEditingEntity({ id: null, type: 'folder' });
-                                setCurrentEntity({ id: null, type: 'folder' });
-                            }}
+                        <span
+                            className="cursor-pointer"
+                            onClick={() =>
+                                setCurrentEntity({
+                                    id: null,
+                                    type: EntityType.FOLDER,
+                                })
+                            }
                         >
                             Головна
-                        </button>
+                        </span>
                     </BreadcrumbItem>
-                    {documentFolders.data?.parent?.parentId && (
+                    {topParentId && (
                         <>
                             <BreadcrumbSeparator className="[&>svg]:size-5" />
                             <BreadcrumbItem>
@@ -235,25 +247,29 @@ const Knowledge: React.FC<{
                             </BreadcrumbItem>
                         </>
                     )}
-                    {documentFolders.data?.parent?.id && (
+                    {parentId && (
                         <>
                             <BreadcrumbSeparator className="[&>svg]:size-5" />
                             <BreadcrumbItem>
-                                <Link
-                                    href={`/knowledge/f/${documentFolders.data?.parent?.id}`}
+                                <span
+                                    className="cursor-pointer"
+                                    onClick={() =>
+                                        setCurrentEntity({
+                                            id: parentId,
+                                            type: EntityType.FOLDER,
+                                        })
+                                    }
                                 >
-                                    {documentFolders?.data?.parent?.title}
-                                </Link>
+                                    {parentTitle}
+                                </span>
                             </BreadcrumbItem>
                         </>
                     )}
-                    {documentFolders.data?.title && (
+                    {title && (
                         <>
                             <BreadcrumbSeparator className="[&>svg]:size-5" />
                             <BreadcrumbItem>
-                                <BreadcrumbPage>
-                                    {documentFolders?.data?.title}
-                                </BreadcrumbPage>
+                                <BreadcrumbPage>{title}</BreadcrumbPage>
                             </BreadcrumbItem>
                         </>
                     )}

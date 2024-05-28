@@ -34,7 +34,7 @@ import {
     ResizablePanelGroup,
 } from '../ui/resizable';
 import { Editor } from '../management/common/Editor';
-import { ChatTabName as ChatTabType } from '~/utils/types';
+import { ChatTabName as ChatTabType, type EntityData } from '~/utils/types';
 import Knowledge from '../knowledge/Knowledge';
 import { CustomPagination } from '../utils/CustomPagination';
 import { Spinner } from '../ui/spinner';
@@ -71,10 +71,7 @@ export const ChatMessageWindow: React.FC<{
 
     const [notes, setNotes] = useState<string | undefined>();
 
-    const [currentEntity, setCurrentEntity] = useState<{
-        id: string | null;
-        type: 'folder' | 'document';
-    } | null>(null);
+    const [currentEntity, setCurrentEntity] = useState<EntityData>(null);
 
     const [_, setState] = useState(0);
 

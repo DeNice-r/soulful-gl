@@ -69,7 +69,7 @@ export const EntityTypeToPath = {
 
 export type EntityData = {
     id: string | null;
-    type: 'folder' | 'document';
+    type: EntityType;
 } | null;
 
 export const PageTitleMap = {
