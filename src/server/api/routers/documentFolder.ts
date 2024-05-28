@@ -3,22 +3,53 @@ import {
     CUIDSchema,
     DocumentFolderSchema,
     DocumentFolderUpdateSchema,
+    ShortStringSchema,
 } from '~/utils/schemas';
+import { z } from '~/utils/zod';
 
 export const documentFolderRouter = createTRPCRouter({
     list: permissionProcedure
-        .input(CUIDSchema.nullable().optional())
-        .query(async ({ input, ctx }) => {
-            if (input) {
+        .input(
+            z.object({
+                id: CUIDSchema.nullable().optional(),
+                query: ShortStringSchema.optional(),
+            }),
+        )
+        .query(async ({ input: { id, query }, ctx }) => {
+            const contains = {
+                contains: query ?? '',
+                mode: 'insensitive' as const,
+            };
+
+            if (id) {
                 const x = await ctx.db.documentFolder.findUnique({
-                    where: { id: input },
+                    where: { id },
                     select: {
                         title: true,
                         parent: {
                             select: { id: true, title: true, parentId: true },
                         },
-                        documents: true,
-                        folders: true,
+                        documents: query
+                            ? {
+                                  where: {
+                                      OR: [
+                                          {
+                                              title: contains,
+                                          },
+                                          {
+                                              description: contains,
+                                          },
+                                      ],
+                                  },
+                              }
+                            : true,
+                        folders: query
+                            ? {
+                                  where: {
+                                      title: contains,
+                                  },
+                              }
+                            : true,
                     },
                 });
 
@@ -30,14 +61,22 @@ export const documentFolderRouter = createTRPCRouter({
                 };
             }
             const where = {
-                where: {
-                    ...(input ? { parentId: input } : { parentId: null }),
-                },
+                parentId: id ?? null,
             };
 
             const [folders, documents] = await Promise.all([
-                ctx.db.documentFolder.findMany(where),
-                ctx.db.document.findMany(where),
+                ctx.db.documentFolder.findMany({ where }),
+                ctx.db.document.findMany({
+                    where: {
+                        ...where,
+                        ...(query && {
+                            OR: [
+                                { title: contains },
+                                { description: contains },
+                            ],
+                        }),
+                    },
+                }),
             ]);
             return {
                 documents,
