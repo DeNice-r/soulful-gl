@@ -1,15 +1,13 @@
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { CustomPagination } from '~/components/utils/CustomPagination';
 import { Post } from '~/components/Post';
 import { Layout } from '~/components/common/Layout';
 import { Spinner } from '~/components/ui/spinner';
-import { api } from '~/utils/api';
+import { api, type RouterOutputs } from '~/utils/api';
 import { DEFAULT_POSTS_LAYOUT_LIMIT } from '~/utils/constants';
 
 const Posts: React.FC = () => {
-    const [_, setState] = useState(0);
-
     const router = useRouter();
 
     const limit = router.query.limit
@@ -22,17 +20,11 @@ const Posts: React.FC = () => {
 
     const total = posts.data?.count ? Math.ceil(posts.data.count / limit) : 0;
 
-    // api.recommendation.random.useQuery()
-    const recommendations = {
-        data: [{ id: 1, title: 'title', description: 'description' }],
-    }; // todo
-
-    function rerender() {
-        setState((prev) => prev + 1);
-    }
+    const recommendations = api.recommendation.random.useQuery();
 
     const goToPage = (page: number) => {
         const currentPath = router.pathname;
+        void recommendations.refetch();
         const currentQuery = { ...router.query, page };
         void router.push({
             pathname: currentPath,
@@ -40,9 +32,18 @@ const Posts: React.FC = () => {
         });
     };
 
-    useEffect(() => {
-        if (posts.data) rerender();
-    }, [posts.data]);
+    const PostHelper = (
+        post: RouterOutputs['post']['list']['values'][number],
+    ) => {
+        return (
+            <div
+                key={post.id}
+                className="flex w-full flex-grow justify-center rounded-md bg-neutral-200 shadow-md outline-2 outline-neutral-200 transition-shadow duration-100 ease-in hover:cursor-pointer hover:shadow-xl hover:outline xl:w-5/12"
+            >
+                <Post variant="posts" post={post} />
+            </div>
+        );
+    };
 
     return (
         <Layout className="bg-homepage-cover">
@@ -51,53 +52,40 @@ const Posts: React.FC = () => {
                     <h3 className="w-full pb-4 text-center font-bold">
                         Дописи з порадами щодо ментального здоров&apos;я
                     </h3>
-                    {!!recommendations.data?.length && (
-                        <div className="flex w-full flex-col gap-10 rounded-2xl bg-neutral-200 px-10 py-14 shadow-lg">
-                            <div className="flex flex-col items-center justify-center gap-4 lg:flex-row">
-                                <h2 className="text-center font-bold">
-                                    Рекомендації для гарного настрою
-                                </h2>
-                                <SunIcon />
+                    {posts?.data?.values
+                        .slice(0, Math.ceil(limit / 2))
+                        .map((post) => PostHelper(post))}
+                    {!!recommendations.data?.length &&
+                        !recommendations.isFetching && (
+                            <div className="flex w-full flex-col gap-10 rounded-2xl bg-neutral-200 px-10 py-14 shadow-lg">
+                                <div className="flex flex-col items-center justify-center gap-4 lg:flex-row">
+                                    <h2 className="text-center font-bold">
+                                        Рекомендації для гарного настрою
+                                    </h2>
+                                    <SunIcon />
+                                </div>
+                                <div className="flex w-full flex-wrap gap-8 text-justify font-semibold">
+                                    {recommendations?.data?.map(
+                                        (recommendation) => (
+                                            <article
+                                                key={recommendation.id}
+                                                className="flex min-w-52 flex-grow basis-1/5 flex-col items-center justify-center gap-4 rounded-xl bg-neutral-200 p-10 shadow-inner"
+                                            >
+                                                <h1 className="font-bold">
+                                                    {recommendation.title}
+                                                </h1>
+                                                <p>
+                                                    {recommendation.description}
+                                                </p>
+                                            </article>
+                                        ),
+                                    )}
+                                </div>
                             </div>
-                            <div className="flex w-full flex-wrap gap-8 text-justify font-semibold">
-                                {recommendations?.data?.map(
-                                    (recommendation) => (
-                                        <article
-                                            key={recommendation.id}
-                                            className="flex min-w-52 flex-grow basis-1/5 flex-col items-center justify-center gap-4 rounded-xl bg-neutral-200 p-10 shadow-inner"
-                                        >
-                                            <h1 className="font-bold">
-                                                {recommendation.title}
-                                            </h1>
-                                            <p>{recommendation.description}</p>
-                                        </article>
-                                    ),
-                                )}
-                                {/* <p className="flex min-w-52 flex-grow basis-1/5 items-center rounded-xl bg-neutral-300 p-10 shadow-inner">
-                                Nullam molestie justo odio, in dictum risus
-                                hendrerit sit amet.
-                            </p>
-                            <p className="flex min-w-52 flex-grow basis-1/5 items-center rounded-xl bg-neutral-300 p-10 shadow-inner">
-                                Morbi congue libero eget dolor vulputate, id
-                                mollis massa porta.
-                            </p>
-                            <p className="flex min-w-52 flex-grow basis-1/5 items-center rounded-xl bg-neutral-300 p-10 shadow-inner">
-                                Vivamus sodales fermentum ante. Duis sapien
-                                mauris, facilisis vel nibh a, malesuada placerat
-                                magna. Vivamus sodales fermentum ante. Duis
-                                sapien mauris
-                            </p> */}
-                            </div>
-                        </div>
-                    )}
-                    {posts?.data?.values.map((post) => (
-                        <div
-                            key={post.id}
-                            className="flex w-full flex-grow justify-center rounded-md bg-neutral-200 shadow-md outline-2 outline-neutral-200 transition-shadow duration-100 ease-in hover:cursor-pointer hover:shadow-xl hover:outline xl:w-5/12"
-                        >
-                            <Post variant="posts" post={post} />
-                        </div>
-                    ))}
+                        )}
+                    {posts?.data?.values
+                        .slice(Math.round(limit / 2))
+                        .map((post) => PostHelper(post))}
                     {!posts.data && (
                         <div className="h-full w-full">
                             <Spinner size="large" />

@@ -102,7 +102,13 @@ export const recommendationRouter = createTRPCRouter({
 
     random: publicProcedure.input(CountSchema).query(async ({ input, ctx }) => {
         return ctx.db
-            .$queryRaw`select * from "Recommendation" limit ${input} offset floor(random() * (select count(*) from "Recommendation"));`;
+            .$queryRaw`select * from "Recommendation" limit ${input} offset floor(random() * (select count(*) from "Recommendation"));` as Promise<
+            {
+                id: number;
+                title: string;
+                description: string;
+            }[]
+        >;
     }),
 
     create: permissionProcedure
