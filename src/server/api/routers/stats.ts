@@ -138,8 +138,8 @@ export const statsRouter = createTRPCRouter({
                     avgDuration,
                 },
                 graphs: {
-                    dailyMessageCount: messageCount,
-                    dailyChatCount: chatCount,
+                    messageCount,
+                    chatCount,
                 },
             };
         }),

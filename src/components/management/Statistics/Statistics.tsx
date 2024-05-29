@@ -4,7 +4,7 @@ import { Table, TableBody, TableRow } from '~/components/ui/table';
 import { TableCell } from '@mui/material';
 import { Spinner } from '~/components/ui/spinner';
 import { defaultFormatDiff } from '~/utils/dates';
-import LineChart from '~/components/management/Statistecs/LineChart';
+import LineChart from '~/components/management/Statistics/LineChart';
 import { NO_REFETCH } from '~/utils/constants';
 import { Interval, IntervalMs } from '~/utils/types';
 
@@ -32,8 +32,8 @@ export const Statistics: React.FC = () => {
                 <div className="flex-1 p-2">
                     <LineChart
                         data={
-                            Array.isArray(stats.data?.graphs.dailyMessageCount)
-                                ? stats.data?.graphs.dailyMessageCount
+                            Array.isArray(stats.data?.graphs.messageCount)
+                                ? stats.data?.graphs.messageCount
                                 : []
                         }
                         label="Повідомлення"
@@ -42,8 +42,8 @@ export const Statistics: React.FC = () => {
                 <div className="flex-1 p-2">
                     <LineChart
                         data={
-                            Array.isArray(stats.data?.graphs.dailyChatCount)
-                                ? stats.data?.graphs.dailyChatCount
+                            Array.isArray(stats.data?.graphs.chatCount)
+                                ? stats.data?.graphs.chatCount
                                 : []
                         }
                         label="Активні чати"
