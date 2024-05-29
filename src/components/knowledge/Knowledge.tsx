@@ -55,7 +55,9 @@ const Knowledge: React.FC<{
 
     const { client: apiClient } = api.useUtils();
 
-    const documentFolders = api.documentFolder.list.useQuery(currentEntity?.id);
+    const documentFolders = api.documentFolder.list.useQuery({
+        id: currentEntity?.id,
+    });
 
     const deleteMutation = {
         folder: api.documentFolder.delete.useMutation(),
@@ -175,9 +177,11 @@ const Knowledge: React.FC<{
 
     const handleDocumentEdit = async () => {
         setIsEditing((val) => !val);
-        if (isEditing && editingEntity?.id && document) {
+        console.log(document);
+        console.log(isEditing, currentEntity?.id, document);
+        if (isEditing && currentEntity?.id && document) {
             await updateMutation['document'].mutateAsync({
-                id: editingEntity?.id,
+                id: currentEntity?.id,
                 title: document.title,
                 description: document.description,
             });

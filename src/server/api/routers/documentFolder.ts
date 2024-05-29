@@ -10,10 +10,12 @@ import { z } from '~/utils/zod';
 export const documentFolderRouter = createTRPCRouter({
     list: permissionProcedure
         .input(
-            z.object({
-                id: CUIDSchema.nullable().optional(),
-                query: ShortStringSchema.optional(),
-            }),
+            z
+                .object({
+                    id: CUIDSchema.nullable().optional(),
+                    query: ShortStringSchema.optional(),
+                })
+                .default({ id: null }),
         )
         .query(async ({ input: { id, query }, ctx }) => {
             const contains = {

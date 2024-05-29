@@ -295,6 +295,7 @@ const ChatUI = () => {
                 <ChatMessageWindow
                     chats={chatsRef.current}
                     {...{
+                        messageText,
                         currentChat,
                         handleSend,
                         setMessageText,

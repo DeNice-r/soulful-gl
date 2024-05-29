@@ -47,6 +47,7 @@ export const ChatMessageWindow: React.FC<{
     chats: RouterOutputs['chat']['listFull'];
     currentChat: number;
     handleSend: () => void;
+    messageText: string | null | undefined;
     setMessageText: React.Dispatch<
         React.SetStateAction<string | null | undefined>
     >;
@@ -58,6 +59,7 @@ export const ChatMessageWindow: React.FC<{
     chats,
     currentChat,
     handleSend,
+    messageText,
     setMessageText,
     messageEndRef,
     closeCurrentChatAndReport,
@@ -245,6 +247,7 @@ export const ChatMessageWindow: React.FC<{
                                     <Input
                                         className="flex-1"
                                         placeholder="Введіть повідомлення..."
+                                        value={messageText ?? ''}
                                         onChange={(e) => {
                                             setMessageText(e.target.value);
                                         }}
