@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { api } from '~/utils/api';
 import { Table, TableBody, TableRow } from '~/components/ui/table';
 import { TableCell } from '@mui/material';
@@ -7,6 +7,7 @@ import { defaultFormatDiff } from '~/utils/dates';
 import LineChart from '~/components/management/Statistics/LineChart';
 import { NO_REFETCH } from '~/utils/constants';
 import { Interval, IntervalMs } from '~/utils/types';
+import { Button } from '~/components/ui/button';
 
 const l10n: Record<string, Record<string, string>> = {
     numbers: {
@@ -19,8 +20,27 @@ const l10n: Record<string, Record<string, string>> = {
     },
 };
 
+const presets = [
+    { intervalName: Interval.MINUTE, intervalNumber: 30 },
+    { intervalName: Interval.HOUR, intervalNumber: 24 },
+    { intervalName: Interval.DAY, intervalNumber: 7 },
+    { intervalName: Interval.DAY, intervalNumber: 30 },
+    { intervalName: Interval.MONTH, intervalNumber: 12 },
+    { intervalName: Interval.YEAR, intervalNumber: 5 },
+] as const;
+
+const presetL10n = [
+    'Похвилинно',
+    'Погодинно',
+    'Поденно (тиждень)',
+    'Поденно (місяць)',
+    'Помісячно',
+    'Порічно',
+];
+
 export const Statistics: React.FC = () => {
-    const stats = api.stats.list.useQuery(undefined, {
+    const [presetNum, setPresetNum] = useState<number>(0);
+    const stats = api.stats.list.useQuery(presets[presetNum], {
         ...NO_REFETCH,
         refetchInterval: IntervalMs[Interval.MINUTE],
     });
@@ -28,6 +48,18 @@ export const Statistics: React.FC = () => {
     return (
         <>
             {/* todo: interval name and number select*/}
+            <div>
+                {presets.map((_, index) => (
+                    <Button
+                        className="me-1"
+                        key={index}
+                        variant={index !== presetNum ? 'ghost' : 'default'}
+                        onClick={() => setPresetNum(index)}
+                    >
+                        {presetL10n[index]}
+                    </Button>
+                ))}
+            </div>
             <div className="flex flex-row flex-wrap md:flex-nowrap">
                 <div className="flex-1 p-2">
                     <LineChart
@@ -37,6 +69,7 @@ export const Statistics: React.FC = () => {
                                 : []
                         }
                         label="Повідомлення"
+                        interval={presets[presetNum].intervalName}
                     ></LineChart>
                 </div>
                 <div className="flex-1 p-2">
@@ -47,6 +80,7 @@ export const Statistics: React.FC = () => {
                                 : []
                         }
                         label="Активні чати"
+                        interval={presets[presetNum].intervalName}
                     ></LineChart>
                 </div>
             </div>

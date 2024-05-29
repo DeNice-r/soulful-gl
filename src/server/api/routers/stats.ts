@@ -1,16 +1,16 @@
 import { createTRPCRouter, spaProcedure } from '~/server/api/trpc';
 import { z } from '~/utils/zod';
-import { IntervalMs } from '~/utils/types';
+import { Interval, IntervalMs } from '~/utils/types';
 
 export const statsRouter = createTRPCRouter({
     list: spaProcedure
         .input(
             z
                 .object({
-                    intervalName: z.enum(['day', 'hour']).default('day'),
+                    intervalName: z.nativeEnum(Interval).default(Interval.DAY),
                     intervalNumber: z.number().default(30),
                 })
-                .default({ intervalName: 'day', intervalNumber: 30 }),
+                .default({ intervalName: Interval.DAY, intervalNumber: 30 }),
         )
         .query(async ({ ctx, input: { intervalName, intervalNumber } }) => {
             const [

@@ -4,7 +4,7 @@ import { Sidebar } from '~/components/management/common/Sidebar';
 import { ShortHeader } from '~/components/management/common/ShortHeader';
 import { Toaster } from '~/components/ui/toaster';
 
-import { Statistics } from '~/components/management/Statistecs/Statistics';
+import { Statistics } from '~/components/management/Statistics/Statistics';
 import Users from '~/components/management/User';
 import { Operators } from '~/components/management/User/Operators';
 import Posts from '~/components/management/Post';
