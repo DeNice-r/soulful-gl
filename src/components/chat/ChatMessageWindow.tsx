@@ -75,6 +75,8 @@ export const ChatMessageWindow: React.FC<{
 
     const [currentEntity, setCurrentEntity] = useState<EntityData>(null);
 
+    const [currentPage, setCurrentPage] = useState<number>(1);
+
     const [_, setState] = useState(0);
 
     const { toast } = useToast();
@@ -110,9 +112,7 @@ export const ChatMessageWindow: React.FC<{
         ? Number(router.query.limit)
         : CHAT_POSTS_LAYOUT_LIMIT;
 
-    const page = router.query.page ? Number(router.query.page) : 1;
-
-    const posts = api.post.list.useQuery({ limit, page });
+    const posts = api.post.list.useQuery({ limit, page: currentPage });
 
     const total = posts.data?.count ? Math.ceil(posts.data.count / limit) : 0;
 
@@ -121,12 +121,7 @@ export const ChatMessageWindow: React.FC<{
     }
 
     const goToPage = (page: number) => {
-        const currentPath = router.pathname;
-        const currentQuery = { ...router.query, page };
-        void router.push({
-            pathname: currentPath,
-            query: currentQuery,
-        });
+        setCurrentPage(page);
     };
 
     const debounceNotes = (value: string) => {
@@ -415,7 +410,7 @@ export const ChatMessageWindow: React.FC<{
                                     )}
                                 </div>
                                 <CustomPagination
-                                    page={page}
+                                    page={currentPage}
                                     total={total}
                                     goToPage={goToPage}
                                 />
