@@ -36,7 +36,7 @@ interface Props {
 }
 
 const DtFormat = {
-    [Interval.MINUTE]: 'HH:mm',
+    [Interval.MINUTE]: 'HH:mm:ss',
     [Interval.HOUR]: 'dd, HH:mm',
     [Interval.DAY]: 'dd.MM, HH:mm',
     [Interval.MONTH]: 'dd.MM',

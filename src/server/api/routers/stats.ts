@@ -1,6 +1,7 @@
 import { createTRPCRouter, spaProcedure } from '~/server/api/trpc';
 import { z } from '~/utils/zod';
 import { Interval, IntervalMs } from '~/utils/types';
+import { type PrismaPromise } from '@prisma/client';
 
 export const statsRouter = createTRPCRouter({
     list: spaProcedure
@@ -22,6 +23,7 @@ export const statsRouter = createTRPCRouter({
                 recentArchivedMessageCount,
                 chatCount,
                 ongoingChats,
+                personnelStats,
             ] = await ctx.db.$transaction([
                 ctx.db.user.count({
                     where: {
@@ -112,6 +114,23 @@ export const statsRouter = createTRPCRouter({
                     ORDER BY tr.interval_start;
                 `),
                 ctx.db.chat.findMany(),
+                ctx.db.$queryRawUnsafe(
+                    `SELECT * FROM get_personnel_stats()`,
+                ) as PrismaPromise<
+                    {
+                        personnelid: string;
+                        name: string;
+                        totalchats: number;
+                        normalizedchats: number;
+                        totalmessages: string;
+                        normalizedmessages: number;
+                        averageresponsetimeseconds: string;
+                        normalizedresponsetime: string;
+                        perceivedbusyness: number;
+                        normalizedbusyness: number;
+                        normalizedscore: number;
+                    }[]
+                >,
             ]);
 
             if (Array.isArray(chatCount))
@@ -140,6 +159,9 @@ export const statsRouter = createTRPCRouter({
                 graphs: {
                     messageCount,
                     chatCount,
+                },
+                tables: {
+                    personnelStats,
                 },
             };
         }),
