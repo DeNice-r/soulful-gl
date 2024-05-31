@@ -13,6 +13,12 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '~/components/ui/alert-dialog';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '../ui/tooltip';
 
 interface ChatItemProps {
     chat: ExtendedChat;
@@ -52,9 +58,16 @@ const ChatItem: React.FC<ChatItemProps> = ({
                 )}
             >
                 <AlertDialog>
-                    <AlertDialogTrigger>
-                        <ArchiveX />
-                    </AlertDialogTrigger>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger>
+                                <AlertDialogTrigger>
+                                    <ArchiveX />
+                                </AlertDialogTrigger>
+                            </TooltipTrigger>
+                            <TooltipContent>Заархівувати</TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                     <AlertDialogContent>
                         <AlertDialogHeader>
                             <AlertDialogTitle>
