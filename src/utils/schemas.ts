@@ -86,6 +86,19 @@ export const CNBSchema = z.object({
     subscribe_date_start: z.string().default('2024-01-01 00:00:00'),
 });
 
+export const UserCNBSchema = z.object({
+    amount: MaybeStringifiedNumberSchema.default(20).refine((value) => {
+        const r = LiqpayAmountSchema.safeParse(value);
+        return r.success;
+    }),
+    currency: z.nativeEnum(PaymentCurrency).default(PaymentCurrency.UAH),
+
+    action: z.nativeEnum(PaymentAction).default(PaymentAction.PAYDONATE),
+    subscribe_periodicity: z
+        .nativeEnum(LiqpayPeriodicity)
+        .default(LiqpayPeriodicity.MONTH),
+});
+
 // const ImageBucketRegex = new RegExp(
 //     `https://${env.NEXT_PUBLIC_AWS_S3_BUCKET}\\.s3(?:\\.${env.NEXT_PUBLIC_AWS_REGION})?\\.amazonaws\\.com/.+`,
 // );

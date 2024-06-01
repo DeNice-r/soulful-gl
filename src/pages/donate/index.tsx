@@ -1,10 +1,14 @@
-import axios from 'axios';
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
+import axios from 'axios';
 import { Button } from '~/components/ui/button';
 import { Layout } from '~/components/common/Layout';
-import { PaymentAction, PaymentCurrency } from '~/utils/types';
-import { CNBSchema } from '~/utils/schemas';
+import {
+    LiqpayPeriodicity,
+    PaymentAction,
+    PaymentCurrency,
+} from '~/utils/types';
+import { UserCNBSchema } from '~/utils/schemas';
 import { useForm } from 'react-hook-form';
 import type * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,15 +27,9 @@ import {
     FormItem,
     FormMessage,
 } from '~/components/ui/form';
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectTrigger,
-} from '~/components/ui/select';
-import { SelectValue } from '@radix-ui/react-select';
+
 import { Input } from '~/components/ui/input';
+import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group';
 
 const Donate: React.FC = () => {
     const router = useRouter();
@@ -44,12 +42,13 @@ const Donate: React.FC = () => {
         setIsDialogOpen(!isDialogOpen);
     }
 
-    const form = useForm<z.infer<typeof CNBSchema>>({
-        resolver: zodResolver(CNBSchema),
+    const form = useForm<z.infer<typeof UserCNBSchema>>({
+        resolver: zodResolver(UserCNBSchema),
         defaultValues: {
             action: PaymentAction.PAYDONATE,
             amount: 100,
             currency: PaymentCurrency.UAH,
+            subscribe_periodicity: LiqpayPeriodicity.MONTH,
         },
     });
 
@@ -62,27 +61,13 @@ const Donate: React.FC = () => {
     }
 
     async function onSubmit() {
-        const [
-            description,
-            public_key,
-            version,
-            amount,
-            currency,
-            language,
-            action,
-            subscribe_periodicity,
-            subscribe_date_start,
-        ] = form.getValues([
-            'description',
-            'public_key',
-            'version',
-            'amount',
-            'currency',
-            'language',
-            'action',
-            'subscribe_periodicity',
-            'subscribe_date_start',
-        ]);
+        const [amount, currency, action, subscribe_periodicity] =
+            form.getValues([
+                'amount',
+                'currency',
+                'action',
+                'subscribe_periodicity',
+            ]);
         const res = await axios.get(
             `/api/payment/generate?amount${amount ?? 20}&csurrency=${currency ?? PaymentCurrency.UAH}&action=${action ?? PaymentAction.PAYDONATE}`,
         );
@@ -142,13 +127,15 @@ const Donate: React.FC = () => {
                     className="mt-3 self-center"
                     onClick={changeDialogState}
                 >
-                    Донатити зараз
+                    Підтримати зараз
                 </Button>
             </div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent className="flex flex-col">
                     <DialogHeader className="self-start">
-                        <DialogTitle>Оберіть форму платежу</DialogTitle>
+                        <DialogTitle className="text-xl">
+                            Введіть дані для оплати
+                        </DialogTitle>
                     </DialogHeader>
                     <Form {...form}>
                         <form
@@ -159,141 +146,167 @@ const Donate: React.FC = () => {
                                 control={form.control}
                                 name="action"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-col items-center gap-2 space-y-0">
-                                        <div className="flex w-2/3 items-center justify-end gap-4">
-                                            <Select
-                                                onValueChange={(
-                                                    e: PaymentAction,
-                                                ) => {
-                                                    form.setValue(
-                                                        field.name,
-                                                        e,
-                                                    );
-                                                    handleSubscription();
-                                                }}
-                                                defaultValue={form.getValues(
-                                                    `${field.name}`,
-                                                )}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Оберіть форму платежу" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectGroup>
-                                                        <SelectItem
-                                                            value={
-                                                                PaymentAction.PAYDONATE
-                                                            }
-                                                        >
-                                                            Разова підтримка
-                                                        </SelectItem>
-                                                        <SelectItem
-                                                            value={
-                                                                PaymentAction.SUBSCRIBE
-                                                            }
-                                                        >
-                                                            Підписка
-                                                        </SelectItem>
-                                                    </SelectGroup>
-                                                </SelectContent>
-                                            </Select>
+                                    <FormItem className="flex flex-col items-center space-y-2">
+                                        <div className="flex w-full items-center">
                                             <FormControl>
-                                                <Input
-                                                    className="hidden"
+                                                <ToggleGroup
+                                                    type="single"
+                                                    className="flex-grow gap-0 rounded-lg"
+                                                    onValueChange={(
+                                                        e: PaymentAction,
+                                                    ) => {
+                                                        if (e) {
+                                                            field.onChange(e);
+                                                            handleSubscription();
+                                                        }
+                                                    }}
                                                     {...field}
-                                                />
+                                                >
+                                                    <ToggleGroupItem
+                                                        value={
+                                                            PaymentAction.PAYDONATE
+                                                        }
+                                                        className="flex-grow rounded-none rounded-s-lg border border-e-0 data-[state=on]:border-e data-[state=on]:border-black"
+                                                        aria-label="PAYDONATE"
+                                                    >
+                                                        Разовий платіж
+                                                    </ToggleGroupItem>
+                                                    <ToggleGroupItem
+                                                        value={
+                                                            PaymentAction.SUBSCRIBE
+                                                        }
+                                                        className="flex-grow rounded-none rounded-e-lg border border-s-0 data-[state=on]:border-s data-[state=on]:border-black"
+                                                        aria-label="SUBSCRIBE"
+                                                    >
+                                                        Підписка
+                                                    </ToggleGroupItem>
+                                                </ToggleGroup>
                                             </FormControl>
                                         </div>
-                                        <FormMessage className="w-2/3 self-end text-center" />
+                                        <FormMessage className="text-center" />
                                     </FormItem>
                                 )}
                             />
-                            {!isSubscription ? (
-                                <>
-                                    <FormField
-                                        control={form.control}
-                                        name="amount"
-                                        render={({ field }) => (
-                                            <FormItem className="flex flex-col items-center gap-2 space-y-0">
-                                                <div className="flex w-5/6 items-center justify-end gap-4">
-                                                    <FormLabel className="basis-1/3">
-                                                        Сума внеску:
-                                                    </FormLabel>
-                                                    <FormControl className="flex-grow">
-                                                        <Input
-                                                            type="number"
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                </div>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="currency"
-                                        render={({ field }) => (
-                                            <FormItem className="flex flex-col items-center gap-2 space-y-0">
-                                                <div className="flex w-5/6 items-center justify-end gap-4">
-                                                    <Select
-                                                        onValueChange={(
-                                                            e: PaymentCurrency,
-                                                        ) => {
-                                                            form.setValue(
-                                                                field.name,
-                                                                e,
-                                                            );
-                                                        }}
-                                                        defaultValue={form.getValues(
-                                                            `${field.name}`,
-                                                        )}
-                                                    >
-                                                        <SelectTrigger>
-                                                            <SelectValue />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectGroup>
-                                                                <SelectItem
-                                                                    value={
-                                                                        PaymentCurrency.UAH
-                                                                    }
-                                                                >
-                                                                    ₴
-                                                                </SelectItem>
-                                                                <SelectItem
-                                                                    value={
-                                                                        PaymentCurrency.EUR
-                                                                    }
-                                                                >
-                                                                    $
-                                                                </SelectItem>
-                                                                <SelectItem
-                                                                    value={
-                                                                        PaymentCurrency.USD
-                                                                    }
-                                                                >
-                                                                    €
-                                                                </SelectItem>
-                                                            </SelectGroup>
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormControl>
-                                                        <Input
-                                                            className="hidden"
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                </div>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </>
-                            ) : (
-                                <p>Subscription</p>
-                            )}
 
+                            {isSubscription && (
+                                <FormField
+                                    control={form.control}
+                                    name="subscribe_periodicity"
+                                    render={({ field }) => (
+                                        <FormItem className="space-y-2">
+                                            <FormLabel className="text-lg">
+                                                Регулярність платежу:
+                                            </FormLabel>
+                                            <FormControl>
+                                                <ToggleGroup
+                                                    type="single"
+                                                    className="flex-grow gap-0 rounded-lg"
+                                                    onValueChange={(
+                                                        e: LiqpayPeriodicity,
+                                                    ) => {
+                                                        if (e) {
+                                                            field.onChange(e);
+                                                        }
+                                                    }}
+                                                    {...field}
+                                                >
+                                                    <ToggleGroupItem
+                                                        value={
+                                                            LiqpayPeriodicity.DAY
+                                                        }
+                                                        className="flex-grow rounded-none rounded-s-lg border border-e-0 data-[state=on]:border-e data-[state=on]:border-black"
+                                                        aria-label="DAY"
+                                                    >
+                                                        Щодня
+                                                    </ToggleGroupItem>
+                                                    <ToggleGroupItem
+                                                        value={
+                                                            LiqpayPeriodicity.MONTH
+                                                        }
+                                                        className="flex-grow rounded-none border data-[state=on]:border-black"
+                                                        aria-label="MONTH"
+                                                    >
+                                                        Щомісяця
+                                                    </ToggleGroupItem>
+                                                    <ToggleGroupItem
+                                                        value={
+                                                            LiqpayPeriodicity.YEAR
+                                                        }
+                                                        className="flex-grow rounded-none rounded-e-lg border border-s-0 data-[state=on]:border-s data-[state=on]:border-black"
+                                                        aria-label="YEAR"
+                                                    >
+                                                        Щороку
+                                                    </ToggleGroupItem>
+                                                </ToggleGroup>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
+                            <FormField
+                                control={form.control}
+                                name="currency"
+                                render={({ field }) => (
+                                    <FormItem className="space-y-2">
+                                        <FormLabel className="text-lg">
+                                            Валюта:
+                                        </FormLabel>
+                                        <FormControl className="w-full">
+                                            <ToggleGroup
+                                                type="single"
+                                                className="flex-grow gap-0 rounded-lg"
+                                                onValueChange={(
+                                                    e: PaymentCurrency,
+                                                ) => {
+                                                    if (e) {
+                                                        field.onChange(e);
+                                                    }
+                                                }}
+                                                {...field}
+                                            >
+                                                <ToggleGroupItem
+                                                    value={PaymentCurrency.UAH}
+                                                    className="flex-grow rounded-none rounded-s-lg border border-e-0 data-[state=on]:border-e data-[state=on]:border-black"
+                                                    aria-label="UAH"
+                                                >
+                                                    ₴
+                                                </ToggleGroupItem>
+                                                <ToggleGroupItem
+                                                    value={PaymentCurrency.USD}
+                                                    className="flex-grow rounded-none border data-[state=on]:border-black"
+                                                    aria-label="USD"
+                                                >
+                                                    $
+                                                </ToggleGroupItem>
+                                                <ToggleGroupItem
+                                                    value={PaymentCurrency.EUR}
+                                                    className="flex-grow rounded-none rounded-e-lg border border-s-0 data-[state=on]:border-s data-[state=on]:border-black"
+                                                    aria-label="EUR"
+                                                >
+                                                    €
+                                                </ToggleGroupItem>
+                                            </ToggleGroup>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="amount"
+                                render={({ field }) => (
+                                    <FormItem className="space-y-2">
+                                        <FormLabel className="text-lg">
+                                            Сума внеску:
+                                        </FormLabel>
+                                        <FormControl className="flex-grow">
+                                            <Input type="number" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                             <DialogFooter className="self-end">
                                 <Button type="submit">Оплатити</Button>
                             </DialogFooter>
