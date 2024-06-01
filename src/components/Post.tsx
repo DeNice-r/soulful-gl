@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { type RouterOutputs } from '~/utils/api';
 import { truncateString } from '~/utils';
 import { cn } from '~/lib/utils';
-import { defaultFormatDt } from '~/utils/dates';
+import { defaultFormatDateTime } from '~/utils/dates';
 
 export const Post: React.FC<{
     post: RouterOutputs['post']['list']['values'][number];
@@ -93,7 +93,7 @@ export const Post: React.FC<{
                             variant === 'landing' && 'md:self-end 2xl:mt-4',
                         )}
                     >
-                        {defaultFormatDt(post.createdAt)}
+                        {defaultFormatDateTime(post.createdAt)}
                         {/*{post.createdAt != post.updatedAt &&*/}
                         {/*    ` (оновлено ${defaultFormatDt(post.updatedAt)})`}*/}
                     </small>
