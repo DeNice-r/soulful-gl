@@ -7,7 +7,7 @@ import {
     PopoverContent,
 } from '~/components/ui/popover';
 import { Button } from '../../ui/button';
-import { defaultFormatDt } from '~/utils/dates';
+import { defaultFormatDateTime } from '~/utils/dates';
 import { useToast } from '~/components/ui/use-toast';
 import { MoreHorizontalIcon } from 'lucide-react';
 
@@ -60,8 +60,8 @@ export const Single: React.FC<{
             <TableCell>{entity.answer}</TableCell>
             <TableCell>{entity.authorEmail}</TableCell>
             <TableCell>{entity.authorName}</TableCell>
-            <TableCell>{defaultFormatDt(entity.createdAt)}</TableCell>
-            <TableCell>{defaultFormatDt(entity.updatedAt)}</TableCell>
+            <TableCell>{defaultFormatDateTime(entity.createdAt)}</TableCell>
+            <TableCell>{defaultFormatDateTime(entity.updatedAt)}</TableCell>
             <TableCell>{entity.published ? '✅' : '⛔'}</TableCell>
             <TableCell className="text-right">
                 <Popover>
