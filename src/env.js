@@ -61,6 +61,7 @@ export const env = createEnv({
      * `NEXT_PUBLIC_`.
      */
     client: {
+        NEXT_PUBLIC_URL: z.string().url(),
         NEXT_PUBLIC_WSS_ENDPOINT: z.string().url(),
         NEXT_PUBLIC_AWS_S3_BUCKET: z.string(),
         NEXT_PUBLIC_AWS_REGION: z.string(),
@@ -103,6 +104,7 @@ export const env = createEnv({
 
         LIQPAY_PRIVATE_KEY: process.env.LIQPAY_PRIVATE_KEY,
 
+        NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
         NEXT_PUBLIC_WSS_ENDPOINT: process.env.NEXT_PUBLIC_WSS_ENDPOINT,
         NEXT_PUBLIC_AWS_S3_BUCKET: process.env.NEXT_PUBLIC_AWS_S3_BUCKET,
         NEXT_PUBLIC_AWS_REGION: process.env.NEXT_PUBLIC_AWS_REGION,
