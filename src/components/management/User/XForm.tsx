@@ -1,4 +1,9 @@
-import React, { type RefObject, type ChangeEvent, useState } from 'react';
+import React, {
+    type RefObject,
+    type ChangeEvent,
+    useState,
+    useMemo,
+} from 'react';
 import {
     Form,
     FormControl,
@@ -21,6 +26,7 @@ import Modal from 'react-modal';
 import getCroppedImg from '../../utils/cropImage';
 import Cropper, { type Area, type Point } from 'react-easy-crop';
 import { useToast } from '~/components/ui/use-toast';
+import Select, { type MultiValue } from 'react-select';
 
 declare module 'react' {
     interface CSSProperties {
@@ -45,6 +51,13 @@ export const XForm: React.FC<{
         null,
     );
 
+    const [entityPermissions, setEntityPermissions] = useState<
+        MultiValue<{
+            value: string;
+            label: string;
+        }>
+    >();
+
     const { toast } = useToast();
 
     function successToast(description: string) {
@@ -64,8 +77,10 @@ export const XForm: React.FC<{
             notes: entity?.notes ?? '',
         },
     });
+
     async function onSubmit(values: z.infer<typeof CreateUserSchema>) {
         if (entity) {
+            //todo: entityPermissions row 54?
             await update.mutateAsync({ id: entity.id, ...values });
             successToast('Користувача оновлено');
         } else {
@@ -115,6 +130,26 @@ export const XForm: React.FC<{
             setImageSrc(imageDataUrl?.toString() ?? '');
         }
     };
+
+    const options = useMemo(
+        () =>
+            permissions.data?.map((permission) => ({
+                value: permission.title,
+                label: permission.title,
+            })),
+        [permissions.data],
+    );
+
+    //todo: user.permissions.data...
+    // const defaultOptions = useMemo(
+    //     () =>
+    //         entityPermissions.data?.map((permission) => ({
+    //             value: permission.title,
+    //             label: permission.title,
+    //         })),
+    //     [entityPermissions.data],
+    // );
+
     return (
         <Form {...form}>
             <form
@@ -215,7 +250,7 @@ export const XForm: React.FC<{
                             </FormItem>
                         )}
                     />
-                    <div className="flex h-2/3 w-full gap-12">
+                    <div className="flex h-2/3 w-full gap-12 overflow-y-auto px-1">
                         <div className="flex flex-1 flex-col gap-4">
                             <div className="flex w-full justify-between gap-4">
                                 <FormField
@@ -228,7 +263,7 @@ export const XForm: React.FC<{
                                             </FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    className="flex-grow outline outline-1 outline-neutral-400"
+                                                    className="flex-grow border border-neutral-400"
                                                     placeholder={
                                                         !entity || entity.email
                                                             ? 'anton@gmail.com'
@@ -251,7 +286,7 @@ export const XForm: React.FC<{
                                             </FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    className="flex-grow outline outline-1 outline-neutral-400"
+                                                    className="flex-grow border border-neutral-400"
                                                     placeholder="Антон"
                                                     {...field}
                                                 />
@@ -319,35 +354,16 @@ export const XForm: React.FC<{
                                     </FormItem>
                                 )}
                             />
-                            {/*{permissions.data?.map((permission) => (*/}
-                            {/*    <span key={permission.id}>*/}
-                            {/*        {permission.title}*/}
-                            {/*    </span>*/}
-                            {/*))}*/}
+                            {/* todo: add defaultValues={defaultOptions} */}
+                            <Select
+                                options={options}
+                                onChange={(e) => {
+                                    setEntityPermissions(e);
+                                }}
+                                isMulti
+                                className="max-h-20"
+                            />
                         </div>
-                        {/* todo: userRole */}
-                        {/* <FormField
-                            control={form.control}
-                            name="role"
-                            render={({ field }) => (
-                                <FormItem className="flex-1">
-                                    <FormLabel className="text-xl">
-                                        Username
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            className="flex-grow outline outline-1 outline-neutral-400"
-                                            placeholder="anton@gmail.com"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormDescription>
-                                        This is your public display name.
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        /> */}
                     </div>
 
                     <div className="flex gap-8 self-end">

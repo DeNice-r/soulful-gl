@@ -65,6 +65,7 @@
     "react-markdown": "9.0.1",
     "react-modal": "^3.16.1",
     "react-quill": "^2.0.0",
+    "react-select": "^5.8.0",
     "superjson": "^2.2.1",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",

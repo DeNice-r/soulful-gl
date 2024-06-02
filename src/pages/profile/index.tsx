@@ -344,6 +344,7 @@ const Profile: React.FC = () => {
                                 {/* Collision with `undefined` is unwanted, hence the === false*/}
                                 {entity.data?.isOauth === false && (
                                     <Button
+                                        variant="ghost"
                                         className="px-7 py-6"
                                         type="button"
                                         onClick={changeDialogState}
@@ -373,35 +374,69 @@ const Profile: React.FC = () => {
                             <DialogHeader>
                                 <DialogTitle>Змінненя пароля</DialogTitle>
                             </DialogHeader>
-                            <div className="flex w-full flex-col items-center gap-4 py-4">
-                                <div className="mb-6 flex w-5/6 flex-col gap-2">
-                                    <label className="text-base font-normal">
-                                        Введіть cтарий пароль
-                                    </label>
-                                    <Input
-                                        className=" outline outline-1 outline-neutral-400"
-                                        type="password"
+                            <Form {...passwordForm}>
+                                <form
+                                    onSubmit={passwordForm.handleSubmit(
+                                        onPasswordSubmit,
+                                    )}
+                                    className="flex w-full flex-col items-center gap-4 py-4"
+                                >
+                                    <FormField
+                                        control={passwordForm.control}
+                                        name="oldPassword"
+                                        render={({ field }) => (
+                                            <FormItem className="mb-6 w-5/6 space-y-2">
+                                                <FormLabel className="font-normal">
+                                                    Введіть cтарий пароль
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        className=" outline outline-1 outline-neutral-400"
+                                                        type="password"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
                                     />
-                                </div>
-                                <div className="flex w-5/6 flex-col gap-2">
-                                    <label className="text-base font-normal">
-                                        Введіть новий пароль
-                                    </label>
-                                    <Input
-                                        className=" outline outline-1 outline-neutral-400"
-                                        type="password"
+                                    <FormField
+                                        control={passwordForm.control}
+                                        name="newPassword"
+                                        render={({ field }) => (
+                                            <FormItem className="w-5/6 space-y-2">
+                                                <FormLabel className="font-normal">
+                                                    Введіть новий пароль
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        className="outline outline-1 outline-neutral-400"
+                                                        type="password"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
                                     />
-                                </div>
-                                <div className="flex w-5/6 flex-col gap-2">
-                                    <label className="text-base font-normal">
-                                        Повторіть новий пароль
-                                    </label>
-                                    <Input
-                                        className=" outline outline-1 outline-neutral-400"
-                                        type="password"
+                                    <FormField
+                                        control={passwordForm.control}
+                                        name="newPasswordRepeat"
+                                        render={({ field }) => (
+                                            <FormItem className="w-5/6 space-y-2">
+                                                <FormLabel className="font-normal">
+                                                    Повторіть новий пароль
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        className=" outline outline-1 outline-neutral-400"
+                                                        type="password"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
                                     />
-                                </div>
-                            </div>
+                                </form>
+                            </Form>
                             <DialogFooter>
                                 <Button onClick={handlePasswordChange}>
                                     Підтвердити
