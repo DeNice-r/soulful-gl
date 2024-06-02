@@ -10,24 +10,19 @@ const buttonTranslations = { uk: 'Сплатити', en: 'Pay' };
 export async function api(path: string, unverifiedParams: unknown) {
     const { params, data, signature } = getVerifiedData(unverifiedParams);
 
-    const dataToSend = new URLSearchParams();
-    dataToSend.append('data', data);
-    dataToSend.append('signature', signature);
-
-    console.log(params, unverifiedParams);
+    const dataToSend = new URLSearchParams({
+        data,
+        signature,
+    });
 
     try {
-        const response = await axios.post(
-            `${host}${params.version}/${path}`,
-            dataToSend,
-            {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                timeout: 5000,
-                maxRedirects: 0,
+        await axios.post(`${host}${params.version}/${path}`, dataToSend, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
-        );
+            timeout: 5000,
+            maxRedirects: 0,
+        });
     } catch (error: unknown) {
         if (
             axios.isAxiosError(error) &&
