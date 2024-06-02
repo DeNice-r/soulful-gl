@@ -43,4 +43,10 @@
         min-width: 100%;
         pointer-events: all !important;
     }
+    .ql-editor p img {
+        @apply mx-auto py-2
+    }
+    .ql-editor {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    }
 }
