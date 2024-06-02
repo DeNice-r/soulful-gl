@@ -142,9 +142,9 @@ export const SetBooleanNumberIdSchema = z.object({
 });
 
 export const SetNotesSchema = z.object({
-    id: CUIDSchema,
+    id: StringIdSchema,
 
-    notes: z.string(),
+    notes: z.string().optional(),
 });
 
 export const SinglePermissionUserSchema = z.object({

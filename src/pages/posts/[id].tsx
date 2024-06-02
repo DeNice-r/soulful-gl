@@ -5,7 +5,7 @@ import { Layout } from '~/components/common/Layout';
 import Image from 'next/image';
 import { api } from '~/utils/api';
 import { Button } from '~/components/ui/button';
-import { defaultFormatDt } from '~/utils/dates';
+import { defaultFormatDateTime } from '~/utils/dates';
 import { Spinner } from '~/components/ui/spinner';
 
 const Post: React.FC = () => {
@@ -70,7 +70,7 @@ const Post: React.FC = () => {
                             <p className="pb-4">
                                 By {post?.author?.name || 'Unknown author'}
                             </p>
-                            <p>{defaultFormatDt(post.createdAt)}</p>
+                            <p>{defaultFormatDateTime(post.createdAt)}</p>
                         </div>
                         {post.image && (
                             <Image

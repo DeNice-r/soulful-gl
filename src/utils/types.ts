@@ -49,6 +49,29 @@ export enum ManagementPageName {
     QnA = 'QnA',
 }
 
+export enum ChatTabName {
+    NOTES = 'notes',
+    KNOWLEDGE = 'knowledge',
+    EXERCISES = 'exercises',
+    POSTS = 'posts',
+    AI = 'ai',
+}
+
+export enum EntityType {
+    FOLDER = 'folder',
+    DOCUMENT = 'document',
+}
+
+export const EntityTypeToPath = {
+    f: EntityType.FOLDER,
+    d: EntityType.DOCUMENT,
+};
+
+export type EntityData = {
+    id: string | null;
+    type: EntityType;
+} | null;
+
 export const PageTitleMap = {
     [ManagementPageName.STATISTICS]: 'Головна',
     [ManagementPageName.USERS]: 'Користувачі',
@@ -140,6 +163,22 @@ export const Order = {
 };
 
 export const AmountPerPageOptions = [10, 20, 50, 100];
+
+export enum Interval {
+    MINUTE = 'minute',
+    HOUR = 'hour',
+    DAY = 'day',
+    MONTH = 'month',
+    YEAR = 'year',
+}
+
+export const IntervalMs = {
+    [Interval.MINUTE]: 60 * 1000,
+    [Interval.HOUR]: 60 * 60 * 1000,
+    [Interval.DAY]: 24 * 60 * 60 * 1000,
+    [Interval.MONTH]: 30 * 24 * 60 * 60 * 1000,
+    [Interval.YEAR]: 365 * 24 * 60 * 60 * 1000,
+};
 
 export enum PaymentAction {
     // PAY = 'pay',

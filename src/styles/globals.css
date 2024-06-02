@@ -19,22 +19,22 @@
         @apply flex md:basis-1/3 flex-col justify-center text-center gap-8 md:gap-24 text-xl font-bold text-stone-700 md:text-4xl md:text-left
     }
     h1 {
-        @apply text-xl
-    }
-    h2 {
         @apply text-2xl
     }
-    h3 {
+    h2 {
         @apply text-3xl
     }
-    h4 {
+    h3 {
         @apply text-4xl
     }
-    h5 {
+    h4 {
         @apply text-5xl
     }
-    h6 {
+    h5 {
         @apply text-6xl
+    }
+    h6 {
+        @apply text-7xl
     }
     html {
         overflow-y:scroll;
@@ -45,6 +45,9 @@
     }
     .ql-editor p img {
         @apply mx-auto py-2
+    }
+    .ql-editor p a {
+        @apply text-blue-600 underline visited:text-indigo-500
     }
     .ql-editor {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
