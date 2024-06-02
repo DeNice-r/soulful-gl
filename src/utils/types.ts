@@ -49,6 +49,29 @@ export enum ManagementPageName {
     QnA = 'QnA',
 }
 
+export enum ChatTabName {
+    NOTES = 'notes',
+    KNOWLEDGE = 'knowledge',
+    EXERCISES = 'exercises',
+    POSTS = 'posts',
+    AI = 'ai',
+}
+
+export enum EntityType {
+    FOLDER = 'folder',
+    DOCUMENT = 'document',
+}
+
+export const EntityTypeToPath = {
+    f: EntityType.FOLDER,
+    d: EntityType.DOCUMENT,
+};
+
+export type EntityData = {
+    id: string | null;
+    type: EntityType;
+} | null;
+
 export const PageTitleMap = {
     [ManagementPageName.STATISTICS]: 'Головна',
     [ManagementPageName.USERS]: 'Користувачі',

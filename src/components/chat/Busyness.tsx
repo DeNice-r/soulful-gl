@@ -19,11 +19,11 @@ export const Busyness = () => {
     }
 
     return (
-        <div className="flex justify-between">
+        <div className="flex h-10 justify-between px-4">
             {Object.keys(BusynessEmoji).map((emoji, index) => (
                 <button
                     key={index}
-                    className="rounded-full border-2 border-transparent p-2 disabled:border-gray-500 disabled:bg-gray-300"
+                    className="rounded-full border-transparent p-2 disabled:border-gray-500 disabled:bg-neutral-200"
                     disabled={busyness === index}
                     onClick={() => setBusynessHandler(index)}
                 >
