@@ -28,6 +28,7 @@ export const Header: React.FC = () => {
                     <NavLink href="/knowledge/f">База знань</NavLink>
                     <NavLink href="/QnA">Запитання та відповіді</NavLink>
                     <NavLink href="/chat">Чати</NavLink>
+                    <NavLink href="/donate">Підтримати</NavLink>
                 </nav>
                 {session ? (
                     <div className="flex items-center justify-end gap-4">

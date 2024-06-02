@@ -179,3 +179,27 @@ export const IntervalMs = {
     [Interval.MONTH]: 30 * 24 * 60 * 60 * 1000,
     [Interval.YEAR]: 365 * 24 * 60 * 60 * 1000,
 };
+
+export enum PaymentAction {
+    // PAY = 'pay',
+    // HOLD = 'hold',
+    SUBSCRIBE = 'subscribe',
+    PAYDONATE = 'paydonate',
+}
+
+export enum PaymentCurrency {
+    UAH = 'UAH',
+    USD = 'USD',
+    EUR = 'EUR',
+}
+
+export enum PaymentLanguage {
+    UK = 'uk',
+    EN = 'en',
+}
+
+export enum LiqpayPeriodicity {
+    DAY = 'day',
+    MONTH = 'month',
+    YEAR = 'year',
+}
