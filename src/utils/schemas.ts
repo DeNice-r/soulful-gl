@@ -86,7 +86,7 @@ export const CNBSchema = UserCNBSchema.extend({
     description: ShortStringSchema.default('Пожертва команді Soulful'),
     language: z.nativeEnum(PaymentLanguage).default(PaymentLanguage.UK),
     subscribe_date_start: z.string().default('2024-01-01 00:00:00'),
-    result_url: z.string().default(`${env.NEXT_PUBLIC_URL}/payment/thankyou`),
+    result_url: z.string().default(`${env.NEXT_PUBLIC_URL}/donate/thankyou`),
 });
 
 // const ImageBucketRegex = new RegExp(
