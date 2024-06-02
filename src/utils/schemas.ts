@@ -62,7 +62,19 @@ export const LiqpayAmountSchema = z
     .max(10000)
     .default(20);
 
-export const CNBSchema = z.object({
+export const UserCNBSchema = z.object({
+    amount: MaybeStringifiedNumberSchema.default(20).refine((value) => {
+        const r = LiqpayAmountSchema.safeParse(value);
+        return r.success;
+    }),
+    currency: z.nativeEnum(PaymentCurrency).default(PaymentCurrency.UAH),
+    action: z.nativeEnum(PaymentAction).default(PaymentAction.PAYDONATE),
+    subscribe_periodicity: z
+        .nativeEnum(LiqpayPeriodicity)
+        .default(LiqpayPeriodicity.MONTH),
+});
+
+export const CNBSchema = UserCNBSchema.extend({
     public_key: z
         .string()
         .refine((value) => value === env.NEXT_PUBLIC_LIQPAY_PUBLIC_KEY)
@@ -71,32 +83,9 @@ export const CNBSchema = z.object({
         const r = LiqpayAPIVersionSchema.safeParse(value);
         return r.success;
     }),
-    amount: MaybeStringifiedNumberSchema.default(20).refine((value) => {
-        const r = LiqpayAmountSchema.safeParse(value);
-        return r.success;
-    }),
-    currency: z.nativeEnum(PaymentCurrency).default(PaymentCurrency.UAH),
     description: ShortStringSchema.default('Пожертва команді Soulful'),
     language: z.nativeEnum(PaymentLanguage).default(PaymentLanguage.UK),
-
-    action: z.nativeEnum(PaymentAction).default(PaymentAction.PAYDONATE),
-    subscribe_periodicity: z
-        .nativeEnum(LiqpayPeriodicity)
-        .default(LiqpayPeriodicity.MONTH),
     subscribe_date_start: z.string().default('2024-01-01 00:00:00'),
-});
-
-export const UserCNBSchema = z.object({
-    amount: MaybeStringifiedNumberSchema.default(20).refine((value) => {
-        const r = LiqpayAmountSchema.safeParse(value);
-        return r.success;
-    }),
-    currency: z.nativeEnum(PaymentCurrency).default(PaymentCurrency.UAH),
-
-    action: z.nativeEnum(PaymentAction).default(PaymentAction.PAYDONATE),
-    subscribe_periodicity: z
-        .nativeEnum(LiqpayPeriodicity)
-        .default(LiqpayPeriodicity.MONTH),
 });
 
 // const ImageBucketRegex = new RegExp(

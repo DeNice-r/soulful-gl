@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import axios from 'axios';
 import { Button } from '~/components/ui/button';
 import { Layout } from '~/components/common/Layout';
 import {
@@ -30,6 +29,7 @@ import {
 
 import { Input } from '~/components/ui/input';
 import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group';
+import axios from 'axios';
 
 const Donate: React.FC = () => {
     const router = useRouter();
@@ -60,17 +60,15 @@ const Donate: React.FC = () => {
         }
     }
 
-    async function onSubmit() {
-        const [amount, currency, action, subscribe_periodicity] =
-            form.getValues([
-                'amount',
-                'currency',
-                'action',
-                'subscribe_periodicity',
-            ]);
-        const res = await axios.get(
-            `/api/payment/generate?amount${amount ?? 20}&csurrency=${currency ?? PaymentCurrency.UAH}&action=${action ?? PaymentAction.PAYDONATE}`,
-        );
+    async function onSubmit(values: z.infer<typeof UserCNBSchema>) {
+        const params = new URLSearchParams({
+            ...values,
+            amount: values.amount.toString(),
+        });
+
+        const res = await axios.get(`/api/payment/generate`, {
+            params,
+        });
 
         if (res.status === 200 && typeof res.data === 'string') {
             await router.push(res.data);
