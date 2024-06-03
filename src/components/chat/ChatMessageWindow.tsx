@@ -187,7 +187,9 @@ export const ChatMessageWindow: React.FC<{
     async function refetchAI() {
         if (currentChat === -1) return;
         try {
+            setIsRefreshing(true);
             const newHelp = await getHelpMutation.mutateAsync(currentChat);
+            setIsRefreshing(false);
             setHelp([...(help ?? []), newHelp.text]);
         } catch (e) {
             toast({
