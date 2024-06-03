@@ -1,6 +1,8 @@
 import {
     createTRPCRouter,
+    multilevelPermissionProcedure,
     permissionProcedure,
+    publicMultilevelPermissionProcedure,
     publicProcedure,
 } from '~/server/api/trpc';
 import {
@@ -15,7 +17,7 @@ import { SearchableRecommendationFields } from '~/utils/types';
 import { getFullAccessConstraintWithAuthor } from '~/utils/auth';
 
 export const recommendationRouter = createTRPCRouter({
-    list: publicProcedure
+    list: publicMultilevelPermissionProcedure
         .input(PageSchema)
         .query(
             async ({ input: { page, limit, query, orderBy, order }, ctx }) => {
@@ -89,16 +91,18 @@ export const recommendationRouter = createTRPCRouter({
             },
         ),
 
-    get: publicProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
-        return ctx.db.recommendation.findUnique({
-            where: { id: input, ...getFullAccessConstraintWithAuthor(ctx) },
-            include: {
-                author: {
-                    select: { name: true },
+    get: publicMultilevelPermissionProcedure
+        .input(CUIDSchema)
+        .query(async ({ input, ctx }) => {
+            return ctx.db.recommendation.findUnique({
+                where: { id: input, ...getFullAccessConstraintWithAuthor(ctx) },
+                include: {
+                    author: {
+                        select: { name: true },
+                    },
                 },
-            },
-        });
-    }),
+            });
+        }),
 
     random: publicProcedure.input(CountSchema).query(async ({ input, ctx }) => {
         return ctx.db
@@ -124,7 +128,7 @@ export const recommendationRouter = createTRPCRouter({
             });
         }),
 
-    update: permissionProcedure
+    update: multilevelPermissionProcedure
         .input(RecommendationUpdateSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.recommendation.update({
@@ -141,7 +145,7 @@ export const recommendationRouter = createTRPCRouter({
             });
         }),
 
-    publish: permissionProcedure
+    publish: multilevelPermissionProcedure
         .input(SetBooleanSchema)
         .mutation(async ({ ctx, input: { id, value } }) => {
             return ctx.db.recommendation.update({
@@ -155,7 +159,7 @@ export const recommendationRouter = createTRPCRouter({
             });
         }),
 
-    delete: permissionProcedure
+    delete: multilevelPermissionProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.recommendation.delete({

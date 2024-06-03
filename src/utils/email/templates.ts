@@ -43,6 +43,48 @@ export async function sendRegEmail(
     await sendEmail(getFromEmail({ local: 'welcome' }), to, subject, body);
 }
 
+export async function sendPasswordUpdateEmail(
+    to: string,
+    name: string,
+    password: string,
+    host: string,
+) {
+    const subject = 'Ваш пароль на Soulful змінено.';
+    const body = `
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Пароль у системі змінено.</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { width: 80%; margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; background-color: #f9f9f9; }
+        .header { font-size: 24px; color: #444; }
+        .content { margin-top: 20px; }
+        .button { display: inline-block; padding: 10px 20px; margin-top: 20px; background-color: lightgray; border: 3px solid dimgray; color: white; border-radius: 10px; text-decoration: none; }
+        .footer { margin-top: 20px; font-size: 12px; text-align: center; color: #777; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">Ваш пароль змінено.</div>
+        <div class="content">
+            <p>Привіт, ${name}!</p>
+            <p><b>Ваш новий пароль:</b> <code>${password}</code></p>
+            <p>Будь ласка, змініть свій пароль після першого входу в систему.</p>
+            <a href="http://${host}/api/auth/signin" class="button">Увійти до облікового запису</a>
+            <p>Якщо у вас є питання або вам потрібна допомога, не соромтеся звертатися до нашої служби підтримки.</p>
+        </div>
+        <div class="footer">
+            З найкращими побажаннями,<br>
+            Команда Soulful
+        </div>
+    </div>
+</body>
+</html>`;
+    await sendEmail(getFromEmail({ local: 'welcome' }), to, subject, body);
+}
+
 export async function sendQandaEmail(
     to: string,
     name: string,
@@ -120,4 +162,46 @@ export async function sendQandaDeleteEmail(
 </body>
 </html>`;
     await sendEmail(getFromEmail({ local: 'support' }), to, subject, body);
+}
+
+export async function sendChangeEmailEmail(
+    name: string,
+    oldEmail: string,
+    newEmail: string,
+) {
+    const subject = 'Ваш запит на зміну електронної пошти було виконано.';
+    const body = `
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Ваш запит на зміну електронної пошти було виконано.</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { width: 80%; margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; background-color: #f9f9f9; }
+        .header { font-size: 24px; color: #444; }
+        .content { margin-top: 20px; }
+        .button { display: inline-block; padding: 10px 20px; margin-top: 20px; background-color: lightgray; border: 3px solid dimgray; color: white; border-radius: 10px; text-decoration: none; }
+        .footer { margin-top: 20px; font-size: 12px; text-align: center; color: #777; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">Дякуємо за запит і що залишаєтесь з нами.</div>
+        <div class="content">
+            <p>Привіт, ${name}!</p>
+            <p><b>Ваша наступна електронна пошта:</b> ${oldEmail}</p>
+            <p><b>Успішно замінена на нову:</b> ${newEmail}</p>
+        </div>
+        <div class="footer">
+            З найкращими побажаннями,<br>
+            Команда Soulful
+        </div>
+    </div>
+</body>
+</html>`;
+
+    const fromEmail = getFromEmail({ local: 'support' });
+    await sendEmail(fromEmail, oldEmail, subject, body);
+    await sendEmail(fromEmail, newEmail, subject, body);
 }

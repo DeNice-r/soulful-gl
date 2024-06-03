@@ -9,7 +9,7 @@ export async function updatePermissions() {
         'Warning: renamed permissions are treated as deleted and added again, so any users with the old permissions will lose them.',
     );
 
-    const relevantPermissions = Array.from(getRelevantPermissions());
+    const relevantPermissions = getRelevantPermissions();
 
     console.log(relevantPermissions);
 
@@ -55,7 +55,8 @@ export async function updatePermissions() {
 }
 
 function getRelevantPermissions() {
-    const result: Record<string, string[]> = {};
+    const result: Record<string, { action: string; multilevel: boolean }[]> =
+        {};
 
     interface AppRouterStructure {
         [key: string]: {
@@ -76,7 +77,10 @@ function getRelevantPermissions() {
             const meta = typedAppRouter[entity][action]?._def?.meta;
             if (meta?.hasSpaProtection) hasSpaProtection = true;
             else if (meta?.hasPermissionProtection) {
-                actions.push(action);
+                actions.push({
+                    action,
+                    multilevel: meta?.hasMultilevelProtection ?? false,
+                });
             }
         }
         if (actions.length > 0 || hasSpaProtection) {
@@ -86,14 +90,22 @@ function getRelevantPermissions() {
 
     const permissions = new Set<string>();
     for (const entity in result) {
-        result[entity].push('*');
+        let hasMultilevel = false;
         for (let x = 0; x < result[entity].length; x++) {
-            const action = result[entity][x];
+            const { action, multilevel } = result[entity][x];
 
             permissions.add(`${entity}:${action}`);
-            permissions.add(`${entity}:${action}:*`);
+
+            if (multilevel) {
+                permissions.add(`${entity}:${action}:*`);
+                hasMultilevel = true;
+            }
+        }
+        permissions.add(`${entity}:*`);
+        if (hasMultilevel) {
+            permissions.add(`${entity}:*:*`);
         }
     }
 
-    return permissions.add('*:*:*');
+    return Array.from(permissions.add('*:*:*'));
 }

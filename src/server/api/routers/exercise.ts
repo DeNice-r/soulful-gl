@@ -9,14 +9,15 @@ import {
 
 import {
     createTRPCRouter,
+    multilevelPermissionProcedure,
     permissionProcedure,
-    publicProcedure,
+    publicMultilevelPermissionProcedure,
 } from '~/server/api/trpc';
 import { SearchableExerciseFields } from '~/utils/types';
 import { getFullAccessConstraintWithAuthor } from '~/utils/auth';
 
 export const exerciseRouter = createTRPCRouter({
-    list: publicProcedure
+    list: publicMultilevelPermissionProcedure
         .input(PageSchema)
         .query(
             async ({ input: { page, limit, query, orderBy, order }, ctx }) => {
@@ -92,20 +93,22 @@ export const exerciseRouter = createTRPCRouter({
             },
         ),
 
-    get: publicProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
-        return ctx.db.exercise.findUnique({
-            where: {
-                id: input,
-                ...getFullAccessConstraintWithAuthor(ctx),
-            },
-            include: {
-                author: {
-                    select: { name: true },
+    get: publicMultilevelPermissionProcedure
+        .input(CUIDSchema)
+        .query(async ({ input, ctx }) => {
+            return ctx.db.exercise.findUnique({
+                where: {
+                    id: input,
+                    ...getFullAccessConstraintWithAuthor(ctx),
                 },
-                steps: true,
-            },
-        });
-    }),
+                include: {
+                    author: {
+                        select: { name: true },
+                    },
+                    steps: true,
+                },
+            });
+        }),
 
     create: permissionProcedure
         .input(ExerciseSchema)
@@ -145,7 +148,7 @@ export const exerciseRouter = createTRPCRouter({
             });
         }),
 
-    update: permissionProcedure
+    update: multilevelPermissionProcedure
         .input(ExerciseUpdateSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.exercise.update({
@@ -178,7 +181,7 @@ export const exerciseRouter = createTRPCRouter({
             });
         }),
 
-    updateStep: permissionProcedure
+    updateStep: multilevelPermissionProcedure
         .input(ExerciseStepSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.exerciseStep.update({
@@ -194,7 +197,7 @@ export const exerciseRouter = createTRPCRouter({
             });
         }),
 
-    publish: permissionProcedure
+    publish: multilevelPermissionProcedure
         .input(SetBooleanSchema)
         .mutation(async ({ ctx, input: { id, value } }) => {
             return ctx.db.exercise.update({
@@ -208,7 +211,7 @@ export const exerciseRouter = createTRPCRouter({
             });
         }),
 
-    delete: permissionProcedure
+    delete: multilevelPermissionProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.exercise.delete({
@@ -219,7 +222,7 @@ export const exerciseRouter = createTRPCRouter({
             });
         }),
 
-    deleteStep: permissionProcedure
+    deleteStep: multilevelPermissionProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.exerciseStep.delete({

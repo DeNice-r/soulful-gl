@@ -13,6 +13,7 @@ export enum BackgroundPattern {
 export interface Meta {
     hasPermissionProtection?: boolean;
     hasSpaProtection?: boolean;
+    hasMultilevelProtection?: boolean;
 }
 
 export enum AccessType {

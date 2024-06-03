@@ -1,4 +1,8 @@
-import { createTRPCRouter, permissionProcedure } from '~/server/api/trpc';
+import {
+    createTRPCRouter,
+    multilevelPermissionProcedure,
+    permissionProcedure,
+} from '~/server/api/trpc';
 import {
     CUIDSchema,
     DocumentSchema,
@@ -24,7 +28,7 @@ export const documentRouter = createTRPCRouter({
         }),
 
     get: permissionProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
-        return await ctx.db.document.findUnique({
+        return ctx.db.document.findUnique({
             where: { id: input },
             include: {
                 author: {
@@ -62,7 +66,7 @@ export const documentRouter = createTRPCRouter({
             });
         }),
 
-    update: permissionProcedure
+    update: multilevelPermissionProcedure
         .input(DocumentUpdateSchema)
         .mutation(async ({ ctx, input }) => {
             const { tags, ...noTagsInput } = input;
@@ -86,7 +90,7 @@ export const documentRouter = createTRPCRouter({
             });
         }),
 
-    delete: permissionProcedure
+    delete: multilevelPermissionProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.document.delete({
