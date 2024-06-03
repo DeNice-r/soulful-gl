@@ -41,8 +41,6 @@ export const FSEntity: React.FC<{
                     <p className="select-none">{entity.title}</p>
                 )}
             </div>
-            {/*todo: onclick same context menu*/}
-            {/*<EllipsisVertical className="min-h-6 min-w-6 rounded-full transition-colors hover:bg-neutral-400/60" />*/}
         </Button>
     );
 };

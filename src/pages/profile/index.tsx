@@ -105,7 +105,6 @@ const Profile: React.FC = () => {
         });
     }
 
-    // todo @Anton: add password change logic
     async function onPasswordSubmit(
         values: z.infer<typeof ChangePasswordSchema>,
     ) {

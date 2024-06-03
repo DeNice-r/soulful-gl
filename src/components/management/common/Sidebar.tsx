@@ -77,7 +77,6 @@ export const Sidebar: React.FC<Props & { entity: ManagementPageName }> = ({
     }
 
     return (
-        // todo: @Anton fix adaptive
         <div
             className={cn(
                 'hidden min-h-screen overflow-hidden text-nowrap bg-gray-100/40 transition-all duration-1000 ease-in-out dark:bg-gray-800/40 sm:flex sm:flex-shrink-0 sm:flex-col sm:gap-2',
