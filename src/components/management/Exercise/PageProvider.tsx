@@ -3,6 +3,7 @@ import React, {
     useContext,
     useState,
     type ReactNode,
+    useRef,
 } from 'react';
 
 interface PageData {
@@ -26,26 +27,13 @@ interface PageContextProps {
 const PageContext = createContext<PageContextProps | undefined>(undefined);
 
 export const PageProvider = ({ children }: { children: ReactNode }) => {
-    const [pages, setPages] = useState<PageData[]>([
+    const pagesRef = useRef<PageData[]>([
         { id: 1, data: { image: '', title: '', description: '' } },
     ]);
     const [currentPage, setCurrentPage] = useState(0);
 
     const savePageData = (index: number, data: PageData['data']) => {
-        const newPages = [...pages];
-        newPages[index] = { ...newPages[index], data };
-        setPages(newPages);
-    };
-
-    const addNewPage = () => {
-        setPages([
-            ...pages,
-            {
-                id: pages.length + 1,
-                data: { image: '', title: '', description: '' },
-            },
-        ]);
-        setCurrentPage(pages.length);
+        pagesRef.current[index] = { ...pagesRef.current[index], data };
     };
 
     const goToPreviousPage = (currentPageData: PageData['data']) => {
@@ -57,19 +45,15 @@ export const PageProvider = ({ children }: { children: ReactNode }) => {
 
     const goToNextPage = (currentPageData: PageData['data']) => {
         savePageData(currentPage, currentPageData);
-        if (currentPage < pages.length - 1) {
-            setCurrentPage(currentPage + 1);
-        } else {
-            addNewPage();
-        }
+        setCurrentPage(currentPage + 1);
     };
 
     const deletePage = (index: number) => {
         if (index > 0) {
-            const newPages = pages.filter(
+            pagesRef.current = pagesRef.current.filter(
                 (_, pageIndex) => pageIndex !== index,
             );
-            setPages(newPages);
+
             setCurrentPage((prevPage) =>
                 prevPage >= index ? prevPage - 1 : prevPage,
             );
@@ -79,7 +63,7 @@ export const PageProvider = ({ children }: { children: ReactNode }) => {
     return (
         <PageContext.Provider
             value={{
-                pages,
+                pages: pagesRef.current,
                 currentPage,
                 savePageData,
                 goToPreviousPage,

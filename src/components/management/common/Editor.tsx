@@ -63,10 +63,6 @@ export const Editor = ({
     const [text, setText] = useState(defaultValue);
     function changeValue(newValue: string) {
         setText(newValue);
-        console.log(
-            'lastChangeOutsideRef.current',
-            lastChangeOutsideRef.current,
-        );
         if (!emitOnOutsideChanges && lastChangeOutsideRef.current) {
             lastChangeOutsideRef.current--;
             return;

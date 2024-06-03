@@ -42,15 +42,8 @@ export const userRouter = createTRPCRouter({
                 }
 
                 let where: Record<string, object> | undefined = permissions && {
-                    permissions: {
-                        some: {
-                            title: {
-                                in: p,
-                            },
-                        },
-                    },
-                    roles: {
-                        some: {
+                    OR: [
+                        {
                             permissions: {
                                 some: {
                                     title: {
@@ -59,7 +52,20 @@ export const userRouter = createTRPCRouter({
                                 },
                             },
                         },
-                    },
+                        {
+                            roles: {
+                                some: {
+                                    permissions: {
+                                        some: {
+                                            title: {
+                                                in: p,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    ],
                 };
 
                 const contains = {
