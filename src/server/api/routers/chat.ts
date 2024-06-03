@@ -1,6 +1,7 @@
 import { createTRPCRouter, spaProcedure } from '~/server/api/trpc';
 import { BusynessSchema, NumberIdSchema } from '~/utils/schemas';
 import { archiveChat } from '~/server/api/routers/common';
+import { getHelp } from '~/utils/openai';
 
 export const chatRouter = createTRPCRouter({
     list: spaProcedure.query(async ({ ctx }) => {
@@ -126,6 +127,75 @@ export const chatRouter = createTRPCRouter({
                 },
                 data: {
                     busyness,
+                },
+            });
+        }),
+
+    listHelp: spaProcedure
+        .input(NumberIdSchema)
+        .query(async ({ ctx, input: chatId }) => {
+            return (
+                ctx.db.gptMessage.findMany({
+                    where: {
+                        chatId,
+                        chat: {
+                            personnelId: ctx.session.user.id,
+                        },
+                    },
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
+                }) ?? []
+            );
+        }),
+
+    getHelp: spaProcedure
+        .input(NumberIdSchema)
+        .mutation(async ({ ctx, input: chatId }) => {
+            const messages = await ctx.db.message.findMany({
+                where: {
+                    chatId,
+                    chat: {
+                        personnelId: ctx.session.user.id,
+                    },
+                },
+                orderBy: {
+                    createdAt: 'asc',
+                },
+                select: {
+                    id: true,
+                    text: true,
+                    isFromUser: true,
+                },
+            });
+            if (!messages) throw new Error('Чат не знайдено');
+
+            const oldHelp = await ctx.db.gptMessage.findFirst({
+                where: {
+                    messageId: messages[messages.length - 1].id,
+                },
+                select: {
+                    id: true,
+                },
+            });
+            if (oldHelp)
+                throw new Error(
+                    'Ви вже отримали допомогу для цього повідомлення',
+                );
+
+            const gptMessage = await getHelp(
+                messages.map((message) => ({
+                    role: 'user',
+                    name: message.isFromUser ? 'user' : 'psychologist',
+                    content: message.text,
+                })),
+            );
+
+            return ctx.db.gptMessage.create({
+                data: {
+                    chatId,
+                    messageId: messages[messages.length - 1].id,
+                    text: gptMessage,
                 },
             });
         }),

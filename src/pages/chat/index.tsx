@@ -32,6 +32,12 @@ const ChatUI = () => {
     const unassignedChatsQuery = api.chat.listUnassigned.useQuery(undefined, {
         enabled: false,
     });
+    const getHelpMutation = api.chat.getHelp.useMutation();
+
+    useEffect(() => {
+        console.log(getHelpMutation.data);
+    }, [getHelpMutation.data]);
+
     const unassignedChatsQueryRef = useRef<NodeJS.Timeout | null>(null);
 
     const chatsRef = useRef<FullChats>({});
@@ -215,6 +221,8 @@ const ChatUI = () => {
 
     function changeChat(index: number) {
         if (index !== currentChat) setCurrentChat(index);
+
+        if (index === -1) return;
 
         scrollToBottom(false);
 

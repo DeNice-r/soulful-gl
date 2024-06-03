@@ -80,6 +80,7 @@ export const ChatMessageWindow: React.FC<{
     const [tabType, setTabType] = useState<ChatTabType>(ChatTabType.NOTES);
 
     const [notes, setNotes] = useState<string | undefined>();
+    const [help, setHelp] = useState<string[] | undefined>();
 
     const [currentEntity, setCurrentEntity] = useState<EntityData>(null);
 
@@ -90,6 +91,10 @@ export const ChatMessageWindow: React.FC<{
     const { toast } = useToast();
 
     const userNotesMutation = api.user.notes.useMutation();
+    const listHelpQuery = api.chat.listHelp.useQuery(currentChat, {
+        enabled: false,
+    });
+    const getHelpMutation = api.chat.getHelp.useMutation();
 
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -157,7 +162,10 @@ export const ChatMessageWindow: React.FC<{
                 setNotes('');
                 return;
             }
+            setHelp(undefined);
             setNotes(undefined);
+
+            await listHelpQuery.refetch();
             setNotes(
                 (
                     await userNotesMutation.mutateAsync({
@@ -168,26 +176,25 @@ export const ChatMessageWindow: React.FC<{
         })();
     }, [currentChat]);
 
-    function refetchAI() {
-        console.log('refetched');
+    useEffect(() => {
+        if (listHelpQuery.data)
+            setHelp(listHelpQuery.data.map((help) => help.text));
+    }, [listHelpQuery.data]);
+
+    async function refetchAI() {
+        if (currentChat === -1) return;
+        try {
+            const newHelp = await getHelpMutation.mutateAsync(currentChat);
+            setHelp([...(help ?? []), newHelp.text]);
+        } catch (e) {
+            toast({
+                title: 'Помилка',
+                description:
+                    e instanceof Error ? e.message : 'Невідома помилка',
+                variant: 'destructive',
+            });
+        }
     }
-
-    const x =
-        'Повідомлення від користувача: "Мені страшенно сумно. Я нікого не потребую, я втомився від всього. Життя без сенсу. Я більше не можу терпіти цей біль"\n' +
-        '\n' +
-        'Аналіз:\n' +
-        'На основі виразних слів та фраз, користувач, швидше за все, переживає глибоку депресію та відчуває сильний емоціональний біль. Вислови, як "Життя без сенсу" та "Я більше не можу терпіти цей біль", можуть свідчити про суїцидальні настрої.\n' +
-        '\n' +
-        'Підхід до відповіді: \n' +
-        'Відповідь слід утримувати доброзичливою, співчутливою та підтримуючою. Забезпечити їм канали комунікації та необхідну допомогу. Важливо вислухати та успокоїти їх, не забуваючи про інформування про важливість звернення до професіоналів.\n' +
-        '\n' +
-        'Відповідь:\n' +
-        `"Мені справді шкода, що ви зараз переживаєте цей складний момент. Ви заслуговуєте на допомогу, і важливо, щоб ви знали, що ви не самі. Професійні консультанти можуть надати вам необхідну підтримку і допомогу, вам варто з ними зв'язатися."\n` +
-        '\n' +
-        'Додаткові дії:\n' +
-        'Через можливі стан суїцидальних намірів користувача, необхідно відразу ж повідомити про цей випадок керуючого психолога чи професійну службу допомоги.';
-
-    const y = [x, x, x, x];
 
     return (
         <TooltipProvider>
@@ -518,7 +525,7 @@ export const ChatMessageWindow: React.FC<{
                             {tabType === ChatTabType.AI && (
                                 <div className="flex h-full items-start justify-center">
                                     <div className="flex h-full flex-col items-center gap-8 overflow-y-auto p-8">
-                                        {y.map((content, index1, y) => {
+                                        {help?.map((content, index1, y) => {
                                             return (
                                                 <>
                                                     <div

@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL") // uses connection pooling
+  url      = env("DATABASE_URL")
 }
 
 // Auth-related models
@@ -122,22 +122,35 @@ model VerificationToken {
 model Chat {
   id Int @id @default(autoincrement())
 
-  createdAt   DateTime  @default(now())
-  user        User      @relation(name: "userChat", fields: [userId], references: [id], onDelete: Cascade)
-  userId      String    @unique
-  personnel   User?     @relation(name: "personnelChats", fields: [personnelId], references: [id], onDelete: SetNull)
+  createdAt   DateTime     @default(now())
+  user        User         @relation(name: "userChat", fields: [userId], references: [id], onDelete: Cascade)
+  userId      String       @unique
+  personnel   User?        @relation(name: "personnelChats", fields: [personnelId], references: [id], onDelete: SetNull)
   personnelId String?
   messages    Message[]
+  gptMessage  gptMessage[]
 }
 
 model Message {
   id Int @id @default(autoincrement())
 
-  createdAt  DateTime @default(now())
+  createdAt  DateTime     @default(now())
   text       String
-  chat       Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chat       Chat         @relation(fields: [chatId], references: [id], onDelete: Cascade)
   chatId     Int
   isFromUser Boolean
+  gptMessage gptMessage[]
+}
+
+model gptMessage {
+  id Int @id @default(autoincrement())
+
+  createdAt DateTime @default(now())
+  text      String
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chatId    Int
+  message   Message? @relation(fields: [messageId], references: [id], onDelete: SetNull)
+  messageId Int?
 }
 
 model ArchivedChat {
@@ -268,7 +281,7 @@ model Document {
   id String @id @default(cuid())
 
   parentId String?
-  parent   DocumentFolder?  @relation(fields: [parentId], references: [id])
+  parent   DocumentFolder? @relation(fields: [parentId], references: [id])
 
   title       String
   description String
