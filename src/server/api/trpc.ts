@@ -6,7 +6,7 @@ import { ZodError } from 'zod';
 
 import { getServerSession } from '~/utils/auth';
 import { db } from '~/server/db';
-import { isPermitted } from '~/utils/authAssertions';
+import { getAccessType } from '~/utils/authAssertions';
 import { AccessType, type Meta } from '~/utils/types';
 
 interface CreateContextOptions {
@@ -126,7 +126,7 @@ export const protectedProcedure = publicProcedure.use(({ ctx, next }) => {
 
 export const permissionProcedure = protectedProcedure
     .use(({ ctx, next }) => {
-        const accessType = isPermitted(
+        const accessType = getAccessType(
             ctx.session.user.permissions,
             ctx.entity,
             ctx.action,

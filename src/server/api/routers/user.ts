@@ -25,7 +25,7 @@ import {
     sendRegEmail,
 } from '~/utils/email/templates';
 import { AccessType, SearchableUserFields } from '~/utils/types';
-import { getAccessType } from '~/utils/auth';
+import { getAccessTypeFromContext } from '~/utils/auth';
 
 export const userRouter = createTRPCRouter({
     list: multilevelPermissionProcedure
@@ -106,7 +106,7 @@ export const userRouter = createTRPCRouter({
     get: publicMultilevelPermissionProcedure
         .input(StringIdSchema.optional())
         .query(async ({ input, ctx }) => {
-            const accessType = getAccessType(ctx);
+            const accessType = getAccessTypeFromContext(ctx);
             if (
                 input !== ctx.session?.user?.id &&
                 accessType === AccessType.NONE
@@ -375,5 +375,6 @@ function getProjection(isFullAccess: boolean) {
         updatedAt: true,
         reportCount: true,
         suspended: isFullAccess,
+        permissions: true,
     };
 }

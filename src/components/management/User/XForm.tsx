@@ -27,6 +27,8 @@ import getCroppedImg from '../../utils/cropImage';
 import Cropper, { type Area, type Point } from 'react-easy-crop';
 import { useToast } from '~/components/ui/use-toast';
 import Select, { type MultiValue } from 'react-select';
+import { useSession } from 'next-auth/react';
+import { hasAccess } from '~/utils/authAssertions';
 
 declare module 'react' {
     interface CSSProperties {
@@ -39,10 +41,13 @@ export const XForm: React.FC<{
     changeModalState: () => void;
     formRef: RefObject<HTMLFormElement>;
 }> = ({ entity, changeModalState, formRef }) => {
+    const { data: session, status } = useSession();
+
     const create = api.user.create.useMutation();
     const update = api.user.update.useMutation();
 
     const permissions = api.permission.list.useQuery();
+    const setForUserMutation = api.permission.setForUser.useMutation();
 
     const [imageSrc, setImageSrc] = useState<string | null>(null);
     const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
@@ -80,7 +85,18 @@ export const XForm: React.FC<{
 
     async function onSubmit(values: z.infer<typeof CreateUserSchema>) {
         if (entity) {
-            //todo: entityPermissions row 54?
+            try {
+                await setForUserMutation.mutateAsync({
+                    entityId: entity.id,
+                    titles: entityPermissions
+                        ? entityPermissions.map(
+                              (permission) => permission.value,
+                          )
+                        : [],
+                });
+            } catch (e) {
+                console.error(e);
+            }
             await update.mutateAsync({ id: entity.id, ...values });
             successToast('Користувача оновлено');
         } else {
@@ -140,15 +156,16 @@ export const XForm: React.FC<{
         [permissions.data],
     );
 
-    //todo: user.permissions.data...
-    // const defaultOptions = useMemo(
-    //     () =>
-    //         entityPermissions.data?.map((permission) => ({
-    //             value: permission.title,
-    //             label: permission.title,
-    //         })),
-    //     [entityPermissions.data],
-    // );
+    const defaultOptions = useMemo(
+        () =>
+            entity
+                ? entity.permissions.map((permission) => ({
+                      value: permission.title,
+                      label: permission.title,
+                  }))
+                : [],
+        [entity],
+    );
 
     return (
         <Form {...form}>
@@ -354,7 +371,6 @@ export const XForm: React.FC<{
                                     </FormItem>
                                 )}
                             />
-                            {/* todo: add defaultValues={defaultOptions} */}
                             <Select
                                 options={options}
                                 onChange={(e) => {
@@ -362,6 +378,14 @@ export const XForm: React.FC<{
                                 }}
                                 isMulti
                                 className="max-h-20"
+                                defaultValue={defaultOptions}
+                                isDisabled={
+                                    !hasAccess(
+                                        session?.user?.permissions ?? [],
+                                        'permission',
+                                        'setForUser',
+                                    )
+                                }
                             />
                         </div>
                     </div>

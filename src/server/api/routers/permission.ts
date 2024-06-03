@@ -1,5 +1,6 @@
 import { createTRPCRouter, spaProcedure } from '~/server/api/trpc';
 import {
+    CUIDSchema,
     MultiPermissionRoleSchema,
     MultiPermissionUserSchema,
     SinglePermissionRoleSchema,
@@ -34,6 +35,20 @@ export const permissionRouter = createTRPCRouter({
                     ();
             },
         ),
+
+    getForUser: spaProcedure
+        .input(CUIDSchema)
+        .query(async ({ ctx, input: id }) => {
+            return ctx.db.permission.findMany({
+                where: {
+                    users: {
+                        some: {
+                            id,
+                        },
+                    },
+                },
+            });
+        }),
 
     setForUser: spaProcedure
         .input(MultiPermissionUserSchema)

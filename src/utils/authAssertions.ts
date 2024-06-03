@@ -1,6 +1,6 @@
 import { AccessType } from '~/utils/types';
 
-export const isPermitted = (
+export const getAccessType = (
     userPermissions: string[],
     entity: string,
     action: string,
@@ -30,4 +30,12 @@ export const isPermitted = (
     }
 
     return AccessType.NONE;
+};
+
+export const hasAccess = (
+    userPermissions: string[],
+    entity: string,
+    action: string,
+) => {
+    return getAccessType(userPermissions, entity, action) !== AccessType.NONE;
 };
