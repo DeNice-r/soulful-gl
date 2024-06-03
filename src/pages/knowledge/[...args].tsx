@@ -1,23 +1,13 @@
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { Layout } from '~/components/common/Layout';
 import Knowledge from '~/components/knowledge/Knowledge';
-import { hasAccess } from '~/utils/authAssertions';
 import { type EntityData, EntityTypeToPath } from '~/utils/types';
 
 const CURRENT_PATH = 'knowledge';
 
 const KnowledgePage: React.FC = () => {
     const router = useRouter();
-
-    const { data: session } = useSession();
-
-    if (
-        !hasAccess(session?.user?.permissions ?? [], 'documentFolder', 'list')
-    ) {
-        void router.push('/');
-    }
 
     // const [_1, _2, entity, currentEntityId] = router.pathname.split('/').pop();
     const currentEntity = {
