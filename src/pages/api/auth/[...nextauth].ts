@@ -69,7 +69,7 @@ export function requestWrapper(
 
                 session.user.id = user.id;
                 session.user.name = user.name ?? '';
-                session.user.image = user.image ?? '/image/default_avatar.png';
+                session.user.image = user.image ?? '/images/default_avatar.png';
                 session.user.email = user.email;
                 session.user.busyness = user.busyness;
 

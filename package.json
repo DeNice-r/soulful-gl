@@ -69,6 +69,7 @@
     "react": "18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-charts": "^2.0.0-beta.7",
+    "react-countdown-circle-timer": "^3.2.1",
     "react-dom": "18.2.0",
     "react-easy-crop": "^5.0.7",
     "react-hook-form": "^7.51.3",

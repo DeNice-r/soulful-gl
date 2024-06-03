@@ -174,6 +174,11 @@ export const XForm: React.FC<{
                     <X className="hover:text-slate-700" />
                 </Button>
                 <div className="flex h-[90%] w-4/5 flex-col items-center justify-between gap-4">
+                    {currentPage < 1 ? (
+                        <h2>Титульна сторінка вправи</h2>
+                    ) : (
+                        <h2>Крок вправи</h2>
+                    )}
                     <FormField
                         control={form.control}
                         name="image"
@@ -266,19 +271,39 @@ export const XForm: React.FC<{
                     />
                     <div className="flex h-2/3 w-full gap-12">
                         <div className="flex flex-1 flex-col gap-4">
-                            <div className="flex w-full justify-between gap-4">
+                            <FormField
+                                control={form.control}
+                                name="title"
+                                render={({ field }) => (
+                                    <FormItem className="">
+                                        <FormLabel className="text-xl">
+                                            Заголовок
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                className="flex-grow outline outline-1 outline-neutral-400"
+                                                placeholder="Заспокоєння у стресовій ситуації"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            {currentPage > 0 && (
                                 <FormField
                                     control={form.control}
-                                    name="title"
+                                    name="timeseconds"
                                     render={({ field }) => (
-                                        <FormItem className="basis-full">
+                                        <FormItem className="">
                                             <FormLabel className="text-xl">
-                                                Заголовок
+                                                Час на виконання кроку (с)
                                             </FormLabel>
                                             <FormControl>
                                                 <Input
                                                     className="flex-grow outline outline-1 outline-neutral-400"
-                                                    placeholder="Заспокоєння у стресовій ситуації"
+                                                    defaultValue={30}
+                                                    type="number"
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -286,7 +311,7 @@ export const XForm: React.FC<{
                                         </FormItem>
                                     )}
                                 />
-                            </div>
+                            )}
                             <FormField
                                 control={form.control}
                                 name="description"
