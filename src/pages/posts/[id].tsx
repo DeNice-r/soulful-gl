@@ -7,6 +7,7 @@ import { api } from '~/utils/api';
 import { Button } from '~/components/ui/button';
 import { defaultFormatDateTime } from '~/utils/dates';
 import { Spinner } from '~/components/ui/spinner';
+import { hasAccess } from '~/utils/authAssertions';
 
 const Post: React.FC = () => {
     const router = useRouter();
@@ -42,21 +43,29 @@ const Post: React.FC = () => {
                             <h3 className="pb-6 text-justify font-bold">
                                 {post.title}
                             </h3>
+
                             <div className="flex h-full gap-4">
-                                {/* isAtLeast(session?.user.role, UserRole.OPERATOR) &&
-                        todo: new permission system */}
-                                <Button
-                                    className="px-8 hover:bg-neutral-300"
-                                    variant={'ghost'}
-                                    onClick={() => handlePublish(post.id)}
-                                >
-                                    {!post.published
-                                        ? 'Опублікувати'
-                                        : 'Приховати'}
-                                </Button>
-                                {userHasValidSession && (
-                                    // isAtLeast(session?.user.role, UserRole.OPERATOR) &&
-                                    // todo: new permission system
+                                {hasAccess(
+                                    session?.user?.permissions ?? [],
+                                    'post',
+                                    'publish',
+                                ) && (
+                                    <Button
+                                        className="px-8 hover:bg-neutral-300"
+                                        variant={'ghost'}
+                                        onClick={() => handlePublish(post.id)}
+                                    >
+                                        {!post.published
+                                            ? 'Опублікувати'
+                                            : 'Приховати'}
+                                    </Button>
+                                )}
+
+                                {hasAccess(
+                                    session?.user?.permissions ?? [],
+                                    'post',
+                                    'delete',
+                                ) && (
                                     <Button
                                         className="px-8"
                                         onClick={() => handleDelete(post.id)}

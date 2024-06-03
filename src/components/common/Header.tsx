@@ -5,12 +5,10 @@ import { useSession } from 'next-auth/react';
 import { NavLink } from '../utils/NavLink';
 import { Logo } from './Logo';
 import ProfilePopup from './ProfilePopup';
+import { hasAccess } from '~/utils/authAssertions';
 
 export const Header: React.FC = () => {
     const { data: session } = useSession();
-
-    const image = session?.user?.image ?? '/images/placeholder.svg';
-    const name = session?.user?.name ?? 'Користувач';
 
     const router = useRouter();
 
@@ -28,9 +26,17 @@ export const Header: React.FC = () => {
                     }
                     <NavLink href="/posts">Дописи</NavLink>
                     <NavLink href="/exercises">Вправи</NavLink>
-                    <NavLink href="/knowledge/f">База знань</NavLink>
+                    {hasAccess(
+                        session?.user?.permissions ?? [],
+                        'documentFolder',
+                        'list',
+                    ) && <NavLink href="/knowledge/f">База знань</NavLink>}
                     <NavLink href="/QnA">Запитання та відповіді</NavLink>
-                    <NavLink href="/chat">Чати</NavLink>
+                    {hasAccess(
+                        session?.user?.permissions ?? [],
+                        'chat',
+                        '*',
+                    ) && <NavLink href="/chat">Чати</NavLink>}
                     <NavLink href="/donate">Підтримати</NavLink>
                 </nav>
                 {session ? (

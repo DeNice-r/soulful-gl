@@ -4,7 +4,17 @@ import { Button } from '../ui/button';
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { User, Cog } from 'lucide-react';
+import {
+    User,
+    AreaChart,
+    Users,
+    Mic,
+    Newspaper,
+    CloudSun,
+    CalendarDays,
+    CircleHelp,
+} from 'lucide-react';
+import { hasAccess } from '~/utils/authAssertions';
 
 const ProfilePopup: React.FC = () => {
     const { data: session } = useSession();
@@ -58,7 +68,7 @@ const ProfilePopup: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="grid gap-1 p-3">
+                    <div className="grid gap-3 divide-y p-3">
                         <Link
                             className="flex items-center gap-2 hover:text-slate-600"
                             href="/profile"
@@ -66,16 +76,99 @@ const ProfilePopup: React.FC = () => {
                             <User className="w-4" />
                             Профіль
                         </Link>
-                        <Link
-                            className="flex items-center gap-2 hover:text-slate-600"
-                            href="/management"
-                        >
-                            {
-                                //add permissions
-                            }
-                            <Cog className="h-4 w-4" />
-                            Керування
-                        </Link>
+                        <div>
+                            <p className="mb-2 text-sm text-neutral-400">
+                                Керування
+                            </p>
+                            {hasAccess(
+                                session?.user?.permissions ?? [],
+                                'stats',
+                                '*',
+                            ) && (
+                                <Link
+                                    className="flex items-center gap-2 hover:text-slate-600"
+                                    href="/management"
+                                >
+                                    <AreaChart className="h-4 w-4" />
+                                    Статистика
+                                </Link>
+                            )}
+                            {hasAccess(
+                                session?.user?.permissions ?? [],
+                                'user',
+                                'list',
+                            ) && (
+                                <>
+                                    <Link
+                                        className="flex items-center gap-2 hover:text-slate-600"
+                                        href="/management/users"
+                                    >
+                                        <Users className="h-4 w-4" />
+                                        Користувачі
+                                    </Link>
+
+                                    <Link
+                                        className="flex items-center gap-2 hover:text-slate-600"
+                                        href="/management/operators"
+                                    >
+                                        <Mic className="h-4 w-4" />
+                                        Оператори
+                                    </Link>
+                                </>
+                            )}
+                            {hasAccess(
+                                session?.user?.permissions ?? [],
+                                'post',
+                                'list',
+                            ) && (
+                                <Link
+                                    className="flex items-center gap-2 hover:text-slate-600"
+                                    href="/management/posts"
+                                >
+                                    <Newspaper className="h-4 w-4" />
+                                    Дописи
+                                </Link>
+                            )}
+                            {hasAccess(
+                                session?.user?.permissions ?? [],
+                                'recommendation',
+                                'list',
+                            ) && (
+                                <Link
+                                    className="flex items-center gap-2 hover:text-slate-600"
+                                    href="/management/recommendations"
+                                >
+                                    <CloudSun className="h-4 w-4" />
+                                    Рекомендації
+                                </Link>
+                            )}
+                            {hasAccess(
+                                session?.user?.permissions ?? [],
+                                'exercise',
+                                'list',
+                            ) && (
+                                <Link
+                                    className="flex items-center gap-2 hover:text-slate-600"
+                                    href="/management/exercises"
+                                >
+                                    <CalendarDays className="h-4 w-4" />
+                                    Вправи
+                                </Link>
+                            )}
+                            {hasAccess(
+                                session?.user?.permissions ?? [],
+                                'qanda',
+                                '*',
+                            ) && (
+                                <Link
+                                    className="flex items-center gap-2 hover:text-slate-600"
+                                    href="/management/QnA"
+                                >
+                                    <CircleHelp className="h-4 w-4" />
+                                    Запитання та відповіді
+                                </Link>
+                            )}
+                        </div>
                     </div>
                     <div className="p-3">
                         <Button

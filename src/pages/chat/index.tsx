@@ -18,11 +18,19 @@ import {
 // import useSound from 'use-sound';
 import { Toaster } from '~/components/ui/toaster';
 import { useToast } from '~/components/ui/use-toast';
+import { hasAccess } from '~/utils/authAssertions';
+import { useRouter } from 'next/router';
 
 type FullChats = NonNullable<RouterOutputs['chat']['listFull']>;
 
 const ChatUI = () => {
     const { data: session, status } = useSession();
+
+    const router = useRouter();
+
+    if (!hasAccess(session?.user?.permissions ?? [], 'chat', '*')) {
+        void router.push('/');
+    }
 
     const { client: apiClient } = api.useUtils();
     const chatListFullQuery = api.chat.listFull.useQuery(undefined, {
