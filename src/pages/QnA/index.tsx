@@ -153,7 +153,7 @@ const QnA: React.FC = () => {
                                                 htmlFor="question"
                                                 className="text-right"
                                             >
-                                                Ел. пошта
+                                                Запитання
                                             </FormLabel>
                                             <FormControl>
                                                 <Input

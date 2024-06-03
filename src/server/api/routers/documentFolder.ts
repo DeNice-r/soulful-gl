@@ -1,4 +1,8 @@
-import { createTRPCRouter, permissionProcedure } from '~/server/api/trpc';
+import {
+    createTRPCRouter,
+    multilevelPermissionProcedure,
+    permissionProcedure,
+} from '~/server/api/trpc';
 import {
     CUIDSchema,
     DocumentFolderSchema,
@@ -141,7 +145,7 @@ export const documentFolderRouter = createTRPCRouter({
             });
         }),
 
-    delete: permissionProcedure
+    delete: multilevelPermissionProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.documentFolder.delete({

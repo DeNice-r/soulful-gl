@@ -1,64 +1,86 @@
-import { createTRPCRouter, permissionProcedure } from '~/server/api/trpc';
+import { createTRPCRouter, spaProcedure } from '~/server/api/trpc';
 import {
+    CUIDSchema,
     MultiPermissionRoleSchema,
     MultiPermissionUserSchema,
-    SearchSchema,
     SinglePermissionRoleSchema,
     SinglePermissionUserSchema,
 } from '~/utils/schemas';
 
 export const permissionRouter = createTRPCRouter({
-    list: permissionProcedure
-        .input(SearchSchema)
-        .query(async ({ ctx, input: { query } }) => {
+    list: spaProcedure
+        // .input(SearchSchema)
+        .query(
+            async ({
+                ctx,
+                // input: { query }
+            }) => {
+                return ctx.db.permission
+                    .findMany
+                    // {
+                    // where: {
+                    //     ...(query && {
+                    //         title: {
+                    //             contains: query,
+                    //             mode: 'insensitive',
+                    //         },
+                    //     }),
+                    //     users: {
+                    //         some: {
+                    //             id: ctx.session.user.id,
+                    //         },
+                    //     },
+                    // },
+                    // }
+                    ();
+            },
+        ),
+
+    getForUser: spaProcedure
+        .input(CUIDSchema)
+        .query(async ({ ctx, input: id }) => {
             return ctx.db.permission.findMany({
                 where: {
-                    ...(query && {
-                        title: {
-                            contains: query,
-                            mode: 'insensitive',
-                        },
-                    }),
                     users: {
                         some: {
-                            id: ctx.session.user.id,
+                            id,
                         },
                     },
                 },
             });
         }),
 
-    setForUser: permissionProcedure
+    setForUser: spaProcedure
         .input(MultiPermissionUserSchema)
         .mutation(async ({ ctx, input: { entityId, titles } }) => {
             return ctx.db.user.update(getSetArgs(entityId, titles));
         }),
 
-    setForRole: permissionProcedure
+    setForRole: spaProcedure
         .input(MultiPermissionRoleSchema)
         .mutation(async ({ ctx, input: { entityId, titles } }) => {
             return ctx.db.role.update(getSetArgs(entityId, titles));
         }),
 
-    addToUser: permissionProcedure
+    addToUser: spaProcedure
         .input(SinglePermissionUserSchema)
         .mutation(async ({ ctx, input: { entityId, title } }) => {
             return ctx.db.user.update(getAddArgs(entityId, title));
         }),
 
-    addToRole: permissionProcedure
+    addToRole: spaProcedure
         .input(SinglePermissionRoleSchema)
         .mutation(async ({ ctx, input: { entityId, title } }) => {
             return ctx.db.role.update(getAddArgs(entityId, title));
         }),
 
-    removeFromUser: permissionProcedure
+    removeFromUser: spaProcedure
         .input(SinglePermissionUserSchema)
         .mutation(async ({ ctx, input: { entityId, title } }) => {
             return ctx.db.user.update(getRemoveArgs(entityId, title));
         }),
 
-    removeFromRole: permissionProcedure
+    removeFromRole: spaProcedure
         .input(SinglePermissionRoleSchema)
         .mutation(async ({ ctx, input: { entityId, title } }) => {
             return ctx.db.role.update(getRemoveArgs(entityId, title));
