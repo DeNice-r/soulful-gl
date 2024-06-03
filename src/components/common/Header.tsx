@@ -15,7 +15,7 @@ export const Header: React.FC = () => {
         router.pathname === pathname;
 
     return (
-        <header className="sticky top-0 z-10 flex justify-center border-b bg-neutral-200 shadow-lg dark:bg-gray-950">
+        <header className="sticky top-0 z-10 flex justify-center border-b bg-neutral-200 drop-shadow-sm dark:bg-gray-950">
             <div className="flex h-16 w-2/3 items-center justify-between">
                 <Logo className="hidden" />
                 <nav className="flex basis-3/5 justify-center gap-4 lg:gap-8">

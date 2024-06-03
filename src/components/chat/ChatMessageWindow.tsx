@@ -15,6 +15,7 @@ import {
     ArchiveX,
     CalendarDays,
     Newspaper,
+    RefreshCw,
 } from 'lucide-react';
 import {
     AlertDialog,
@@ -48,6 +49,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '../ui/tooltip';
+import { Separator } from '../ui/separator';
 
 export const ChatMessageWindow: React.FC<{
     chats: RouterOutputs['chat']['listFull'];
@@ -165,6 +167,27 @@ export const ChatMessageWindow: React.FC<{
             );
         })();
     }, [currentChat]);
+
+    function refetchAI() {
+        console.log('refetched');
+    }
+
+    const x =
+        'Повідомлення від користувача: "Мені страшенно сумно. Я нікого не потребую, я втомився від всього. Життя без сенсу. Я більше не можу терпіти цей біль"\n' +
+        '\n' +
+        'Аналіз:\n' +
+        'На основі виразних слів та фраз, користувач, швидше за все, переживає глибоку депресію та відчуває сильний емоціональний біль. Вислови, як "Життя без сенсу" та "Я більше не можу терпіти цей біль", можуть свідчити про суїцидальні настрої.\n' +
+        '\n' +
+        'Підхід до відповіді: \n' +
+        'Відповідь слід утримувати доброзичливою, співчутливою та підтримуючою. Забезпечити їм канали комунікації та необхідну допомогу. Важливо вислухати та успокоїти їх, не забуваючи про інформування про важливість звернення до професіоналів.\n' +
+        '\n' +
+        'Відповідь:\n' +
+        `"Мені справді шкода, що ви зараз переживаєте цей складний момент. Ви заслуговуєте на допомогу, і важливо, щоб ви знали, що ви не самі. Професійні консультанти можуть надати вам необхідну підтримку і допомогу, вам варто з ними зв'язатися."\n` +
+        '\n' +
+        'Додаткові дії:\n' +
+        'Через можливі стан суїцидальних намірів користувача, необхідно відразу ж повідомити про цей випадок керуючого психолога чи професійну службу допомоги.';
+
+    const y = [x, x, x, x];
 
     return (
         <TooltipProvider>
@@ -319,9 +342,7 @@ export const ChatMessageWindow: React.FC<{
                                         <PanelRight />
                                     </div>
                                 </TooltipTrigger>
-                                <TooltipContent>
-                                    Відкрити бічну панель
-                                </TooltipContent>
+                                <TooltipContent>Бічна панель</TooltipContent>
                             </Tooltip>
                             <Tooltip>
                                 <TooltipTrigger className="flex w-full justify-end">
@@ -494,7 +515,57 @@ export const ChatMessageWindow: React.FC<{
                                     />
                                 </div>
                             )}
-                            {tabType === ChatTabType.AI && <div>AI</div>}
+                            {tabType === ChatTabType.AI && (
+                                <div className="flex h-full items-start justify-center">
+                                    <div className="flex h-full flex-col items-center gap-8 overflow-y-auto p-8">
+                                        {y.map((content, index1, y) => {
+                                            return (
+                                                <>
+                                                    <div
+                                                        key={index1}
+                                                        className="space-y-2 text-justify"
+                                                    >
+                                                        {content
+                                                            .split('\n')
+                                                            .map(
+                                                                (
+                                                                    article,
+                                                                    index2,
+                                                                ) => {
+                                                                    return (
+                                                                        <p
+                                                                            key={
+                                                                                index1 *
+                                                                                    100 +
+                                                                                index2
+                                                                            }
+                                                                        >
+                                                                            {
+                                                                                article
+                                                                            }
+                                                                        </p>
+                                                                    );
+                                                                },
+                                                            )}
+                                                    </div>
+                                                    {index1 !==
+                                                        y.length - 1 && (
+                                                        <Separator className="my-4 bg-neutral-800" />
+                                                    )}
+                                                </>
+                                            );
+                                        })}
+                                        {/* todo: AI refetch */}
+                                        <Button
+                                            className="flex gap-2"
+                                            onClick={refetchAI}
+                                        >
+                                            Запросити аналіз чату
+                                            <RefreshCw className="h-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                     <style>
