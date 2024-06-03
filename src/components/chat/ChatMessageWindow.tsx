@@ -50,6 +50,7 @@ import {
     TooltipTrigger,
 } from '../ui/tooltip';
 import { Separator } from '../ui/separator';
+import { env } from '~/env';
 
 export const ChatMessageWindow: React.FC<{
     chats: RouterOutputs['chat']['listFull'];
@@ -85,6 +86,8 @@ export const ChatMessageWindow: React.FC<{
     const [currentEntity, setCurrentEntity] = useState<EntityData>(null);
 
     const [currentPage, setCurrentPage] = useState<number>(1);
+
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const [_, setState] = useState(0);
 
@@ -292,14 +295,6 @@ export const ChatMessageWindow: React.FC<{
                                 </main>
                                 <footer className="border-t p-4 dark:border-zinc-700">
                                     <div className="flex items-center gap-2">
-                                        {/* <Button
-                                        onClick={() =>
-                                            setIsExerciseDialog(true)
-                                        }
-                                        className="rounded-full bg-neutral-50 px-1.5 text-neutral-800 shadow-none hover:bg-neutral-200"
-                                    >
-                                        <Plus />
-                                    </Button> */}
                                         <Input
                                             className="flex-1"
                                             placeholder="Введіть повідомлення..."
@@ -316,7 +311,6 @@ export const ChatMessageWindow: React.FC<{
                                                 }
                                             }}
                                         />
-                                        {/* <ChatInput {...{ handleSend, inputRef }} /> */}
                                         <Button onClick={handleSend}>
                                             <SendHorizonal />
                                         </Button>
@@ -506,6 +500,11 @@ export const ChatMessageWindow: React.FC<{
                                                 <Post
                                                     variant="chat"
                                                     post={post}
+                                                    onClick={() =>
+                                                        setMessageText(
+                                                            `${env.NEXT_PUBLIC_URL}/posts/${post.id}`,
+                                                        )
+                                                    }
                                                 />
                                             </div>
                                         ))}
@@ -522,7 +521,7 @@ export const ChatMessageWindow: React.FC<{
                                     />
                                 </div>
                             )}
-                            {tabType === ChatTabType.AI && (
+                            {tabType === ChatTabType.AI && isWindowOpened && (
                                 <div className="flex h-full items-start justify-center">
                                     <div className="flex h-full flex-col items-center gap-8 overflow-y-auto p-8">
                                         {help?.map((content, index1, y) => {
@@ -568,7 +567,13 @@ export const ChatMessageWindow: React.FC<{
                                             onClick={refetchAI}
                                         >
                                             Запросити аналіз чату
-                                            <RefreshCw className="h-4" />
+                                            <RefreshCw
+                                                className={cn(
+                                                    'h-4',
+                                                    isRefreshing &&
+                                                        'animate-spin',
+                                                )}
+                                            />
                                         </Button>
                                     </div>
                                 </div>

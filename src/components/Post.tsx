@@ -8,8 +8,9 @@ import { defaultFormatDateTime } from '~/utils/dates';
 
 export const Post: React.FC<{
     post: RouterOutputs['post']['list']['values'][number];
+    onClick?: React.MouseEventHandler<HTMLElement>;
     variant?: 'posts' | 'landing' | 'chat';
-}> = ({ post, variant }) => {
+}> = ({ post, onClick, variant }) => {
     const authorName = post.author ? post.author.name : 'Unknown author';
     return (
         <article
@@ -17,7 +18,13 @@ export const Post: React.FC<{
                 'flex h-full flex-col items-center gap-4 text-center text-inherit text-slate-800 md:gap-8 md:text-left  2xl:gap-0 2xl:text-center',
                 variant === 'landing' && 'p-6 md:flex-row 2xl:flex-col',
             )}
-            onClick={() => Router.push(`/posts/${post.id}`)}
+            onClick={
+                onClick
+                    ? onClick
+                    : async () => {
+                          await Router.push(`/posts/${post.id}`);
+                      }
+            }
         >
             {post.image && (
                 <Image

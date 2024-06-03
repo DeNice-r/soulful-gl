@@ -19,6 +19,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '../ui/tooltip';
+import { truncateString } from '~/utils';
 
 interface ChatItemProps {
     chat: ExtendedChat;
@@ -36,24 +37,24 @@ const ChatItem: React.FC<ChatItemProps> = ({
     return (
         <div
             className={cn(
-                'group flex h-24 rounded-2xl border',
+                'group flex h-24 w-full rounded-2xl border',
                 currentChat === chat.id && 'bg-neutral-200',
             )}
         >
             <div
-                className="flex flex-grow cursor-pointer flex-col gap-2 p-4"
+                className="flex-grow cursor-pointer space-y-2 truncate p-4"
                 onClick={onClick}
             >
                 <h1 className="font-medium">Чат #{chat.id}</h1>
-                <p>
+                <p className="truncate">
                     {/*{chat.lastMessage}*/}
                     {chat?.messages?.length > 0 &&
-                        chat.messages.slice(-1)[0].text}
+                        truncateString(chat.messages.slice(-1)[0].text)}
                 </p>
             </div>
             <div
                 className={cn(
-                    'invisible flex h-full w-12 cursor-pointer items-center justify-center transition-colors hover:text-red-600 group-hover:visible',
+                    'invisible flex h-full w-24 cursor-pointer items-center justify-center transition-colors hover:text-red-600 group-hover:visible',
                     currentChat === chat.id && 'w-0 group-hover:invisible',
                 )}
             >

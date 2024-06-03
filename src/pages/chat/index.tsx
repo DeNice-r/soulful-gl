@@ -1,13 +1,12 @@
 import * as React from 'react';
 import { useEffect, useRef } from 'react';
 import { type Message } from '@prisma/client';
-import { Alert } from '~/components/ui/alert';
 import { useSession } from 'next-auth/react';
 import { api, type RouterOutputs } from '~/utils/api';
 import { ChatBar } from '~/components/chat/ChatBar';
 import { ChatMessageWindow } from '~/components/chat/ChatMessageWindow';
 import { Button } from '~/components/ui/button';
-import { LoaderIcon, TriangleAlert } from 'lucide-react';
+import { LoaderIcon } from 'lucide-react';
 import { Logo } from '~/components/common/Logo';
 import {
     ResizableHandle,
@@ -17,8 +16,8 @@ import {
 
 //todo: fix types
 // import useSound from 'use-sound';
-import { cn } from '~/lib/utils';
 import { Toaster } from '~/components/ui/toaster';
+import { useToast } from '~/components/ui/use-toast';
 
 type FullChats = NonNullable<RouterOutputs['chat']['listFull']>;
 
@@ -32,6 +31,9 @@ const ChatUI = () => {
     const unassignedChatsQuery = api.chat.listUnassigned.useQuery(undefined, {
         enabled: false,
     });
+
+    const { toast } = useToast();
+
     const getHelpMutation = api.chat.getHelp.useMutation();
 
     useEffect(() => {
@@ -51,7 +53,6 @@ const ChatUI = () => {
         changeState((prevState) => prevState + 1);
     }
 
-    const [error, setError] = React.useState(false);
     const [currentChat, setCurrentChat] = React.useState<number>(-1);
 
     const inputRef = React.useRef<HTMLInputElement | null>();
@@ -196,10 +197,10 @@ const ChatUI = () => {
         if (!session || !messageText || !wsRef.current) return;
         if (messageText.trim() !== '') {
             if (wsRef.current && wsRef.current.readyState !== WebSocket.OPEN) {
-                setError(true);
-                setTimeout(() => {
-                    setError(false);
-                }, 5000);
+                toast({
+                    title: `Встановлення з'єднання з сервером`,
+                    variant: 'destructive',
+                });
                 return;
             }
 
@@ -263,19 +264,6 @@ const ChatUI = () => {
             className="flex max-h-screen min-h-screen"
         >
             <Toaster />
-            {error && (
-                <Alert
-                    className={cn(
-                        'absolute left-1/2 flex w-96 gap-2 rounded-t-none border-none bg-amber-600 text-white',
-                        currentChat !== -1 ? 'top-[60px]' : 'top-0',
-                    )}
-                >
-                    <div>
-                        <TriangleAlert className="stroke-white" />
-                    </div>
-                    Встановлення з&apos;єднання з сервером...
-                </Alert>
-            )}
             <ResizablePanel
                 className="relative flex h-screen min-w-56 flex-col"
                 defaultSize={20}
