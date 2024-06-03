@@ -73,6 +73,13 @@ export type EntityData = {
     type: EntityType;
 } | null;
 
+export type UnreadMessages =
+    | {
+          id: number;
+          counter: number;
+      }[]
+    | null;
+
 export const PageTitleMap = {
     [ManagementPageName.STATISTICS]: 'Головна',
     [ManagementPageName.USERS]: 'Користувачі',

@@ -26,6 +26,7 @@ interface ChatItemProps {
     onClick: (e: React.SyntheticEvent) => void;
     closeChat: (chatID: number) => Promise<void>;
     currentChat: number;
+    unreadCounter?: number;
 }
 
 const ChatItem: React.FC<ChatItemProps> = ({
@@ -33,6 +34,7 @@ const ChatItem: React.FC<ChatItemProps> = ({
     chat,
     closeChat,
     currentChat,
+    unreadCounter,
 }) => {
     return (
         <div
@@ -45,7 +47,19 @@ const ChatItem: React.FC<ChatItemProps> = ({
                 className="flex-grow cursor-pointer space-y-2 truncate p-4"
                 onClick={onClick}
             >
-                <h1 className="font-medium">Чат #{chat.id}</h1>
+                <div className="flex items-center gap-2">
+                    <h1 className="font-medium">Чат #{chat.id}</h1>
+                    <div className="flex items-center gap-1">
+                        {unreadCounter !== undefined && unreadCounter > 0 && (
+                            <div className="h-3 w-3 rounded-full bg-sky-500 text-sm" />
+                        )}
+                        {unreadCounter !== undefined && unreadCounter > 1 && (
+                            <span className="text-sm text-sky-500">
+                                {unreadCounter}
+                            </span>
+                        )}
+                    </div>
+                </div>
                 <p className="truncate">
                     {/*{chat.lastMessage}*/}
                     {chat?.messages?.length > 0 &&

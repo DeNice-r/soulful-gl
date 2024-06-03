@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { type Message } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import { api, type RouterOutputs } from '~/utils/api';
@@ -14,25 +14,19 @@ import {
     ResizablePanelGroup,
 } from '~/components/ui/resizable';
 
-//todo: fix types
-// import useSound from 'use-sound';
+// @ts-expect-error no types included in library
+import useSound from 'use-sound';
 import { Toaster } from '~/components/ui/toaster';
 import { useToast } from '~/components/ui/use-toast';
-import { hasAccess } from '~/utils/authAssertions';
-import { useRouter } from 'next/router';
+import { type UnreadMessages } from '~/utils/types';
 
 type FullChats = NonNullable<RouterOutputs['chat']['listFull']>;
 
 const ChatUI = () => {
     const { data: session, status } = useSession();
 
-    const router = useRouter();
-
-    if (!hasAccess(session?.user?.permissions ?? [], 'chat', '*')) {
-        void router.push('/');
-    }
-
     const { client: apiClient } = api.useUtils();
+
     const chatListFullQuery = api.chat.listFull.useQuery(undefined, {
         enabled: false,
     });
@@ -51,7 +45,7 @@ const ChatUI = () => {
     const unassignedChatsQueryRef = useRef<NodeJS.Timeout | null>(null);
 
     const chatsRef = useRef<FullChats>({});
-    const [_, changeState] = React.useState<number>(0);
+    const [_, changeState] = useState<number>(0);
 
     const unassignedChatsRef = useRef<
         NonNullable<RouterOutputs['chat']['listUnassigned']>
@@ -61,28 +55,23 @@ const ChatUI = () => {
         changeState((prevState) => prevState + 1);
     }
 
-    const [currentChat, setCurrentChat] = React.useState<number>(-1);
+    const [currentChat, setCurrentChat] = useState<number>(-1);
 
-    const inputRef = React.useRef<HTMLInputElement | null>();
-    const messageEndRef = React.useRef();
+    const inputRef = useRef<HTMLInputElement | null>();
+    const messageEndRef = useRef();
 
-    const wsRef = React.useRef<WebSocket>();
-    const wsReconnectInterval = React.useRef<NodeJS.Timeout>();
+    const wsRef = useRef<WebSocket>();
+    const wsReconnectInterval = useRef<NodeJS.Timeout>();
 
-    //todo: fix types
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+    const [notification] = useSound('/sounds/notification.mp3', {
+        volume: 0.3,
+        interrupt: true,
+    });
 
-    // const [notification] = useSound('/sounds/notification.mp3', {
-    //     volume: 0.3,
-    // });
+    const [messageText, setMessageText] = useState<string | null>();
 
-    const [messageText, setMessageText] = React.useState<string | null>();
-
-    // useEffect(() => {
-    //     if (audioPlayer.current) {
-    //         console.log(audioPlayer.current);
-    //         audioPlayer.current.play();
-    //     }
-    // }, [audioPlayer.current]);
+    const [unreadMessages, setUnreadMessages] = useState<UnreadMessages>(null);
 
     useEffect(() => {
         if (
@@ -148,14 +137,7 @@ const ChatUI = () => {
 
         rerender();
 
-        setTimeout(() => {
-            // @ts-expect-error - ref is legacy todo: replace
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            messageEndRef.current.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center',
-            });
-        }, 0);
+        scrollToBottom();
     }
 
     async function wsConnect() {
@@ -196,22 +178,45 @@ const ChatUI = () => {
     async function wsOnMessage(event: MessageEvent<string>) {
         const message = JSON.parse(event.data) as Message;
         await pushMessage(message);
-        //todo: fix types
+        if (message.isFromUser && message.chatId !== currentChat) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+            notification();
+            setUnreadMessages((prev) => {
+                if (prev === null) {
+                    return [{ id: message.chatId, counter: 1 }];
+                }
 
-        // notification();
+                const chatIndex = prev.findIndex(
+                    (chat) => chat?.id === message.chatId,
+                );
+                if (chatIndex !== -1) {
+                    const newUnreadMessages = [...prev];
+                    newUnreadMessages[chatIndex] = {
+                        ...newUnreadMessages[chatIndex],
+                        counter: newUnreadMessages[chatIndex].counter + 1,
+                    };
+                    return newUnreadMessages;
+                } else {
+                    return [...prev, { id: message.chatId, counter: 1 }];
+                }
+            });
+        }
     }
 
     const handleSend = () => {
-        if (!session || !messageText || !wsRef.current) return;
+        if (!messageText) return;
+        if (
+            !session ||
+            !wsRef.current ||
+            wsRef.current.readyState !== WebSocket.OPEN
+        ) {
+            toast({
+                title: `З'єднання з сервером не встановлено`,
+                variant: 'destructive',
+            });
+            return;
+        }
         if (messageText.trim() !== '') {
-            if (wsRef.current && wsRef.current.readyState !== WebSocket.OPEN) {
-                toast({
-                    title: `Встановлення з'єднання з сервером`,
-                    variant: 'destructive',
-                });
-                return;
-            }
-
             if (!chatsRef.current[currentChat]) return;
 
             const chat = chatsRef.current[currentChat];
@@ -232,6 +237,23 @@ const ChatUI = () => {
         if (index !== currentChat) setCurrentChat(index);
 
         if (index === -1) return;
+
+        setUnreadMessages((prev) => {
+            if (prev === null) {
+                return null;
+            }
+
+            const chatIndex = prev.findIndex((chat) => chat?.id === index);
+            if (chatIndex !== -1) {
+                const newUnreadMessages = [...prev];
+                delete newUnreadMessages[chatIndex];
+                return newUnreadMessages;
+            } else {
+                return [...prev];
+            }
+        });
+
+        setMessageText('');
 
         scrollToBottom(false);
 
@@ -281,7 +303,7 @@ const ChatUI = () => {
                 <Logo className="min-h-16 px-4" />
                 <ChatBar
                     chats={chatsRef.current}
-                    {...{ changeChat, closeChat, currentChat }}
+                    {...{ changeChat, closeChat, currentChat, unreadMessages }}
                 />
                 {unassignedChatsRef.current.length > 0 && (
                     <Button

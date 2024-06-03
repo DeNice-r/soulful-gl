@@ -290,7 +290,7 @@ export const XForm: React.FC<{
                                     </FormItem>
                                 )}
                             />
-                            {currentPage > 0 && (
+                            {/* {currentPage > 0 && (
                                 <FormField
                                     control={form.control}
                                     name="timeseconds"
@@ -311,7 +311,7 @@ export const XForm: React.FC<{
                                         </FormItem>
                                     )}
                                 />
-                            )}
+                            )} */}
                             <FormField
                                 control={form.control}
                                 name="description"
