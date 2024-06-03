@@ -162,7 +162,7 @@ export const userRouter = createTRPCRouter({
             return user;
         }),
 
-    setNotes: permissionProcedure
+    notes: permissionProcedure
         .input(SetNotesSchema)
         .mutation(async ({ ctx, input: { id, notes } }) => {
             return ctx.db.user.update({
@@ -171,6 +171,9 @@ export const userRouter = createTRPCRouter({
                 },
                 data: {
                     notes,
+                },
+                select: {
+                    notes: true,
                 },
             });
         }),

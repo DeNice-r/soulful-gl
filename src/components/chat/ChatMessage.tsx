@@ -1,35 +1,20 @@
 import type { Message } from '@prisma/client';
-import { Box, Paper, Typography } from '@mui/material';
 import * as React from 'react';
+import { cn } from '~/lib/utils';
 
 export const ChatMesssage = ({ message }: { message: Message }) => {
     const isRemote = message.isFromUser;
 
     return (
-        <Box
-            sx={{
-                display: 'flex',
-                justifyContent: isRemote ? 'flex-start' : 'flex-end',
-                mb: 2,
-            }}
-        >
-            <Paper
-                variant="outlined"
-                sx={{
-                    p: 2,
-                    backgroundColor: isRemote
-                        ? 'primary.light'
-                        : 'secondary.light',
-                    color: isRemote
-                        ? 'primary.contrastText'
-                        : 'secondary.contrastText',
-                    borderRadius: isRemote
-                        ? '20px 20px 20px 5px'
-                        : '20px 20px 5px 20px',
-                }}
+        <div className={cn('flex items-end gap-2', !isRemote && 'justify-end')}>
+            <div
+                className={cn(
+                    'rounded-lg bg-zinc-200 p-2 text-sm dark:bg-zinc-700',
+                    !isRemote && 'bg-blue-500 text-white',
+                )}
             >
-                <Typography variant="body1">{message.text}</Typography>
-            </Paper>
-        </Box>
+                <p>{message.text}</p>
+            </div>
+        </div>
     );
 };

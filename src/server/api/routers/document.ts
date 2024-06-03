@@ -34,6 +34,9 @@ export const documentRouter = createTRPCRouter({
                 author: {
                     select: { name: true },
                 },
+                parent: {
+                    select: { id: true, title: true, parentId: true },
+                },
             },
         });
     }),

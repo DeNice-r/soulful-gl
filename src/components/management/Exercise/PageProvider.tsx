@@ -27,7 +27,7 @@ const PageContext = createContext<PageContextProps | undefined>(undefined);
 
 export const PageProvider = ({ children }: { children: ReactNode }) => {
     const [pages, setPages] = useState<PageData[]>([
-        { id: 1, data: { image: '1', title: '1', description: '1' } },
+        { id: 1, data: { image: '', title: '', description: '' } },
     ]);
     const [currentPage, setCurrentPage] = useState(0);
 

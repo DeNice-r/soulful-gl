@@ -7,7 +7,7 @@ import {
     PopoverContent,
 } from '~/components/ui/popover';
 import { Button } from '../../ui/button';
-import { defaultFormatDt } from '~/utils/dates';
+import { defaultFormatDateTime } from '~/utils/dates';
 import { useToast } from '~/components/ui/use-toast';
 import Image from 'next/image';
 
@@ -95,8 +95,8 @@ export const Single: React.FC<{
             <TableCell>{entity.id}</TableCell>
             <TableCell>{entity.email ?? '📲'}</TableCell>
             <TableCell>{entity.name ?? '👤'}</TableCell>
-            <TableCell>{defaultFormatDt(entity.createdAt)}</TableCell>
-            <TableCell>{defaultFormatDt(entity.updatedAt)}</TableCell>
+            <TableCell>{defaultFormatDateTime(entity.createdAt)}</TableCell>
+            <TableCell>{defaultFormatDateTime(entity.updatedAt)}</TableCell>
             <TableCell>{entity.reportCount}</TableCell>
             <TableCell>{entity.suspended ? '⛔' : '✅'}</TableCell>
             <TableCell className="text-right">
