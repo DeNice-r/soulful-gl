@@ -526,6 +526,20 @@ export const ChatMessageWindow: React.FC<{
                             {tabType === ChatTabType.AI && isWindowOpened && (
                                 <div className="flex h-full items-start justify-center">
                                     <div className="flex h-full flex-col items-center gap-8 overflow-y-auto p-8">
+                                        <Button
+                                            className="flex gap-2"
+                                            onClick={refetchAI}
+                                            disabled={isRefreshing}
+                                        >
+                                            Запросити аналіз чату
+                                            <RefreshCw
+                                                className={cn(
+                                                    'h-4',
+                                                    isRefreshing &&
+                                                        'animate-spin',
+                                                )}
+                                            />
+                                        </Button>
                                         {help?.map((content, index1, y) => {
                                             return (
                                                 <>
@@ -533,6 +547,11 @@ export const ChatMessageWindow: React.FC<{
                                                         key={index1}
                                                         className="space-y-2 text-justify"
                                                     >
+                                                        <span className="font-semibold">
+                                                            {help.length -
+                                                                index1 +
+                                                                '.'}
+                                                        </span>
                                                         {content
                                                             .split('\n')
                                                             .map(
@@ -563,20 +582,6 @@ export const ChatMessageWindow: React.FC<{
                                                 </>
                                             );
                                         })}
-                                        {/* todo: AI refetch */}
-                                        <Button
-                                            className="flex gap-2"
-                                            onClick={refetchAI}
-                                        >
-                                            Запросити аналіз чату
-                                            <RefreshCw
-                                                className={cn(
-                                                    'h-4',
-                                                    isRefreshing &&
-                                                        'animate-spin',
-                                                )}
-                                            />
-                                        </Button>
                                     </div>
                                 </div>
                             )}

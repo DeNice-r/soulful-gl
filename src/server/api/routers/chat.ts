@@ -143,7 +143,7 @@ export const chatRouter = createTRPCRouter({
                         },
                     },
                     orderBy: {
-                        createdAt: 'asc',
+                        createdAt: 'desc',
                     },
                 }) ?? []
             );
