@@ -57,16 +57,12 @@ export const recommendationRouter = createTRPCRouter({
                 };
 
                 const where: object = {
-                    ...(query && {
-                        where: {
-                            ...containsQuery,
-                            ...getFullAccessConstraintWithAuthor(ctx),
-                        },
-                    }),
+                    ...(query && containsQuery),
+                    ...getFullAccessConstraintWithAuthor(ctx),
                 };
 
                 const [count, values] = await ctx.db.$transaction([
-                    ctx.db.recommendation.count(where),
+                    ctx.db.recommendation.count({ where }),
                     ctx.db.recommendation.findMany({
                         where,
                         include: {

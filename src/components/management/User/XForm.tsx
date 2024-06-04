@@ -42,7 +42,7 @@ export const XForm: React.FC<{
     changeModalState: () => void;
     formRef: RefObject<HTMLFormElement>;
 }> = ({ entity, changeModalState, formRef }) => {
-    const { data: session, status } = useSession();
+    const { data: session } = useSession();
 
     const create = api.user.create.useMutation();
     const update = api.user.update.useMutation();

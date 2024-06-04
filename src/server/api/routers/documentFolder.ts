@@ -104,12 +104,14 @@ export const documentFolderRouter = createTRPCRouter({
                             connect: { id: parentId },
                         },
                     }),
-                    tags: {
-                        connectOrCreate: tags.map((tag) => ({
-                            where: { title: tag },
-                            create: { title: tag },
-                        })),
-                    },
+                    ...(tags && {
+                        tags: {
+                            connectOrCreate: tags.map((tag) => ({
+                                where: { title: tag },
+                                create: { title: tag },
+                            })),
+                        },
+                    }),
                     author: {
                         connect: { id: ctx.session.user.id },
                     },

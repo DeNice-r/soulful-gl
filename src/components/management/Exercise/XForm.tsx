@@ -194,7 +194,12 @@ export const XForm: React.FC<{
             },
             ...entity.steps.map((step, index) => ({
                 id: index + 2,
-                data: step,
+                data: {
+                    image: step.image ?? '',
+                    title: step.title,
+                    description: step.description,
+                    timeSeconds: step.timeSeconds ?? undefined,
+                },
             })),
         ];
         console.log(pagesRef.current);

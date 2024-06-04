@@ -20,8 +20,6 @@ const Post: React.FC = () => {
     const query = api.post.get.useQuery(id as string);
     const post = query.data;
 
-    const userHasValidSession = Boolean(session);
-
     const handleDelete = async (id: string) => {
         if (window.confirm('Are you sure you want to delete this post?')) {
             await deleteMutation.mutateAsync(id);

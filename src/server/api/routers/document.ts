@@ -27,24 +27,26 @@ export const documentRouter = createTRPCRouter({
             });
         }),
 
-    get: permissionProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
-        return ctx.db.document.findUnique({
-            where: { id: input },
-            include: {
-                author: {
-                    select: { name: true },
+    get: permissionProcedure
+        .input(CUIDSchema)
+        .query(async ({ input: id, ctx }) => {
+            return ctx.db.document.findUnique({
+                where: { id },
+                include: {
+                    author: {
+                        select: { name: true },
+                    },
+                    parent: {
+                        select: { id: true, title: true, parentId: true },
+                    },
                 },
-                parent: {
-                    select: { id: true, title: true, parentId: true },
-                },
-            },
-        });
-    }),
+            });
+        }),
 
     create: permissionProcedure
         .input(DocumentSchema)
         .mutation(async ({ ctx, input }) => {
-            const { parentId, ...noFolderInput } = input;
+            const { parentId, tags, ...noFolderInput } = input;
             return ctx.db.document.create({
                 data: {
                     ...noFolderInput,
@@ -53,12 +55,14 @@ export const documentRouter = createTRPCRouter({
                             connect: { id: parentId },
                         },
                     }),
-                    tags: {
-                        connectOrCreate: input.tags.map((tag) => ({
-                            where: { title: tag },
-                            create: { title: tag },
-                        })),
-                    },
+                    ...(tags && {
+                        tags: {
+                            connectOrCreate: tags.map((tag) => ({
+                                where: { title: tag },
+                                create: { title: tag },
+                            })),
+                        },
+                    }),
                     author: {
                         connect: { id: ctx.session.user.id },
                     },

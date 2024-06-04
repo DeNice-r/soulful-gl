@@ -29,18 +29,18 @@ export function getIsFullAccess(
 export function getFullAccessConstraintWithAuthor(
     ctx: Awaited<ReturnType<typeof createTRPCContext>>,
 ) {
-    return (
-        !getIsFullAccess(ctx) && {
-            OR: [
-                { published: true },
-                ...(ctx?.session?.user?.id.length
-                    ? [
-                          {
-                              authorId: ctx.session.user.id,
-                          },
-                      ]
-                    : []),
-            ],
-        }
-    );
+    return !getIsFullAccess(ctx)
+        ? {
+              OR: [
+                  { published: true },
+                  ...(ctx?.session?.user?.id
+                      ? [
+                            {
+                                authorId: ctx.session.user.id,
+                            },
+                        ]
+                      : []),
+              ],
+          }
+        : {};
 }

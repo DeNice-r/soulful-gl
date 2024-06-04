@@ -72,7 +72,6 @@ export const PageProvider = ({ children }: { children: ReactNode }) => {
                 goToNextPage,
                 deletePage,
                 rerender: () => {
-                    const p = currentPage;
                     setCurrentPage(-1);
                     setTimeout(() => setCurrentPage(0), 0);
                 },
