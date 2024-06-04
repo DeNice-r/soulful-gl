@@ -6,10 +6,10 @@ export const ChatMesssage = ({ message }: { message: Message }) => {
     const isRemote = message.isFromUser;
 
     return (
-        <div className={cn('flex items-end gap-2', !isRemote && 'justify-end')}>
+        <div className={cn('flex', !isRemote ? 'justify-end pl-10' : 'pr-10')}>
             <div
                 className={cn(
-                    'rounded-lg bg-zinc-200 p-2 text-sm dark:bg-zinc-700',
+                    'rounded-lg bg-neutral-200 p-2 text-sm dark:bg-zinc-700',
                     !isRemote && 'bg-blue-500 text-white',
                 )}
             >

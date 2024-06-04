@@ -9,12 +9,12 @@ import { Button } from '~/components/ui/button';
 import {
     Table,
     TableBody,
+    TableCell,
     TableHead,
     TableHeader,
     TableRow,
 } from '~/components/ui/table';
 import { CustomPagination } from '~/components/utils/CustomPagination';
-import { TableCell } from '@mui/material';
 import { Spinner } from '~/components/ui/spinner';
 import { SortableQnAFields } from '~/utils/types';
 import { Single } from '~/components/management/QnA/Single';

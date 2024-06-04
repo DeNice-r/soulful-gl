@@ -49,7 +49,6 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '../ui/tooltip';
-import { Separator } from '../ui/separator';
 import { env } from '~/env';
 import { Exercise } from '../Exercise';
 
@@ -204,10 +203,9 @@ export const ChatMessageWindow: React.FC<{
 
     async function refetchAI() {
         if (currentChat === -1) return;
+        setIsRefreshing(true);
         try {
-            setIsRefreshing(true);
             const newHelp = await getHelpMutation.mutateAsync(currentChat);
-            setIsRefreshing(false);
             setHelp([...(help ?? []), newHelp.text]);
         } catch (e) {
             toast({
@@ -217,6 +215,7 @@ export const ChatMessageWindow: React.FC<{
                 variant: 'destructive',
             });
         }
+        setIsRefreshing(false);
     }
 
     return (
@@ -255,7 +254,6 @@ export const ChatMessageWindow: React.FC<{
                                                     Заархівувати
                                                 </TooltipContent>
                                             </Tooltip>
-
                                             <AlertDialogContent>
                                                 <AlertDialogHeader>
                                                     <AlertDialogTitle>
@@ -566,7 +564,7 @@ export const ChatMessageWindow: React.FC<{
                             )}
                             {tabType === ChatTabType.AI && isWindowOpened && (
                                 <div className="flex h-full items-start justify-center">
-                                    <div className="flex h-full flex-col items-center gap-8 overflow-y-auto p-8">
+                                    <div className="flex h-full flex-col items-center gap-6 overflow-y-auto p-8">
                                         <Button
                                             className="flex gap-2"
                                             onClick={refetchAI}
@@ -586,40 +584,40 @@ export const ChatMessageWindow: React.FC<{
                                                 <>
                                                     <div
                                                         key={index1}
-                                                        className="space-y-2 text-justify"
+                                                        className="flex flex-col gap-4 rounded-lg bg-neutral-50 p-4 text-justify drop-shadow-md"
                                                     >
-                                                        <span className="font-semibold">
-                                                            {help.length -
-                                                                index1 +
-                                                                '.'}
-                                                        </span>
-                                                        {content
-                                                            .split('\n')
-                                                            .map(
-                                                                (
-                                                                    article,
-                                                                    index2,
-                                                                ) => {
-                                                                    return (
-                                                                        <p
-                                                                            key={
-                                                                                index1 *
-                                                                                    100 +
-                                                                                index2
-                                                                            }
-                                                                        >
-                                                                            {
-                                                                                article
-                                                                            }
-                                                                        </p>
-                                                                    );
-                                                                },
-                                                            )}
+                                                        <div className="flex pr-10">
+                                                            <span className="rounded-lg bg-neutral-200 p-2 text-sm dark:bg-zinc-700">
+                                                                Lorem ipsum
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex justify-end pl-10">
+                                                            <div className="flex flex-col gap-2 rounded-lg bg-teal-600 p-2 text-start text-sm text-white">
+                                                                {content
+                                                                    .split('\n')
+                                                                    .map(
+                                                                        (
+                                                                            article,
+                                                                            index2,
+                                                                        ) => {
+                                                                            return (
+                                                                                <p
+                                                                                    key={
+                                                                                        index1 *
+                                                                                            100 +
+                                                                                        index2
+                                                                                    }
+                                                                                >
+                                                                                    {
+                                                                                        article
+                                                                                    }
+                                                                                </p>
+                                                                            );
+                                                                        },
+                                                                    )}
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    {index1 !==
-                                                        y.length - 1 && (
-                                                        <Separator className="my-4 bg-neutral-800" />
-                                                    )}
                                                 </>
                                             );
                                         })}
