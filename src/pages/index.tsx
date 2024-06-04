@@ -2,19 +2,17 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { truculenta } from './_app';
-import { Header } from '~/components/common/Header';
-import { Footer } from '~/components/common/Footer';
 import { Logo } from '~/components/common/Logo';
 import { Post } from '~/components/Post';
 import { api } from '~/utils/api';
+import { Layout } from '~/components/common/Layout';
 
 const Blog: React.FC = () => {
     const posts = api.post.list.useQuery({
         limit: 4,
     });
     return (
-        <main className="bg-homepage-cover">
-            <Header />
+        <Layout className="flex-col bg-homepage-cover">
             <section className="flex h-[calc(100svh-8rem)] flex-col items-center justify-center md:gap-16">
                 <Logo className="flex text-3xl 2xl:text-6xl" />
                 <p className="w-3/4 self-center text-center text-lg font-medium md:w-1/2 md:text-xl 2xl:text-3xl">
@@ -92,8 +90,7 @@ const Blog: React.FC = () => {
                     Proudly powered by WordPress 😎
                 </Link>
             </div>
-            <Footer />
-        </main>
+        </Layout>
     );
 };
 

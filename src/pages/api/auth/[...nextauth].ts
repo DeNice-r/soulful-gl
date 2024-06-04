@@ -63,6 +63,7 @@ export function requestWrapper(
 
     const opts: NextAuthOptions = {
         adapter,
+        pages: { signIn: '/signin' },
         callbacks: {
             async session({ session, user }) {
                 if (user.suspended) throw new Error('User is suspended');

@@ -68,7 +68,7 @@ const ProfilePopup: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="grid gap-3 divide-y p-3">
+                    <div className="grid gap-3 p-3">
                         <Link
                             className="flex items-center gap-2 hover:text-slate-600"
                             href="/profile"
@@ -76,99 +76,94 @@ const ProfilePopup: React.FC = () => {
                             <User className="w-4" />
                             Профіль
                         </Link>
-                        <div>
-                            <p className="mb-2 text-sm text-neutral-400">
-                                Керування
-                            </p>
-                            {hasAccess(
-                                session?.user?.permissions ?? [],
-                                'stats',
-                                '*',
-                            ) && (
+                        {hasAccess(
+                            session?.user?.permissions ?? [],
+                            'stats',
+                            '*',
+                        ) && (
+                            <Link
+                                className="flex items-center gap-2 hover:text-slate-600"
+                                href="/management"
+                            >
+                                <AreaChart className="h-4 w-4" />
+                                Статистика
+                            </Link>
+                        )}
+                        {hasAccess(
+                            session?.user?.permissions ?? [],
+                            'user',
+                            'list',
+                        ) && (
+                            <>
                                 <Link
                                     className="flex items-center gap-2 hover:text-slate-600"
-                                    href="/management"
+                                    href="/management/users"
                                 >
-                                    <AreaChart className="h-4 w-4" />
-                                    Статистика
+                                    <Users className="h-4 w-4" />
+                                    Користувачі
                                 </Link>
-                            )}
-                            {hasAccess(
-                                session?.user?.permissions ?? [],
-                                'user',
-                                'list',
-                            ) && (
-                                <>
-                                    <Link
-                                        className="flex items-center gap-2 hover:text-slate-600"
-                                        href="/management/users"
-                                    >
-                                        <Users className="h-4 w-4" />
-                                        Користувачі
-                                    </Link>
 
-                                    <Link
-                                        className="flex items-center gap-2 hover:text-slate-600"
-                                        href="/management/operators"
-                                    >
-                                        <Mic className="h-4 w-4" />
-                                        Оператори
-                                    </Link>
-                                </>
-                            )}
-                            {hasAccess(
-                                session?.user?.permissions ?? [],
-                                'post',
-                                'list',
-                            ) && (
                                 <Link
                                     className="flex items-center gap-2 hover:text-slate-600"
-                                    href="/management/posts"
+                                    href="/management/operators"
                                 >
-                                    <Newspaper className="h-4 w-4" />
-                                    Дописи
+                                    <Mic className="h-4 w-4" />
+                                    Оператори
                                 </Link>
-                            )}
-                            {hasAccess(
-                                session?.user?.permissions ?? [],
-                                'recommendation',
-                                'list',
-                            ) && (
-                                <Link
-                                    className="flex items-center gap-2 hover:text-slate-600"
-                                    href="/management/recommendations"
-                                >
-                                    <CloudSun className="h-4 w-4" />
-                                    Рекомендації
-                                </Link>
-                            )}
-                            {hasAccess(
-                                session?.user?.permissions ?? [],
-                                'exercise',
-                                'list',
-                            ) && (
-                                <Link
-                                    className="flex items-center gap-2 hover:text-slate-600"
-                                    href="/management/exercises"
-                                >
-                                    <CalendarDays className="h-4 w-4" />
-                                    Вправи
-                                </Link>
-                            )}
-                            {hasAccess(
-                                session?.user?.permissions ?? [],
-                                'qanda',
-                                '*',
-                            ) && (
-                                <Link
-                                    className="flex items-center gap-2 hover:text-slate-600"
-                                    href="/management/QnA"
-                                >
-                                    <CircleHelp className="h-4 w-4" />
-                                    Запитання та відповіді
-                                </Link>
-                            )}
-                        </div>
+                            </>
+                        )}
+                        {hasAccess(
+                            session?.user?.permissions ?? [],
+                            'post',
+                            'list',
+                        ) && (
+                            <Link
+                                className="flex items-center gap-2 hover:text-slate-600"
+                                href="/management/posts"
+                            >
+                                <Newspaper className="h-4 w-4" />
+                                Дописи
+                            </Link>
+                        )}
+                        {hasAccess(
+                            session?.user?.permissions ?? [],
+                            'recommendation',
+                            'list',
+                        ) && (
+                            <Link
+                                className="flex items-center gap-2 hover:text-slate-600"
+                                href="/management/recommendations"
+                            >
+                                <CloudSun className="h-4 w-4" />
+                                Рекомендації
+                            </Link>
+                        )}
+                        {hasAccess(
+                            session?.user?.permissions ?? [],
+                            'exercise',
+                            'list',
+                        ) && (
+                            <Link
+                                className="flex items-center gap-2 hover:text-slate-600"
+                                href="/management/exercises"
+                            >
+                                <CalendarDays className="h-4 w-4" />
+                                Вправи
+                            </Link>
+                        )}
+                        {hasAccess(
+                            session?.user?.permissions ?? [],
+                            'qanda',
+                            '*',
+                        ) && (
+                            <Link
+                                className="flex items-center gap-2 hover:text-slate-600"
+                                href="/management/QnA"
+                            >
+                                <CircleHelp className="h-4 w-4" />
+                                Запитання та відповіді
+                            </Link>
+                        )}
                     </div>
                     <div className="p-3">
                         <Button

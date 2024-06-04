@@ -77,7 +77,7 @@ const Donate: React.FC = () => {
     }
 
     return (
-        <Layout className="items-center bg-homepage-cover">
+        <Layout className="items-center bg-homepage-cover py-14">
             <Head>
                 <title>Пітримати</title>
             </Head>
