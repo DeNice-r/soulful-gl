@@ -2,9 +2,9 @@ import type { RouterOutputs } from '~/utils/api';
 import ChatItem from '~/components/chat/ChatItem';
 import * as React from 'react';
 import { Busyness } from '~/components/chat/Busyness';
-import { Spinner } from '~/components/ui/spinner';
 import { ScrollArea } from '../ui/scroll-area';
 import { type UnreadMessages } from '~/utils/types';
+import { Rabbit } from 'lucide-react';
 
 export const ChatBar = ({
     chats,
@@ -43,7 +43,9 @@ export const ChatBar = ({
                     );
                 })}
                 {Object.values(chats).length === 0 && (
-                    <Spinner size="large"></Spinner>
+                    <p className="flex h-[calc(100vh-140px)] w-full items-center justify-center gap-2 text-lg text-neutral-400">
+                        Повідомлень ще немає <Rabbit />
+                    </p>
                 )}
             </div>
         </ScrollArea>
