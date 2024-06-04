@@ -65,12 +65,14 @@ export const XForm: React.FC<{
         image: '',
         title: '',
         description: '',
+        timeSeconds: null,
     };
 
     useEffect(() => {
         form.setValue('image', currentPageData.image);
         form.setValue('title', currentPageData.title);
         form.setValue('description', currentPageData.description);
+        form.setValue('timeSeconds', currentPageData.timeSeconds);
     }, [currentPage]);
 
     const form = useForm<z.infer<typeof ExerciseStepSchema>>({
@@ -79,6 +81,9 @@ export const XForm: React.FC<{
             title: entity?.title ?? currentPageData.title,
             description: entity?.description ?? currentPageData.description,
             image: entity?.image ?? currentPageData.image,
+            timeSeconds:
+                entity?.steps[currentPage - 1]?.timeSeconds?.toString() ??
+                currentPageData.timeSeconds?.toString(),
         },
     });
 
@@ -87,9 +92,14 @@ export const XForm: React.FC<{
         try {
             const r = ExerciseSchema.parse({
                 ...pages[0].data,
-                steps: pages.slice(1).map((page) => page.data),
+                steps: pages.slice(1).map((page) => ({
+                    ...page.data,
+                    ...(page.data.timeSeconds
+                        ? { timeSeconds: page.data.timeSeconds }
+                        : {}),
+                })),
             });
-            console.log(r);
+            console.log(r.steps);
             if (entity) {
                 await update.mutateAsync({ id: entity.id, ...r });
             } else {
@@ -151,28 +161,32 @@ export const XForm: React.FC<{
     }
 
     function handlePreviousPage() {
-        const [image, title, description] = form.getValues([
+        const [image, title, description, timeSeconds] = form.getValues([
             'image',
             'title',
             'description',
+            'timeSeconds',
         ]);
         goToPreviousPage({
             image: image ?? '',
             title,
             description,
+            timeSeconds: timeSeconds ?? undefined,
         });
     }
 
     function handleNextPage() {
-        const [image, title, description] = form.getValues([
+        const [image, title, description, timeSeconds] = form.getValues([
             'image',
             'title',
             'description',
+            'timeSeconds',
         ]);
         goToNextPage({
             image: image ?? '',
             title,
             description,
+            timeSeconds: timeSeconds ?? undefined,
         });
     }
 
@@ -198,7 +212,7 @@ export const XForm: React.FC<{
                     image: step.image ?? '',
                     title: step.title,
                     description: step.description,
-                    timeSeconds: step.timeSeconds ?? undefined,
+                    timeSeconds: step.timeSeconds?.toString() ?? undefined,
                 },
             })),
         ];
@@ -338,10 +352,10 @@ export const XForm: React.FC<{
                                     </FormItem>
                                 )}
                             />
-                            {/* {currentPage > 0 && (
+                            {currentPage > 0 && (
                                 <FormField
                                     control={form.control}
-                                    name="timeseconds"
+                                    name="timeSeconds"
                                     render={({ field }) => (
                                         <FormItem className="">
                                             <FormLabel className="text-xl">
@@ -350,7 +364,6 @@ export const XForm: React.FC<{
                                             <FormControl>
                                                 <Input
                                                     className="flex-grow outline outline-1 outline-neutral-400"
-                                                    defaultValue={30}
                                                     type="number"
                                                     {...field}
                                                 />
@@ -359,7 +372,7 @@ export const XForm: React.FC<{
                                         </FormItem>
                                     )}
                                 />
-                            )} */}
+                            )}
                             <FormField
                                 control={form.control}
                                 name="description"

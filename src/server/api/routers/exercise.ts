@@ -122,7 +122,12 @@ export const exerciseRouter = createTRPCRouter({
                         },
                     }),
                     steps: {
-                        create: steps,
+                        create: steps.map((step) => ({
+                            ...step,
+                            timeSeconds: step.timeSeconds
+                                ? Number(step.timeSeconds)
+                                : undefined,
+                        })),
                         // ...(step.id && { where: { id: step.id } }),  // could be used if exercise steps were reusable, which is dropped for now
                     },
                     author: {
@@ -138,6 +143,7 @@ export const exerciseRouter = createTRPCRouter({
             return ctx.db.exerciseStep.create({
                 data: {
                     ...input,
+                    timeSeconds: Number(input.timeSeconds),
                     author: {
                         connect: { id: ctx.session.user.id },
                     },
@@ -168,7 +174,12 @@ export const exerciseRouter = createTRPCRouter({
                     ...(steps && {
                         steps: {
                             deleteMany: {},
-                            create: steps,
+                            create: steps.map((step) => ({
+                                ...step,
+                                timeSeconds: step.timeSeconds
+                                    ? Number(step.timeSeconds)
+                                    : undefined,
+                            })),
                         },
                     }),
                 },

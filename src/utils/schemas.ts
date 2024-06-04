@@ -218,7 +218,7 @@ export const PostUpdateSchema = TDIUpdateSchema.extend({
 export const ExerciseStepSchema = TDISchema.extend({
     id: z.string().cuid().optional(),
 
-    timeSeconds: z.number().min(1).max(3600).optional(),
+    timeSeconds: z.string().optional(),
 });
 
 export const ExerciseStepUpdateSchema = TDIUpdateSchema.extend({
