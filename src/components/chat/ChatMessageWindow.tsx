@@ -82,7 +82,9 @@ export const ChatMessageWindow: React.FC<{
     const [tabType, setTabType] = useState<ChatTabType>(ChatTabType.NOTES);
 
     const [notes, setNotes] = useState<string | undefined>();
-    const [help, setHelp] = useState<string[] | undefined>();
+    const [help, setHelp] = useState<
+        { text: string; message: string }[] | undefined
+    >();
 
     const [currentEntity, setCurrentEntity] = useState<EntityData>(null);
 
@@ -199,7 +201,12 @@ export const ChatMessageWindow: React.FC<{
 
     useEffect(() => {
         if (listHelpQuery.data)
-            setHelp(listHelpQuery.data.map((help) => help.text));
+            setHelp(
+                listHelpQuery.data.map((help) => ({
+                    text: help.text,
+                    message: help?.message?.text ?? '',
+                })),
+            );
     }, [listHelpQuery.data]);
 
     async function refetchAI() {
@@ -207,7 +214,10 @@ export const ChatMessageWindow: React.FC<{
         setIsRefreshing(true);
         try {
             const newHelp = await getHelpMutation.mutateAsync(currentChat);
-            setHelp([newHelp.text, ...(help ?? [])]);
+            setHelp([
+                { text: newHelp.text, message: newHelp.message.text },
+                ...(help ?? []),
+            ]);
         } catch (e) {
             toast({
                 title: 'Помилка',
@@ -598,48 +608,58 @@ export const ChatMessageWindow: React.FC<{
                                                 )}
                                             />
                                         </Button>
-                                        {help?.map((content, index1, y) => {
-                                            return (
-                                                <>
-                                                    <div
-                                                        key={index1}
-                                                        className="flex flex-col gap-4 rounded-lg bg-neutral-50 p-4 text-justify drop-shadow-md"
-                                                    >
-                                                        <div className="flex pr-10">
-                                                            <span className="rounded-lg bg-neutral-200 p-2 text-sm dark:bg-zinc-700">
-                                                                Lorem ipsum
-                                                            </span>
-                                                        </div>
-                                                        <div className="flex justify-end pl-10">
-                                                            <div className="flex flex-col gap-2 rounded-lg bg-teal-600 p-2 text-start text-sm text-white">
-                                                                {content
-                                                                    .split('\n')
-                                                                    .map(
-                                                                        (
-                                                                            article,
-                                                                            index2,
-                                                                        ) => {
-                                                                            return (
-                                                                                <p
-                                                                                    key={
-                                                                                        index1 *
-                                                                                            100 +
-                                                                                        index2
-                                                                                    }
-                                                                                >
-                                                                                    {
-                                                                                        article
-                                                                                    }
-                                                                                </p>
-                                                                            );
-                                                                        },
-                                                                    )}
+                                        {help ? (
+                                            help.map((content, index1, y) => {
+                                                return (
+                                                    <>
+                                                        <div
+                                                            key={index1}
+                                                            className="flex flex-col gap-4 rounded-lg bg-neutral-50 p-4 text-justify drop-shadow-md"
+                                                        >
+                                                            <div className="flex pr-10">
+                                                                <span className="rounded-lg bg-neutral-200 p-2 text-sm dark:bg-zinc-700">
+                                                                    {
+                                                                        content.message
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex justify-end pl-10">
+                                                                <div className="flex flex-col gap-2 rounded-lg bg-teal-600 p-2 text-start text-sm text-white">
+                                                                    {content?.text
+                                                                        ?.split(
+                                                                            '\n',
+                                                                        )
+                                                                        .map(
+                                                                            (
+                                                                                article,
+                                                                                index2,
+                                                                            ) => {
+                                                                                return (
+                                                                                    <p
+                                                                                        key={
+                                                                                            index1 *
+                                                                                                100 +
+                                                                                            index2
+                                                                                        }
+                                                                                    >
+                                                                                        {
+                                                                                            article
+                                                                                        }
+                                                                                    </p>
+                                                                                );
+                                                                            },
+                                                                        )}
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                </>
-                                            );
-                                        })}
+                                                    </>
+                                                );
+                                            })
+                                        ) : (
+                                            <div className="h-full w-full">
+                                                <Spinner size="large" />
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}

@@ -142,6 +142,13 @@ export const chatRouter = createTRPCRouter({
                             personnelId: ctx.session.user.id,
                         },
                     },
+                    include: {
+                        message: {
+                            select: {
+                                text: true,
+                            },
+                        },
+                    },
                     orderBy: {
                         createdAt: 'desc',
                     },
@@ -152,22 +159,33 @@ export const chatRouter = createTRPCRouter({
     getHelp: spaProcedure
         .input(NumberIdSchema)
         .mutation(async ({ ctx, input: chatId }) => {
-            const messages = await ctx.db.message.findMany({
-                where: {
-                    chatId,
-                    chat: {
-                        personnelId: ctx.session.user.id,
+            const [messages, qandA] = await ctx.db.$transaction([
+                ctx.db.message.findMany({
+                    where: {
+                        chatId,
+                        chat: {
+                            personnelId: ctx.session.user.id,
+                        },
                     },
-                },
-                orderBy: {
-                    createdAt: 'asc',
-                },
-                select: {
-                    id: true,
-                    text: true,
-                    isFromUser: true,
-                },
-            });
+                    orderBy: {
+                        createdAt: 'asc',
+                    },
+                    select: {
+                        id: true,
+                        text: true,
+                        isFromUser: true,
+                    },
+                }),
+                ctx.db.qandA.findMany({
+                    where: {
+                        published: true,
+                    },
+                    select: {
+                        question: true,
+                        answer: true,
+                    },
+                }),
+            ]);
             if (!messages) throw new Error('Чат не знайдено');
 
             const oldHelp = await ctx.db.gptMessage.findFirst({
@@ -183,19 +201,37 @@ export const chatRouter = createTRPCRouter({
                     'Ви вже отримали допомогу для цього повідомлення',
                 );
 
-            const gptMessage = await getHelp(
-                messages.map((message) => ({
-                    role: 'user',
+            const gptMessagePromise = getHelp([
+                ...qandA.map(({ question, answer }) => ({
+                    role: 'system' as const,
+                    content: `${question}\n${answer}`,
+                })),
+                ...messages.map((message) => ({
+                    role: 'user' as const,
                     name: message.isFromUser ? 'user' : 'psychologist',
                     content: message.text,
                 })),
-            );
+            ]);
+
+            let lastUserMessageId: number | null = null;
+            for (const message of messages) {
+                if (message.isFromUser) {
+                    lastUserMessageId = message.id;
+                }
+            }
 
             return ctx.db.gptMessage.create({
                 data: {
                     chatId,
-                    messageId: messages[messages.length - 1].id,
-                    text: gptMessage,
+                    messageId: lastUserMessageId,
+                    text: await gptMessagePromise,
+                },
+                include: {
+                    message: {
+                        select: {
+                            text: true,
+                        },
+                    },
                 },
             });
         }),
