@@ -83,7 +83,12 @@ export const Post: React.FC<{
                     {/*    }}*/}
                     {/*/>*/}
                 </div>
-                <div className="flex justify-between">
+                <div
+                    className={cn(
+                        'flex justify-between',
+                        variant === 'landing' && 'w-full',
+                    )}
+                >
                     <small
                         className={cn(
                             'text-xs font-light',

@@ -14,7 +14,6 @@ const PostId: React.FC = () => {
     const router = useRouter();
     const { data: session } = useSession();
     const deleteMutation = api.post.delete.useMutation();
-    const updateMutation = api.post.update.useMutation();
 
     const id = router.query.id;
     const query = api.post.get.useQuery(id as string);
@@ -36,11 +35,10 @@ const PostId: React.FC = () => {
             {post && (
                 <div className="flex w-2/3 flex-col gap-6 py-10">
                     <div>
-                        <div className="flex justify-between">
-                            <h3 className="pb-6 text-justify font-bold">
+                        <div className="mb-6 flex items-center justify-between gap-4">
+                            <h3 className="text-justify font-bold">
                                 {post.title}
                             </h3>
-
                             <div className="flex h-full gap-4">
                                 {hasAccess(
                                     session?.user?.permissions ?? [],
@@ -73,7 +71,7 @@ const PostId: React.FC = () => {
                         )}
                     </div>
                     <div
-                        className="text-justify"
+                        className="ql-editor text-justify"
                         dangerouslySetInnerHTML={{ __html: post.description }}
                     />
                 </div>

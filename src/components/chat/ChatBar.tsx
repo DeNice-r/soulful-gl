@@ -32,7 +32,13 @@ export const ChatBar = ({
                         <ChatItem
                             key={index}
                             onClick={() => changeChat(chat.id)}
-                            {...{ chat, closeChat, currentChat, unreadCounter }}
+                            {...{
+                                chats,
+                                chat,
+                                closeChat,
+                                currentChat,
+                                unreadCounter,
+                            }}
                         />
                     );
                 })}
