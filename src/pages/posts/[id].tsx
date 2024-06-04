@@ -10,7 +10,7 @@ import { Spinner } from '~/components/ui/spinner';
 import { hasAccess } from '~/utils/authAssertions';
 import Head from 'next/head';
 
-const Post: React.FC = () => {
+const PostId: React.FC = () => {
     const router = useRouter();
     const { data: session } = useSession();
     const deleteMutation = api.post.delete.useMutation();
@@ -25,11 +25,6 @@ const Post: React.FC = () => {
             await deleteMutation.mutateAsync(id);
             await router.push('/');
         }
-    };
-
-    const handlePublish = async (id: string) => {
-        await updateMutation.mutateAsync({ id, published: true });
-        router.reload();
     };
 
     return (
@@ -47,22 +42,6 @@ const Post: React.FC = () => {
                             </h3>
 
                             <div className="flex h-full gap-4">
-                                {hasAccess(
-                                    session?.user?.permissions ?? [],
-                                    'post',
-                                    'publish',
-                                ) && (
-                                    <Button
-                                        className="px-8 hover:bg-neutral-300"
-                                        variant={'ghost'}
-                                        onClick={() => handlePublish(post.id)}
-                                    >
-                                        {!post.published
-                                            ? 'Опублікувати'
-                                            : 'Приховати'}
-                                    </Button>
-                                )}
-
                                 {hasAccess(
                                     session?.user?.permissions ?? [],
                                     'post',
@@ -103,4 +82,4 @@ const Post: React.FC = () => {
     );
 };
 
-export default Post;
+export default PostId;

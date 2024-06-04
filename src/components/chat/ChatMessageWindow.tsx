@@ -51,6 +51,7 @@ import {
 } from '../ui/tooltip';
 import { Separator } from '../ui/separator';
 import { env } from '~/env';
+import { Exercise } from '../Exercise';
 
 export const ChatMessageWindow: React.FC<{
     chats: RouterOutputs['chat']['listFull'];
@@ -85,7 +86,9 @@ export const ChatMessageWindow: React.FC<{
 
     const [currentEntity, setCurrentEntity] = useState<EntityData>(null);
 
-    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [currentPostsPage, setCurrentPostsPage] = useState<number>(1);
+
+    const [currentExercisesPage, setCurrentExercisesPage] = useState<number>(1);
 
     const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -128,16 +131,31 @@ export const ChatMessageWindow: React.FC<{
         ? Number(router.query.limit)
         : CHAT_POSTS_LAYOUT_LIMIT;
 
-    const posts = api.post.list.useQuery({ limit, page: currentPage });
+    const posts = api.post.list.useQuery({ limit, page: currentPostsPage });
 
-    const total = posts.data?.count ? Math.ceil(posts.data.count / limit) : 0;
+    const exercises = api.exercise.list.useQuery({
+        limit,
+        page: currentExercisesPage,
+    });
+
+    const totalPosts = posts.data?.count
+        ? Math.ceil(posts.data.count / limit)
+        : 0;
+
+    const totalExercises = exercises.data?.count
+        ? Math.ceil(exercises.data.count / limit)
+        : 0;
 
     function rerender() {
         setState((prev) => prev + 1);
     }
 
-    const goToPage = (page: number) => {
-        setCurrentPage(page);
+    const goToPagePosts = (page: number) => {
+        setCurrentPostsPage(page);
+    };
+
+    const goToPageExercises = (page: number) => {
+        setCurrentExercisesPage(page);
     };
 
     const debounceNotes = (value: string) => {
@@ -471,14 +489,6 @@ export const ChatMessageWindow: React.FC<{
                                 </>
                             )}
                             {tabType === ChatTabType.KNOWLEDGE && (
-                                // <div className="h-full w-full">
-                                //     <Label className="relative">
-                                //         <Input
-                                //             placeholder="Введіть назву файлу..."
-                                //             className="rounded-none border-0 border-b border-l border-neutral-500 bg-neutral-200 text-neutral-800 focus-visible:ring-0 focus-visible:ring-offset-0"
-                                //         />
-                                //         <Search className="absolute end-4 top-0 flex h-full items-center text-neutral-500" />
-                                //     </Label>
                                 <Knowledge
                                     chat={true}
                                     {...{
@@ -489,7 +499,38 @@ export const ChatMessageWindow: React.FC<{
                                 // </div>
                             )}
                             {tabType === ChatTabType.EXERCISES && (
-                                <p>Exercises</p>
+                                <div className="flex h-full w-full flex-col gap-4 overflow-y-auto p-8">
+                                    <div className="flex flex-grow flex-wrap justify-center gap-4">
+                                        {exercises?.data?.values.map(
+                                            (exercise) => (
+                                                <div
+                                                    key={exercise.id}
+                                                    className="flex max-h-[26rem] w-full min-w-52 max-w-[25rem] flex-grow justify-center rounded-md bg-neutral-200 shadow-md outline-2 outline-neutral-200 transition-shadow duration-100 ease-in hover:cursor-pointer hover:shadow-xl hover:outline xl:w-5/12"
+                                                >
+                                                    <Exercise
+                                                        variant="chat"
+                                                        exercise={exercise}
+                                                        onClick={() =>
+                                                            setMessageText(
+                                                                `${env.NEXT_PUBLIC_URL}/exercises/${exercise.id}`,
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                            ),
+                                        )}
+                                        {!posts.data && (
+                                            <div className="h-full w-full">
+                                                <Spinner size="large" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <CustomPagination
+                                        page={currentExercisesPage}
+                                        total={totalExercises}
+                                        goToPage={goToPageExercises}
+                                    />
+                                </div>
                             )}
                             {tabType === ChatTabType.POSTS && (
                                 <div className="flex h-full w-full flex-col gap-4 overflow-y-auto p-8">
@@ -517,9 +558,9 @@ export const ChatMessageWindow: React.FC<{
                                         )}
                                     </div>
                                     <CustomPagination
-                                        page={currentPage}
-                                        total={total}
-                                        goToPage={goToPage}
+                                        page={currentPostsPage}
+                                        total={totalPosts}
+                                        goToPage={goToPagePosts}
                                     />
                                 </div>
                             )}

@@ -141,7 +141,7 @@ const Posts: React.FC = () => {
     );
 };
 
-function SunIcon() {
+export function SunIcon() {
     return (
         <svg
             version="1.1"
