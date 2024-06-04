@@ -6,6 +6,11 @@ import { Logo } from '~/components/common/Logo';
 import { Post } from '~/components/Post';
 import { api } from '~/utils/api';
 import { Layout } from '~/components/common/Layout';
+import {
+    FacebookIcon,
+    TelegramIcon,
+    ViberIcon,
+} from '~/components/common/Footer';
 
 const Blog: React.FC = () => {
     const posts = api.post.list.useQuery({
@@ -13,7 +18,7 @@ const Blog: React.FC = () => {
     });
     return (
         <Layout className="flex-col bg-homepage-cover">
-            <section className="flex h-[calc(100svh-8rem)] flex-col items-center justify-center md:gap-16">
+            <section className="flex h-[calc(100vh-4rem)] flex-col items-center justify-center md:gap-16">
                 <Logo className="flex text-3xl 2xl:text-6xl" />
                 <p className="w-3/4 self-center text-center text-lg font-medium md:w-1/2 md:text-xl 2xl:text-3xl">
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
@@ -24,6 +29,30 @@ const Blog: React.FC = () => {
                     libero quam, suscipit sit amet metus pulvinar, placerat
                     lacinia eros.
                 </p>
+                <div className="flex justify-between gap-8">
+                    <Link
+                        className="flex h-14 w-14 items-center justify-center rounded-lg bg-neutral-200 shadow-sm transition-colors hover:bg-neutral-100 hover:shadow-md dark:bg-gray-800"
+                        href="https://t.me/soulful_aid_bot"
+                    >
+                        <TelegramIcon className="h-10 w-10" />
+                        <span className="sr-only">Twitter</span>
+                    </Link>
+                    <Link
+                        className="flex h-14 w-14 items-center justify-center rounded-lg bg-neutral-200 shadow-sm transition-colors hover:bg-neutral-100 hover:shadow-md dark:bg-gray-800"
+                        href="https://www.facebook.com/profile.php?id=100090500564311"
+                    >
+                        <FacebookIcon className="h-6 w-6" />
+                        <span className="sr-only">Facebook</span>
+                    </Link>
+
+                    <Link
+                        className="flex h-14 w-14 items-center justify-center rounded-lg bg-neutral-200 shadow-sm transition-colors hover:bg-neutral-100 hover:shadow-md dark:bg-gray-800"
+                        href="https://www.viber.com/sinapitest"
+                    >
+                        <ViberIcon className="h-6 w-6" />
+                        <span className="sr-only">Viber</span>
+                    </Link>
+                </div>
             </section>
             <article className="flex w-full flex-col justify-center gap-8 py-16 md:px-80 2xl:flex-row 2xl:gap-32 2xl:px-40">
                 {posts?.data?.values.map((post) => (
