@@ -217,8 +217,8 @@ export const PostUpdateSchema = TDIUpdateSchema.extend({
 
 export const ExerciseStepSchema = TDISchema.extend({
     id: z.string().cuid().optional(),
-    backgroundPattern: z.nativeEnum(BackgroundPattern).optional(),
-    timeSeconds: z.number().min(1).max(3600),
+
+    timeSeconds: z.number().min(1).max(3600).optional(),
 });
 
 export const ExerciseStepUpdateSchema = TDIUpdateSchema.extend({
@@ -229,7 +229,7 @@ export const ExerciseStepUpdateSchema = TDIUpdateSchema.extend({
 });
 
 export const ExerciseSchema = TDISchema.extend({
-    tags: z.array(z.string()).min(1).max(25),
+    tags: z.array(z.string()).min(1).max(25).default([]).optional(),
     steps: z.array(ExerciseStepSchema).min(1).max(100),
 });
 
@@ -268,7 +268,7 @@ export const QandAUdateSchema = z.object({
 export const DocumentSchema = TDISchema.extend({
     parentId: CUIDSchema.nullable().optional(),
 
-    tags: z.array(z.string()).max(25).default([]),
+    tags: z.array(z.string()).max(25).default([]).optional(),
 });
 
 export const DocumentUpdateSchema = TDIUpdateSchema.extend({
@@ -284,7 +284,7 @@ export const DocumentFolderSchema = z.object({
 
     title: ShortStringSchema,
 
-    tags: z.array(z.string()).max(25).default([]),
+    tags: z.array(z.string()).max(25).default([]).optional(),
 });
 
 export const DocumentFolderUpdateSchema = z.object({

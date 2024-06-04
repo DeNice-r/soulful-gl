@@ -187,7 +187,7 @@ export const XForm: React.FC<{
                                 >
                                     <div
                                         style={{
-                                            '--image-url': `url(${field.value ? field.value : entity?.image})`,
+                                            '--image-url': `url(${field.value ?? entity?.image ?? ''})`,
                                         }}
                                         className={`flex h-24 w-24 items-center justify-center rounded-full border-2 border-gray-400 bg-white bg-[image:var(--image-url)] bg-cover transition-all hover:opacity-80 dark:bg-gray-700`}
                                     >

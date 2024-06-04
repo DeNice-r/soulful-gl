@@ -113,20 +113,21 @@ export const exerciseRouter = createTRPCRouter({
     create: permissionProcedure
         .input(ExerciseSchema)
         .mutation(async ({ ctx, input }) => {
+            const { tags, steps, ...tdi } = input;
             return ctx.db.exercise.create({
                 data: {
-                    ...input,
-                    tags: {
-                        connectOrCreate: input.tags.map((tag) => ({
-                            where: { title: tag },
-                            create: { title: tag },
-                        })),
-                    },
+                    ...tdi,
+                    ...(tags && {
+                        tags: {
+                            connectOrCreate: tags.map((tag) => ({
+                                where: { title: tag },
+                                create: { title: tag },
+                            })),
+                        },
+                    }),
                     steps: {
-                        connectOrCreate: input.steps.map((step) => ({
-                            where: { id: step.id },
-                            create: { ...step },
-                        })),
+                        create: steps,
+                        // ...(step.id && { where: { id: step.id } }),  // could be used if exercise steps were reusable, which is dropped for now
                     },
                     author: {
                         connect: { id: ctx.session.user.id },
@@ -151,30 +152,27 @@ export const exerciseRouter = createTRPCRouter({
     update: multilevelPermissionProcedure
         .input(ExerciseUpdateSchema)
         .mutation(async ({ ctx, input }) => {
+            const { tags, steps, ...tdi } = input;
             return ctx.db.exercise.update({
                 where: {
                     id: input.id,
                     ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
                 },
                 data: {
-                    title: input.title,
-                    description: input.description,
-                    image: input.image,
+                    ...tdi,
 
-                    ...(input.tags && {
+                    ...(tags && {
                         tags: {
-                            connectOrCreate: input.tags.map((tag) => ({
+                            connectOrCreate: tags.map((tag) => ({
                                 where: { title: tag },
                                 create: { title: tag },
                             })),
                         },
                     }),
-                    ...(input.steps && {
+                    ...(steps && {
                         steps: {
-                            connectOrCreate: input.steps.map((step) => ({
-                                where: { id: step.id },
-                                create: { ...step },
-                            })),
+                            deleteMany: {},
+                            create: steps,
                         },
                     }),
                 },

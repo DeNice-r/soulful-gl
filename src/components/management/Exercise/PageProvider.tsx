@@ -5,23 +5,23 @@ import React, {
     type ReactNode,
     useRef,
 } from 'react';
+import type * as z from 'zod';
+import { type ExerciseStepSchema } from '~/utils/schemas';
 
 interface PageData {
     id: number;
-    data: {
-        image: string;
-        title: string;
-        description: string;
-    };
+    data: z.infer<typeof ExerciseStepSchema>;
 }
 
 interface PageContextProps {
     pages: PageData[];
+    pagesRef: React.MutableRefObject<PageData[]>;
     currentPage: number;
     savePageData: (index: number, data: PageData['data']) => void;
     goToPreviousPage: (currentPageData: PageData['data']) => void;
     goToNextPage: (currentPageData: PageData['data']) => void;
     deletePage: (index: number) => void;
+    rerender: () => void;
 }
 
 const PageContext = createContext<PageContextProps | undefined>(undefined);
@@ -29,6 +29,7 @@ const PageContext = createContext<PageContextProps | undefined>(undefined);
 export const PageProvider = ({ children }: { children: ReactNode }) => {
     const pagesRef = useRef<PageData[]>([
         { id: 1, data: { image: '', title: '', description: '' } },
+        { id: 2, data: { image: '', title: '', description: '' } },
     ]);
     const [currentPage, setCurrentPage] = useState(0);
 
@@ -64,11 +65,17 @@ export const PageProvider = ({ children }: { children: ReactNode }) => {
         <PageContext.Provider
             value={{
                 pages: pagesRef.current,
+                pagesRef,
                 currentPage,
                 savePageData,
                 goToPreviousPage,
                 goToNextPage,
                 deletePage,
+                rerender: () => {
+                    const p = currentPage;
+                    setCurrentPage(-1);
+                    setTimeout(() => setCurrentPage(0), 0);
+                },
             }}
         >
             {children}

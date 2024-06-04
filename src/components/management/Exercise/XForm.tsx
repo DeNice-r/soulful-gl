@@ -18,7 +18,7 @@ import { Input } from '~/components/ui/input';
 import type * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ExerciseSchema } from '~/utils/schemas';
+import { ExerciseSchema, ExerciseStepSchema } from '~/utils/schemas';
 import { api, type RouterOutputs } from '~/utils/api';
 import { uploadImage } from '~/utils/s3/frontend';
 import { Editor } from '../common/Editor';
@@ -27,6 +27,7 @@ import getCroppedImg from '../../utils/cropImage';
 import Cropper, { type Area, type Point } from 'react-easy-crop';
 import { MoveLeft, MoveRight, Trash2, X, Plus, Upload } from 'lucide-react';
 import { usePageContext } from './PageProvider';
+import { toast } from '~/components/ui/use-toast';
 
 declare module 'react' {
     interface CSSProperties {
@@ -51,11 +52,13 @@ export const XForm: React.FC<{
 
     const {
         pages,
+        pagesRef,
         currentPage,
-        // savePageData,
+        savePageData,
         goToPreviousPage,
         goToNextPage,
         deletePage,
+        rerender,
     } = usePageContext();
 
     const currentPageData = pages[currentPage]?.data || {
@@ -70,8 +73,8 @@ export const XForm: React.FC<{
         form.setValue('description', currentPageData.description);
     }, [currentPage]);
 
-    const form = useForm<z.infer<typeof ExerciseSchema>>({
-        resolver: zodResolver(ExerciseSchema),
+    const form = useForm<z.infer<typeof ExerciseStepSchema>>({
+        resolver: zodResolver(ExerciseStepSchema),
         defaultValues: {
             title: entity?.title ?? currentPageData.title,
             description: entity?.description ?? currentPageData.description,
@@ -79,16 +82,30 @@ export const XForm: React.FC<{
         },
     });
 
-    async function onSubmit(values: z.infer<typeof ExerciseSchema>) {
-        if (entity) {
-            await update.mutateAsync({ id: entity.id, ...values });
-        } else {
-            await create.mutateAsync(values);
+    async function onSubmit(values: z.infer<typeof ExerciseStepSchema>) {
+        savePageData(currentPage, values);
+        try {
+            const r = ExerciseSchema.parse({
+                ...pages[0].data,
+                steps: pages.slice(1).map((page) => page.data),
+            });
+            console.log(r);
+            if (entity) {
+                await update.mutateAsync({ id: entity.id, ...r });
+            } else {
+                await create.mutateAsync(r);
+            }
+            changeModalState();
+        } catch (e) {
+            toast({
+                title: 'Один з кроків вправи не відповідає вимогам',
+                variant: 'destructive',
+            });
+            return true;
         }
-        changeModalState();
     }
 
-    function createSetValue(field: keyof z.infer<typeof ExerciseSchema>) {
+    function createSetValue(field: keyof z.infer<typeof ExerciseStepSchema>) {
         return async function setDescription(value: string) {
             form.setValue(field, value);
         };
@@ -159,6 +176,31 @@ export const XForm: React.FC<{
         });
     }
 
+    useEffect(() => {
+        if (!entity) {
+            return;
+        }
+
+        console.log(entity);
+
+        pagesRef.current = [
+            {
+                id: 1,
+                data: {
+                    image: entity.image ?? '',
+                    title: entity.title,
+                    description: entity.description,
+                },
+            },
+            ...entity.steps.map((step, index) => ({
+                id: index + 2,
+                data: step,
+            })),
+        ];
+        console.log(pagesRef.current);
+        rerender();
+    }, [entity]);
+
     return (
         <Form {...form}>
             <form
@@ -190,7 +232,7 @@ export const XForm: React.FC<{
                                 >
                                     <div
                                         style={{
-                                            '--image-url': `url(${field.value ? field.value : entity?.image})`,
+                                            '--image-url': `url(${field.value ?? entity?.image ?? ''})`,
                                         }}
                                         className={`flex aspect-video w-72 items-center justify-center rounded-xl border-2 border-gray-400 bg-white bg-[image:var(--image-url)] bg-cover transition-all hover:opacity-80 dark:bg-gray-700`}
                                     >
@@ -205,6 +247,7 @@ export const XForm: React.FC<{
                                         type="file"
                                         onInput={onFileChange}
                                     />
+                                    <FormMessage />
                                 </label>
                                 <Modal
                                     isOpen={!!imageSrc}
@@ -374,7 +417,7 @@ export const XForm: React.FC<{
                         <div className="flex flex-grow basis-1 justify-center">
                             <Button
                                 className="text-wrap px-7 py-6"
-                                variant={'destructive'}
+                                variant="destructive"
                                 onClick={handleDeletePage}
                                 disabled={currentPage < 1 ?? true}
                             >
