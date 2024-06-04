@@ -22,6 +22,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '~/components/ui/input';
 import { api } from '~/utils/api';
 import { UserQandASchema } from '~/utils/schemas';
+import Head from 'next/head';
 
 const QnA: React.FC = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -44,6 +45,9 @@ const QnA: React.FC = () => {
     };
     return (
         <Layout className="flex w-full flex-col items-center bg-homepage-cover">
+            <Head>
+                <title>Запитання та відповіді</title>
+            </Head>
             <h3 className="w-full pt-10 text-center font-bold">
                 Запитання та відповіді
             </h3>

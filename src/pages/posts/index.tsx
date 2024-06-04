@@ -9,6 +9,7 @@ import { DEFAULT_POSTS_LAYOUT_LIMIT } from '~/utils/constants';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import { Search } from 'lucide-react';
+import Head from 'next/head';
 
 const Posts: React.FC = () => {
     const router = useRouter();
@@ -63,6 +64,9 @@ const Posts: React.FC = () => {
 
     return (
         <Layout className="bg-homepage-cover">
+            <Head>
+                <title>Дописи</title>
+            </Head>
             <div className="flex w-full flex-col items-center pb-8 md:w-2/3">
                 <div className="flex w-full flex-wrap justify-between gap-8 py-10 text-slate-800">
                     <div className="flex w-full flex-col items-center gap-8">

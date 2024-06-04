@@ -30,6 +30,7 @@ import {
 import { Input } from '~/components/ui/input';
 import { ToggleGroup, ToggleGroupItem } from '~/components/ui/toggle-group';
 import axios from 'axios';
+import Head from 'next/head';
 
 const Donate: React.FC = () => {
     const router = useRouter();
@@ -77,6 +78,9 @@ const Donate: React.FC = () => {
 
     return (
         <Layout className="items-center bg-homepage-cover">
+            <Head>
+                <title>Пітримати</title>
+            </Head>
             <div className="flex w-2/3 flex-col gap-3 rounded-xl border border-neutral-300 bg-neutral-200/80 p-10 text-justify drop-shadow-xl">
                 <h2 className="text-center font-semibold">
                     Підтримайте Soulful – Ваш внесок у ментально здорове

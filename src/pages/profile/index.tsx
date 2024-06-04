@@ -33,6 +33,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '~/components/ui/dialog';
+import Head from 'next/head';
 
 const Profile: React.FC = () => {
     const update = api.user.selfUpdate.useMutation();
@@ -167,6 +168,9 @@ const Profile: React.FC = () => {
 
     return (
         <Layout className="w-full">
+            <Head>
+                <title>Профіль</title>
+            </Head>
             {session ? (
                 <>
                     <Form {...mainForm}>

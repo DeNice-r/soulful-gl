@@ -1,4 +1,5 @@
 import { Sparkle, Sun } from 'lucide-react';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { Button } from '~/components/ui/button';
@@ -7,6 +8,9 @@ const Thankyou: React.FC = () => {
     const router = useRouter();
     return (
         <>
+            <Head>
+                <title>Дякуємо</title>
+            </Head>
             <div className="over flex h-svh w-full items-center justify-center bg-thankyou-cover">
                 <div className="flex h-2/3 w-2/3 flex-col items-center justify-center gap-8 rounded-2xl bg-neutral-200 p-14 drop-shadow-xl">
                     <h4 className="font-semibold">Дякуємо!</h4>

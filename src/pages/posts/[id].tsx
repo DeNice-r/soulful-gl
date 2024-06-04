@@ -8,6 +8,7 @@ import { Button } from '~/components/ui/button';
 import { defaultFormatDateTime } from '~/utils/dates';
 import { Spinner } from '~/components/ui/spinner';
 import { hasAccess } from '~/utils/authAssertions';
+import Head from 'next/head';
 
 const Post: React.FC = () => {
     const router = useRouter();
@@ -35,6 +36,9 @@ const Post: React.FC = () => {
 
     return (
         <Layout>
+            <Head>
+                <title>{post?.title}</title>
+            </Head>
             {!post && <Spinner size="large" />}
             {post && (
                 <div className="flex w-2/3 flex-col gap-6 py-10">

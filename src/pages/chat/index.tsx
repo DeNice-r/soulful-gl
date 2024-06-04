@@ -19,6 +19,7 @@ import useSound from 'use-sound';
 import { Toaster } from '~/components/ui/toaster';
 import { useToast } from '~/components/ui/use-toast';
 import { type UnreadMessages } from '~/utils/types';
+import Head from 'next/head';
 
 type FullChats = NonNullable<RouterOutputs['chat']['listFull']>;
 
@@ -293,6 +294,9 @@ const ChatUI = () => {
             direction="horizontal"
             className="flex max-h-screen min-h-screen"
         >
+            <Head>
+                <title>Чати</title>
+            </Head>
             <Toaster />
             <ResizablePanel
                 className="relative flex h-screen min-w-56 flex-col"

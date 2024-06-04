@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { Layout } from '~/components/common/Layout';
@@ -25,6 +26,9 @@ const KnowledgePage: React.FC = () => {
 
     return (
         <Layout footer={false} className="bg-knowledge-cover">
+            <Head>
+                <title>База знань</title>
+            </Head>
             <div className="flex w-2/3 flex-col items-center gap-10 py-12 text-slate-800">
                 <Knowledge
                     {...{
