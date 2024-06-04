@@ -49,7 +49,9 @@
     .ql-editor p a {
         @apply text-blue-600 underline visited:text-indigo-500
     }
+    
     .ql-editor {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        @apply flex flex-col !gap-2
     }
 }

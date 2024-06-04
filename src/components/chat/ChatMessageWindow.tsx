@@ -51,6 +51,7 @@ import {
 } from '../ui/tooltip';
 import { env } from '~/env';
 import { Exercise } from '../Exercise';
+import { FacebookIcon, TelegramIcon, ViberIcon } from '../common/Footer';
 
 export const ChatMessageWindow: React.FC<{
     chats: RouterOutputs['chat']['listFull'];
@@ -228,6 +229,10 @@ export const ChatMessageWindow: React.FC<{
         setIsRefreshing(false);
     }
 
+    const [platform, ...idParts] = chats[currentChat]?.userId?.split('_') ?? [];
+
+    const id = idParts.join('');
+
     return (
         <TooltipProvider>
             <ResizablePanelGroup direction="horizontal" className="h-screen">
@@ -236,12 +241,26 @@ export const ChatMessageWindow: React.FC<{
                         {currentChat !== -1 && (
                             <>
                                 <header className="flex h-16 items-center justify-between border-b p-4 dark:border-zinc-700">
-                                    <h2 className="flex items-center gap-4 text-xl font-bold">
-                                        {chats[currentChat]?.userId}
+                                    <div className="flex items-center gap-4 text-xl font-bold">
+                                        <div className="flex gap-2">
+                                            {platform === 'facebook' && (
+                                                <FacebookIcon className="h-5 w-5" />
+                                            )}
+                                            {platform === 'viber' && (
+                                                <ViberIcon className="h-5 w-5" />
+                                            )}
+                                            {platform === 'telegram' && (
+                                                <TelegramIcon className="h-7 w-7" />
+                                            )}
+
+                                            <p className="flex items-center text-sm text-neutral-400">
+                                                {id}
+                                            </p>
+                                        </div>
                                         <Tooltip>
                                             <TooltipTrigger>
                                                 <OctagonAlert
-                                                    onClick={() =>
+                                                    onClick={
                                                         closeCurrentChatAndReport
                                                     }
                                                     className="w-5 cursor-pointer text-red-600"
@@ -251,7 +270,7 @@ export const ChatMessageWindow: React.FC<{
                                                 Поскаржитись
                                             </TooltipContent>
                                         </Tooltip>
-                                    </h2>
+                                    </div>
                                     <div className="flex items-center gap-4">
                                         <AlertDialog>
                                             <Tooltip>
