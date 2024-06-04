@@ -8,12 +8,12 @@ import {
     TableHeader,
     TableBody,
     Table,
+    TableCell,
 } from '~/components/ui/table';
 import { type RouterOutputs, api } from '~/utils/api';
 import Modal from 'react-modal';
 import { XForm } from '~/components/management/User/XForm';
 import { Spinner } from '~/components/ui/spinner';
-import { TableCell } from '@mui/material';
 import { Single } from '~/components/management/User/Single';
 import { CustomPagination } from '~/components/utils/CustomPagination';
 import { SortableUserFields } from '~/utils/types';
