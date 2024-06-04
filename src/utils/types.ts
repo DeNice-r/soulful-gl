@@ -81,7 +81,7 @@ export type UnreadMessages =
     | null;
 
 export const PageTitleMap = {
-    [ManagementPageName.STATISTICS]: 'Головна',
+    [ManagementPageName.STATISTICS]: 'Статистика',
     [ManagementPageName.USERS]: 'Користувачі',
     [ManagementPageName.OPERATORS]: 'Оператори',
     [ManagementPageName.POSTS]: 'Дописи',
