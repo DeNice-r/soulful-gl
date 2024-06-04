@@ -81,7 +81,9 @@ export const ChatMessageWindow: React.FC<{
     const [tabType, setTabType] = useState<ChatTabType>(ChatTabType.NOTES);
 
     const [notes, setNotes] = useState<string | undefined>();
-    const [help, setHelp] = useState<string[] | undefined>();
+    const [help, setHelp] = useState<
+        { text: string; message: string }[] | undefined
+    >();
 
     const [currentEntity, setCurrentEntity] = useState<EntityData>(null);
 
@@ -198,7 +200,12 @@ export const ChatMessageWindow: React.FC<{
 
     useEffect(() => {
         if (listHelpQuery.data)
-            setHelp(listHelpQuery.data.map((help) => help.text));
+            setHelp(
+                listHelpQuery.data.map((help) => ({
+                    text: help.text,
+                    message: help?.message?.text ?? '',
+                })),
+            );
     }, [listHelpQuery.data]);
 
     async function refetchAI() {
@@ -206,7 +213,10 @@ export const ChatMessageWindow: React.FC<{
         setIsRefreshing(true);
         try {
             const newHelp = await getHelpMutation.mutateAsync(currentChat);
-            setHelp([...(help ?? []), newHelp.text]);
+            setHelp([
+                { text: newHelp.text, message: newHelp.message.text },
+                ...(help ?? []),
+            ]);
         } catch (e) {
             toast({
                 title: 'Помилка',
@@ -588,13 +598,17 @@ export const ChatMessageWindow: React.FC<{
                                                     >
                                                         <div className="flex pr-10">
                                                             <span className="rounded-lg bg-neutral-200 p-2 text-sm dark:bg-zinc-700">
-                                                                Lorem ipsum
+                                                                {
+                                                                    content.message
+                                                                }
                                                             </span>
                                                         </div>
                                                         <div className="flex justify-end pl-10">
                                                             <div className="flex flex-col gap-2 rounded-lg bg-teal-600 p-2 text-start text-sm text-white">
-                                                                {content
-                                                                    .split('\n')
+                                                                {content?.text
+                                                                    ?.split(
+                                                                        '\n',
+                                                                    )
                                                                     .map(
                                                                         (
                                                                             article,
