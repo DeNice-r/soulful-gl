@@ -22,18 +22,20 @@ interface PageContextProps {
     goToNextPage: (currentPageData: PageData['data']) => void;
     deletePage: (index: number) => void;
     rerender: () => void;
+    resetPages: () => void;
 }
 
 const PageContext = createContext<PageContextProps | undefined>(undefined);
 
 export const PageProvider = ({ children }: { children: ReactNode }) => {
-    const pagesRef = useRef<PageData[]>([
+    const defaultValue: PageData[] = [
         { id: 1, data: { image: '', title: '', description: '' } },
         {
             id: 2,
             data: { image: '', title: '', description: '', timeSeconds: '' },
         },
-    ]);
+    ];
+    const pagesRef = useRef<PageData[]>(defaultValue);
     const [currentPage, setCurrentPage] = useState(0);
 
     const savePageData = (index: number, data: PageData['data']) => {
@@ -64,6 +66,11 @@ export const PageProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const resetPages = () => {
+        pagesRef.current = defaultValue;
+        setCurrentPage(0);
+    };
+
     return (
         <PageContext.Provider
             value={{
@@ -76,8 +83,9 @@ export const PageProvider = ({ children }: { children: ReactNode }) => {
                 deletePage,
                 rerender: () => {
                     setCurrentPage(-1);
-                    setTimeout(() => setCurrentPage(0), 0);
+                    setTimeout(() => setCurrentPage(0), 300);
                 },
+                resetPages,
             }}
         >
             {children}

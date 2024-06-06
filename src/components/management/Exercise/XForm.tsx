@@ -59,13 +59,14 @@ export const XForm: React.FC<{
         goToNextPage,
         deletePage,
         rerender,
+        resetPages,
     } = usePageContext();
 
     const currentPageData = pages[currentPage]?.data || {
         image: '',
         title: '',
         description: '',
-        timeSeconds: null,
+        timeSeconds: '',
     };
 
     useEffect(() => {
@@ -171,7 +172,7 @@ export const XForm: React.FC<{
             image: image ?? '',
             title,
             description,
-            timeSeconds: timeSeconds ?? undefined,
+            timeSeconds: timeSeconds ?? '',
         });
     }
 
@@ -182,20 +183,20 @@ export const XForm: React.FC<{
             'description',
             'timeSeconds',
         ]);
+        console.log(timeSeconds);
         goToNextPage({
             image: image ?? '',
             title,
             description,
-            timeSeconds: timeSeconds ?? undefined,
+            timeSeconds: timeSeconds ?? '',
         });
     }
 
     useEffect(() => {
         if (!entity) {
+            resetPages();
             return;
         }
-
-        console.log(entity);
 
         pagesRef.current = [
             {
@@ -216,7 +217,6 @@ export const XForm: React.FC<{
                 },
             })),
         ];
-        console.log(pagesRef.current);
         rerender();
     }, [entity]);
 
@@ -425,7 +425,7 @@ export const XForm: React.FC<{
                                 className="px-7 py-6"
                                 onClick={handleNextPage}
                             >
-                                {currentPage + 1 == pages.length ? (
+                                {currentPage + 1 >= pages.length ? (
                                     <Plus />
                                 ) : (
                                     <MoveRight />
