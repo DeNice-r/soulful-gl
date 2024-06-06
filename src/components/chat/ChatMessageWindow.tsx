@@ -215,7 +215,7 @@ export const ChatMessageWindow: React.FC<{
         try {
             const newHelp = await getHelpMutation.mutateAsync(currentChat);
             setHelp([
-                { text: newHelp.text, message: newHelp.message.text },
+                { text: newHelp.text, message: newHelp?.message?.text ?? '' },
                 ...(help ?? []),
             ]);
         } catch (e) {
@@ -614,7 +614,7 @@ export const ChatMessageWindow: React.FC<{
                                                     <>
                                                         <div
                                                             key={index1}
-                                                            className="flex flex-col gap-4 rounded-lg bg-neutral-50 p-4 text-justify drop-shadow-md"
+                                                            className="flex w-full flex-col gap-4 rounded-lg bg-neutral-50 p-4 text-justify drop-shadow-md"
                                                         >
                                                             <div className="flex pr-10">
                                                                 <span className="rounded-lg bg-neutral-200 p-2 text-sm dark:bg-zinc-700">

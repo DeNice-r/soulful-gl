@@ -37,12 +37,6 @@ const ChatUI = () => {
 
     const { toast } = useToast();
 
-    const getHelpMutation = api.chat.getHelp.useMutation();
-
-    useEffect(() => {
-        console.log(getHelpMutation.data);
-    }, [getHelpMutation.data]);
-
     const unassignedChatsQueryRef = useRef<NodeJS.Timeout | null>(null);
 
     const chatsRef = useRef<FullChats>({});
