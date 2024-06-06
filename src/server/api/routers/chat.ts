@@ -189,9 +189,10 @@ export const chatRouter = createTRPCRouter({
             if (!messages) throw new Error('Чат не знайдено');
 
             let lastUserMessageId: number | null = null;
-            for (const message of messages) {
-                if (message.isFromUser) {
-                    lastUserMessageId = message.id;
+            for (let x = messages.length - 1; x >= 0; x--) {
+                if (messages[x].isFromUser) {
+                    lastUserMessageId = messages[x].id;
+                    break;
                 }
             }
 
