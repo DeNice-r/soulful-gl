@@ -609,7 +609,7 @@ export const ChatMessageWindow: React.FC<{
                                             />
                                         </Button>
                                         {help ? (
-                                            help.map((content, index1, y) => {
+                                            help.map((content, index1) => {
                                                 return (
                                                     <>
                                                         <div
