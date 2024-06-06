@@ -41,12 +41,14 @@ const ExerciseId: React.FC = () => {
     };
 
     function goNext() {
+        setIsComplete(false);
         if (page !== total) {
             setPage(page + 1);
         }
     }
 
     function goPrev() {
+        setIsComplete(false);
         if (page !== 0) {
             setPage(page - 1);
         }
@@ -85,7 +87,8 @@ const ExerciseId: React.FC = () => {
                             steps[page - 1].timeSeconds &&
                             (!isComplete ? (
                                 <CountdownCircleTimer
-                                    isPlaying
+                                    isPlaying={true}
+                                    key={page}
                                     duration={steps[page - 1].timeSeconds ?? 0}
                                     colors="#262626"
                                     size={32}
