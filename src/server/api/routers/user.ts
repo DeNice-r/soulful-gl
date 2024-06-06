@@ -79,12 +79,12 @@ export const userRouter = createTRPCRouter({
                     })),
                 };
 
-                if (query && where) {
-                    where = {
-                        AND: [where, containsQuery],
-                    };
-                } else {
-                    where = containsQuery;
+                if (query) {
+                    where
+                        ? (where = {
+                              AND: [where, containsQuery],
+                          })
+                        : (where = containsQuery);
                 }
 
                 const [count, values] = await ctx.db.$transaction([
