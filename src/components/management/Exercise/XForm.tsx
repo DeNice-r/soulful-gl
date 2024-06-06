@@ -58,7 +58,6 @@ export const XForm: React.FC<{
         goToPreviousPage,
         goToNextPage,
         deletePage,
-        rerender,
         resetPages,
     } = usePageContext();
 
@@ -92,20 +91,20 @@ export const XForm: React.FC<{
         savePageData(currentPage, values);
         try {
             const r = ExerciseSchema.parse({
-                ...pages[0].data,
-                steps: pages.slice(1).map((page) => ({
+                ...pagesRef.current[0].data,
+                steps: pagesRef.current.slice(1).map((page) => ({
                     ...page.data,
                     ...(page.data.timeSeconds
                         ? { timeSeconds: page.data.timeSeconds }
                         : {}),
                 })),
             });
-            console.log(r.steps);
             if (entity) {
                 await update.mutateAsync({ id: entity.id, ...r });
             } else {
                 await create.mutateAsync(r);
             }
+            resetPages();
             changeModalState();
         } catch (e) {
             toast({
@@ -183,7 +182,6 @@ export const XForm: React.FC<{
             'description',
             'timeSeconds',
         ]);
-        console.log(timeSeconds);
         goToNextPage({
             image: image ?? '',
             title,
@@ -193,31 +191,27 @@ export const XForm: React.FC<{
     }
 
     useEffect(() => {
-        if (!entity) {
-            resetPages();
-            return;
-        }
-
-        pagesRef.current = [
-            {
-                id: 1,
-                data: {
-                    image: entity.image ?? '',
-                    title: entity.title,
-                    description: entity.description,
+        resetPages(
+            entity && [
+                {
+                    id: 1,
+                    data: {
+                        image: entity.image ?? '',
+                        title: entity.title,
+                        description: entity.description,
+                    },
                 },
-            },
-            ...entity.steps.map((step, index) => ({
-                id: index + 2,
-                data: {
-                    image: step.image ?? '',
-                    title: step.title,
-                    description: step.description,
-                    timeSeconds: step.timeSeconds?.toString() ?? undefined,
-                },
-            })),
-        ];
-        rerender();
+                ...entity.steps.map((step, index) => ({
+                    id: index + 2,
+                    data: {
+                        image: step.image ?? '',
+                        title: step.title,
+                        description: step.description,
+                        timeSeconds: step.timeSeconds?.toString() ?? undefined,
+                    },
+                })),
+            ],
+        );
     }, [entity]);
 
     return (
@@ -230,7 +224,10 @@ export const XForm: React.FC<{
                 <Button
                     className="absolute right-5 top-5 h-6 rounded-full border-none p-0 hover:bg-transparent focus-visible:ring-0"
                     variant="ghost"
-                    onClick={changeModalState}
+                    onClick={() => {
+                        resetPages();
+                        changeModalState();
+                    }}
                 >
                     <X className="hover:text-slate-700" />
                 </Button>
@@ -425,7 +422,7 @@ export const XForm: React.FC<{
                                 className="px-7 py-6"
                                 onClick={handleNextPage}
                             >
-                                {currentPage + 1 >= pages.length ? (
+                                {currentPage + 1 >= pagesRef.current.length ? (
                                     <Plus />
                                 ) : (
                                     <MoveRight />
