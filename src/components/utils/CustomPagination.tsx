@@ -47,7 +47,7 @@ export function CustomPagination({
 
     return (
         <Pagination>
-            <PaginationContent className="flex-wrap">
+            <PaginationContent className="flex w-full flex-wrap justify-center">
                 <PaginationItem>
                     <PaginationPrevious
                         disabled={page <= 1}
