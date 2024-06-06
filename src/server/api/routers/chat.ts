@@ -188,9 +188,19 @@ export const chatRouter = createTRPCRouter({
             ]);
             if (!messages) throw new Error('Чат не знайдено');
 
+            let lastUserMessageId: number | null = null;
+            for (const message of messages) {
+                if (message.isFromUser) {
+                    lastUserMessageId = message.id;
+                }
+            }
+
+            if (!lastUserMessageId)
+                throw new Error('Користувач не відправив повідомлення');
+
             const oldHelp = await ctx.db.gptMessage.findFirst({
                 where: {
-                    messageId: messages[messages.length - 1].id,
+                    messageId: lastUserMessageId,
                 },
                 select: {
                     id: true,
@@ -201,7 +211,7 @@ export const chatRouter = createTRPCRouter({
                     'Ви вже отримали допомогу для цього повідомлення',
                 );
 
-            const gptMessagePromise = getHelp([
+            const gptMessage = await getHelp([
                 ...qandA.map(({ question, answer }) => ({
                     role: 'system' as const,
                     content: `${question}\n${answer}`,
@@ -213,18 +223,11 @@ export const chatRouter = createTRPCRouter({
                 })),
             ]);
 
-            let lastUserMessageId: number | null = null;
-            for (const message of messages) {
-                if (message.isFromUser) {
-                    lastUserMessageId = message.id;
-                }
-            }
-
             return ctx.db.gptMessage.create({
                 data: {
                     chatId,
                     messageId: lastUserMessageId,
-                    text: await gptMessagePromise,
+                    text: gptMessage,
                 },
                 include: {
                     message: {
