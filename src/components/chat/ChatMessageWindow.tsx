@@ -166,7 +166,7 @@ export const ChatMessageWindow: React.FC<{
         debounce(() => {
             void userNotesMutation.mutateAsync({
                 id: chats[currentChat].userId,
-                notes: notes,
+                notes: value,
             });
             toast({ title: '✅ Нотатки збережено' });
         }, 1000);
