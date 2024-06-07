@@ -21,13 +21,14 @@ const Blog: React.FC = () => {
             <section className="flex h-[calc(100vh-4rem)] flex-col items-center justify-center md:gap-16">
                 <Logo className="flex text-3xl 2xl:text-6xl" />
                 <p className="w-3/4 self-center text-center text-lg font-medium md:w-1/2 md:text-xl 2xl:text-3xl">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Praesent ornare tortor ac elementum ultricies. Donec sit
-                    amet tempor est, at placerat tellus. Vestibulum ut risus
-                    placerat, vehicula velit eget, aliquet elit. Phasellus vel
-                    sodales libero. Suspendisse a vestibulum lorem. Suspendisse
-                    libero quam, suscipit sit amet metus pulvinar, placerat
-                    lacinia eros.
+                    Ласкаво просимо до нашого волонтерського проєкту
+                    психологічної підтримки. Ми - команда кваліфікованих
+                    волонтерів, готових вас вислухати і допомогти знайти
+                    рішення. Ми віримо в те, що кожен заслуговує на допомогу та
+                    підтримку в складні моменти. Наша мета – надати безкоштовну,
+                    анонімну та доступну психологічну допомогу через чат у
+                    месенджерах. У складній життєвій ситуації будьте впевнені -
+                    ми прагнемо вам допомогти.
                 </p>
                 <div className="flex justify-between gap-8">
                     <Link
@@ -70,16 +71,15 @@ const Blog: React.FC = () => {
                         Чим ми надихались
                     </h1>
                     <p className="flex-grow font-medium text-stone-800 md:text-xl">
-                        Maecenas tristique sagittis quam sit amet scelerisque.
-                        Sed vel fermentum felis, quis tristique ex. Pellentesque
-                        at velit efficitur, faucibus odio eget, pretium nisl.
-                        Duis ut viverra purus. Proin lectus purus, congue eu
-                        feugiat ut, cursus a ex. Vivamus mattis turpis sed ipsum
-                        tincidunt, non finibus lectus hendrerit. In sit amet
-                        quam mi. Sed ullamcorper ipsum magna. Sed efficitur,
-                        tortor eu rutrum fermentum, ipsum eros tristique dui,
-                        non blandit velit dui in nisi. Etiam quam nisl, mattis
-                        ac justo sit amet, luctus suscipit purus.
+                        Ми надихалися історіями людей, які знайшли сили подолати
+                        труднощі завдяки підтримці близьких та професіоналів.
+                        Усвідомлення важливості доступної психологічної допомоги
+                        мотивувало нас створити цей проєкт. Ми віримо в силу
+                        співчуття та емпатії, які можуть змінити життя. Досвід
+                        волонтерів та успішні приклади підтримки в інших країнах
+                        стали для нас джерелом натхнення. Ми прагнемо, щоб кожен
+                        мав можливість отримати допомогу у складні моменти,
+                        відчуваючи турботу та розуміння.
                     </p>
                 </article>
             </div>
@@ -106,7 +106,7 @@ const Blog: React.FC = () => {
                         </div>
                         <div className="article-responsive text-center md:text-right">
                             <article>Чат-боти у соціальних мережах</article>
-                            <article>Статті від спеціалістів</article>
+                            <article>Статті та вправи від спеціалістів</article>
                         </div>
                     </div>
                 </div>
