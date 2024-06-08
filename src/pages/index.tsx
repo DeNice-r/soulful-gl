@@ -2,30 +2,58 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { truculenta } from './_app';
-import { Header } from '~/components/common/Header';
-import { Footer } from '~/components/common/Footer';
 import { Logo } from '~/components/common/Logo';
 import { Post } from '~/components/Post';
 import { api } from '~/utils/api';
+import { Layout } from '~/components/common/Layout';
+import {
+    FacebookIcon,
+    TelegramIcon,
+    ViberIcon,
+} from '~/components/common/Footer';
 
 const Blog: React.FC = () => {
     const posts = api.post.list.useQuery({
         limit: 4,
     });
     return (
-        <main className="bg-homepage-cover">
-            <Header />
-            <section className="flex h-[calc(100svh-8rem)] flex-col items-center justify-center md:gap-16">
+        <Layout className="flex-col bg-homepage-cover">
+            <section className="flex h-[calc(100vh-4rem)] flex-col items-center justify-center md:gap-16">
                 <Logo className="flex text-3xl 2xl:text-6xl" />
                 <p className="w-3/4 self-center text-center text-lg font-medium md:w-1/2 md:text-xl 2xl:text-3xl">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Praesent ornare tortor ac elementum ultricies. Donec sit
-                    amet tempor est, at placerat tellus. Vestibulum ut risus
-                    placerat, vehicula velit eget, aliquet elit. Phasellus vel
-                    sodales libero. Suspendisse a vestibulum lorem. Suspendisse
-                    libero quam, suscipit sit amet metus pulvinar, placerat
-                    lacinia eros.
+                    Ласкаво просимо до нашого волонтерського проєкту
+                    психологічної підтримки. Ми - команда кваліфікованих
+                    волонтерів, готових вас вислухати і допомогти знайти
+                    рішення. Ми віримо в те, що кожен заслуговує на допомогу та
+                    підтримку в складні моменти. Наша мета – надати безкоштовну,
+                    анонімну та доступну психологічну допомогу через чат у
+                    месенджерах. У складній життєвій ситуації будьте впевнені -
+                    ми прагнемо вам допомогти.
                 </p>
+                <div className="flex justify-between gap-8">
+                    <Link
+                        className="flex h-14 w-14 items-center justify-center rounded-lg bg-neutral-200 shadow-sm transition-colors hover:bg-neutral-100 hover:shadow-md dark:bg-gray-800"
+                        href="https://t.me/soulful_aid_bot"
+                    >
+                        <TelegramIcon className="h-10 w-10" />
+                        <span className="sr-only">Twitter</span>
+                    </Link>
+                    <Link
+                        className="flex h-14 w-14 items-center justify-center rounded-lg bg-neutral-200 shadow-sm transition-colors hover:bg-neutral-100 hover:shadow-md dark:bg-gray-800"
+                        href="https://www.facebook.com/profile.php?id=100090500564311"
+                    >
+                        <FacebookIcon className="h-6 w-6" />
+                        <span className="sr-only">Facebook</span>
+                    </Link>
+
+                    <Link
+                        className="flex h-14 w-14 items-center justify-center rounded-lg bg-neutral-200 shadow-sm transition-colors hover:bg-neutral-100 hover:shadow-md dark:bg-gray-800"
+                        href="https://www.viber.com/sinapitest"
+                    >
+                        <ViberIcon className="h-6 w-6" />
+                        <span className="sr-only">Viber</span>
+                    </Link>
+                </div>
             </section>
             <article className="flex w-full flex-col justify-center gap-8 py-16 md:px-80 2xl:flex-row 2xl:gap-32 2xl:px-40">
                 {posts?.data?.values.map((post) => (
@@ -43,16 +71,15 @@ const Blog: React.FC = () => {
                         Чим ми надихались
                     </h1>
                     <p className="flex-grow font-medium text-stone-800 md:text-xl">
-                        Maecenas tristique sagittis quam sit amet scelerisque.
-                        Sed vel fermentum felis, quis tristique ex. Pellentesque
-                        at velit efficitur, faucibus odio eget, pretium nisl.
-                        Duis ut viverra purus. Proin lectus purus, congue eu
-                        feugiat ut, cursus a ex. Vivamus mattis turpis sed ipsum
-                        tincidunt, non finibus lectus hendrerit. In sit amet
-                        quam mi. Sed ullamcorper ipsum magna. Sed efficitur,
-                        tortor eu rutrum fermentum, ipsum eros tristique dui,
-                        non blandit velit dui in nisi. Etiam quam nisl, mattis
-                        ac justo sit amet, luctus suscipit purus.
+                        Ми надихалися історіями людей, які знайшли сили подолати
+                        труднощі завдяки підтримці близьких та професіоналів.
+                        Усвідомлення важливості доступної психологічної допомоги
+                        мотивувало нас створити цей проєкт. Ми віримо в силу
+                        співчуття та емпатії, які можуть змінити життя. Досвід
+                        волонтерів та успішні приклади підтримки в інших країнах
+                        стали для нас джерелом натхнення. Ми прагнемо, щоб кожен
+                        мав можливість отримати допомогу у складні моменти,
+                        відчуваючи турботу та розуміння.
                     </p>
                 </article>
             </div>
@@ -79,7 +106,7 @@ const Blog: React.FC = () => {
                         </div>
                         <div className="article-responsive text-center md:text-right">
                             <article>Чат-боти у соціальних мережах</article>
-                            <article>Статті від спеціалістів</article>
+                            <article>Статті та вправи від спеціалістів</article>
                         </div>
                     </div>
                 </div>
@@ -92,8 +119,7 @@ const Blog: React.FC = () => {
                     Proudly powered by WordPress 😎
                 </Link>
             </div>
-            <Footer />
-        </main>
+        </Layout>
     );
 };
 

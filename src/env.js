@@ -53,6 +53,8 @@ export const env = createEnv({
         AWS_S3_BUCKET: z.string(),
 
         LIQPAY_PRIVATE_KEY: z.string(),
+
+        OPENAI_API_KEY: z.string(),
     },
 
     /**
@@ -103,6 +105,8 @@ export const env = createEnv({
         AWS_S3_BUCKET: process.env.AWS_S3_BUCKET,
 
         LIQPAY_PRIVATE_KEY: process.env.LIQPAY_PRIVATE_KEY,
+
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY,
 
         NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
         NEXT_PUBLIC_WSS_ENDPOINT: process.env.NEXT_PUBLIC_WSS_ENDPOINT,

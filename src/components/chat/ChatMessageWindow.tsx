@@ -15,6 +15,7 @@ import {
     ArchiveX,
     CalendarDays,
     Newspaper,
+    RefreshCw,
 } from 'lucide-react';
 import {
     AlertDialog,
@@ -48,6 +49,9 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '../ui/tooltip';
+import { env } from '~/env';
+import { Exercise } from '../Exercise';
+import { FacebookIcon, TelegramIcon, ViberIcon } from '../common/Footer';
 
 export const ChatMessageWindow: React.FC<{
     chats: RouterOutputs['chat']['listFull'];
@@ -78,16 +82,27 @@ export const ChatMessageWindow: React.FC<{
     const [tabType, setTabType] = useState<ChatTabType>(ChatTabType.NOTES);
 
     const [notes, setNotes] = useState<string | undefined>();
+    const [help, setHelp] = useState<
+        { text: string; message: string }[] | undefined
+    >();
 
     const [currentEntity, setCurrentEntity] = useState<EntityData>(null);
 
-    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [currentPostsPage, setCurrentPostsPage] = useState<number>(1);
+
+    const [currentExercisesPage, setCurrentExercisesPage] = useState<number>(1);
+
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const [_, setState] = useState(0);
 
     const { toast } = useToast();
 
     const userNotesMutation = api.user.notes.useMutation();
+    const listHelpQuery = api.chat.listHelp.useQuery(currentChat, {
+        enabled: false,
+    });
+    const getHelpMutation = api.chat.getHelp.useMutation();
 
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -118,16 +133,31 @@ export const ChatMessageWindow: React.FC<{
         ? Number(router.query.limit)
         : CHAT_POSTS_LAYOUT_LIMIT;
 
-    const posts = api.post.list.useQuery({ limit, page: currentPage });
+    const posts = api.post.list.useQuery({ limit, page: currentPostsPage });
 
-    const total = posts.data?.count ? Math.ceil(posts.data.count / limit) : 0;
+    const exercises = api.exercise.list.useQuery({
+        limit,
+        page: currentExercisesPage,
+    });
+
+    const totalPosts = posts.data?.count
+        ? Math.ceil(posts.data.count / limit)
+        : 0;
+
+    const totalExercises = exercises.data?.count
+        ? Math.ceil(exercises.data.count / limit)
+        : 0;
 
     function rerender() {
         setState((prev) => prev + 1);
     }
 
-    const goToPage = (page: number) => {
-        setCurrentPage(page);
+    const goToPagePosts = (page: number) => {
+        setCurrentPostsPage(page);
+    };
+
+    const goToPageExercises = (page: number) => {
+        setCurrentExercisesPage(page);
     };
 
     const debounceNotes = (value: string) => {
@@ -136,7 +166,7 @@ export const ChatMessageWindow: React.FC<{
         debounce(() => {
             void userNotesMutation.mutateAsync({
                 id: chats[currentChat].userId,
-                notes: notes,
+                notes: value,
             });
             toast({ title: '✅ Нотатки збережено' });
         }, 1000);
@@ -155,7 +185,10 @@ export const ChatMessageWindow: React.FC<{
                 setNotes('');
                 return;
             }
+            setHelp(undefined);
             setNotes(undefined);
+
+            await listHelpQuery.refetch();
             setNotes(
                 (
                     await userNotesMutation.mutateAsync({
@@ -166,6 +199,40 @@ export const ChatMessageWindow: React.FC<{
         })();
     }, [currentChat]);
 
+    useEffect(() => {
+        if (listHelpQuery.data)
+            setHelp(
+                listHelpQuery.data.map((help) => ({
+                    text: help.text,
+                    message: help?.message?.text ?? '',
+                })),
+            );
+    }, [listHelpQuery.data]);
+
+    async function refetchAI() {
+        if (currentChat === -1) return;
+        setIsRefreshing(true);
+        try {
+            const newHelp = await getHelpMutation.mutateAsync(currentChat);
+            setHelp([
+                { text: newHelp.text, message: newHelp?.message?.text ?? '' },
+                ...(help ?? []),
+            ]);
+        } catch (e) {
+            toast({
+                title: 'Помилка',
+                description:
+                    e instanceof Error ? e.message : 'Невідома помилка',
+                variant: 'destructive',
+            });
+        }
+        setIsRefreshing(false);
+    }
+
+    const [platform, ...idParts] = chats[currentChat]?.userId?.split('_') ?? [];
+
+    const id = idParts.join('');
+
     return (
         <TooltipProvider>
             <ResizablePanelGroup direction="horizontal" className="h-screen">
@@ -174,12 +241,26 @@ export const ChatMessageWindow: React.FC<{
                         {currentChat !== -1 && (
                             <>
                                 <header className="flex h-16 items-center justify-between border-b p-4 dark:border-zinc-700">
-                                    <h2 className="flex items-center gap-4 text-xl font-bold">
-                                        {chats[currentChat]?.userId}
+                                    <div className="flex items-center gap-4 text-xl font-bold">
+                                        <div className="flex gap-2">
+                                            {platform === 'facebook' && (
+                                                <FacebookIcon className="h-5 w-5" />
+                                            )}
+                                            {platform === 'viber' && (
+                                                <ViberIcon className="h-5 w-5" />
+                                            )}
+                                            {platform === 'telegram' && (
+                                                <TelegramIcon className="h-7 w-7" />
+                                            )}
+
+                                            <p className="flex items-center text-sm text-neutral-400">
+                                                {id}
+                                            </p>
+                                        </div>
                                         <Tooltip>
                                             <TooltipTrigger>
                                                 <OctagonAlert
-                                                    onClick={() =>
+                                                    onClick={
                                                         closeCurrentChatAndReport
                                                     }
                                                     className="w-5 cursor-pointer text-red-600"
@@ -189,7 +270,7 @@ export const ChatMessageWindow: React.FC<{
                                                 Поскаржитись
                                             </TooltipContent>
                                         </Tooltip>
-                                    </h2>
+                                    </div>
                                     <div className="flex items-center gap-4">
                                         <AlertDialog>
                                             <Tooltip>
@@ -202,7 +283,6 @@ export const ChatMessageWindow: React.FC<{
                                                     Заархівувати
                                                 </TooltipContent>
                                             </Tooltip>
-
                                             <AlertDialogContent>
                                                 <AlertDialogHeader>
                                                     <AlertDialogTitle>
@@ -262,14 +342,6 @@ export const ChatMessageWindow: React.FC<{
                                 </main>
                                 <footer className="border-t p-4 dark:border-zinc-700">
                                     <div className="flex items-center gap-2">
-                                        {/* <Button
-                                        onClick={() =>
-                                            setIsExerciseDialog(true)
-                                        }
-                                        className="rounded-full bg-neutral-50 px-1.5 text-neutral-800 shadow-none hover:bg-neutral-200"
-                                    >
-                                        <Plus />
-                                    </Button> */}
                                         <Input
                                             className="flex-1"
                                             placeholder="Введіть повідомлення..."
@@ -286,7 +358,6 @@ export const ChatMessageWindow: React.FC<{
                                                 }
                                             }}
                                         />
-                                        {/* <ChatInput {...{ handleSend, inputRef }} /> */}
                                         <Button onClick={handleSend}>
                                             <SendHorizonal />
                                         </Button>
@@ -319,9 +390,7 @@ export const ChatMessageWindow: React.FC<{
                                         <PanelRight />
                                     </div>
                                 </TooltipTrigger>
-                                <TooltipContent>
-                                    Відкрити бічну панель
-                                </TooltipContent>
+                                <TooltipContent>Бічна панель</TooltipContent>
                             </Tooltip>
                             <Tooltip>
                                 <TooltipTrigger className="flex w-full justify-end">
@@ -447,14 +516,6 @@ export const ChatMessageWindow: React.FC<{
                                 </>
                             )}
                             {tabType === ChatTabType.KNOWLEDGE && (
-                                // <div className="h-full w-full">
-                                //     <Label className="relative">
-                                //         <Input
-                                //             placeholder="Введіть назву файлу..."
-                                //             className="rounded-none border-0 border-b border-l border-neutral-500 bg-neutral-200 text-neutral-800 focus-visible:ring-0 focus-visible:ring-offset-0"
-                                //         />
-                                //         <Search className="absolute end-4 top-0 flex h-full items-center text-neutral-500" />
-                                //     </Label>
                                 <Knowledge
                                     chat={true}
                                     {...{
@@ -465,7 +526,38 @@ export const ChatMessageWindow: React.FC<{
                                 // </div>
                             )}
                             {tabType === ChatTabType.EXERCISES && (
-                                <p>Exercises</p>
+                                <div className="flex h-full w-full flex-col gap-4 overflow-y-auto p-8">
+                                    <div className="flex flex-grow flex-wrap justify-center gap-4">
+                                        {exercises?.data?.values.map(
+                                            (exercise) => (
+                                                <div
+                                                    key={exercise.id}
+                                                    className="flex max-h-[26rem] w-full min-w-52 max-w-[25rem] flex-grow justify-center rounded-md bg-neutral-200 shadow-md outline-2 outline-neutral-200 transition-shadow duration-100 ease-in hover:cursor-pointer hover:shadow-xl hover:outline xl:w-5/12"
+                                                >
+                                                    <Exercise
+                                                        variant="chat"
+                                                        exercise={exercise}
+                                                        onClick={() =>
+                                                            setMessageText(
+                                                                `${env.NEXT_PUBLIC_URL}/exercises/${exercise.id}`,
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                            ),
+                                        )}
+                                        {!posts.data && (
+                                            <div className="h-full w-full">
+                                                <Spinner size="large" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <CustomPagination
+                                        page={currentExercisesPage}
+                                        total={totalExercises}
+                                        goToPage={goToPageExercises}
+                                    />
+                                </div>
                             )}
                             {tabType === ChatTabType.POSTS && (
                                 <div className="flex h-full w-full flex-col gap-4 overflow-y-auto p-8">
@@ -478,6 +570,11 @@ export const ChatMessageWindow: React.FC<{
                                                 <Post
                                                     variant="chat"
                                                     post={post}
+                                                    onClick={() =>
+                                                        setMessageText(
+                                                            `${env.NEXT_PUBLIC_URL}/posts/${post.id}`,
+                                                        )
+                                                    }
                                                 />
                                             </div>
                                         ))}
@@ -488,13 +585,84 @@ export const ChatMessageWindow: React.FC<{
                                         )}
                                     </div>
                                     <CustomPagination
-                                        page={currentPage}
-                                        total={total}
-                                        goToPage={goToPage}
+                                        page={currentPostsPage}
+                                        total={totalPosts}
+                                        goToPage={goToPagePosts}
                                     />
                                 </div>
                             )}
-                            {tabType === ChatTabType.AI && <div>AI</div>}
+                            {tabType === ChatTabType.AI && isWindowOpened && (
+                                <div className="flex h-full items-start justify-center">
+                                    <div className="flex h-full flex-col items-center gap-6 overflow-y-auto p-8">
+                                        <Button
+                                            className="flex gap-2"
+                                            onClick={refetchAI}
+                                            disabled={isRefreshing}
+                                        >
+                                            Запросити аналіз чату
+                                            <RefreshCw
+                                                className={cn(
+                                                    'h-4',
+                                                    isRefreshing &&
+                                                        'animate-spin',
+                                                )}
+                                            />
+                                        </Button>
+                                        {help ? (
+                                            help.map((content, index1) => {
+                                                return (
+                                                    <>
+                                                        <div
+                                                            key={index1}
+                                                            className="flex w-full flex-col gap-4 rounded-lg bg-neutral-50 p-4 text-justify drop-shadow-md"
+                                                        >
+                                                            <div className="flex pr-10">
+                                                                <span className="rounded-lg bg-neutral-200 p-2 text-sm dark:bg-zinc-700">
+                                                                    {
+                                                                        content.message
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex justify-end pl-10">
+                                                                <div className="flex flex-col gap-2 rounded-lg bg-teal-600 p-2 text-start text-sm text-white">
+                                                                    {content?.text
+                                                                        ?.split(
+                                                                            '\n',
+                                                                        )
+                                                                        .map(
+                                                                            (
+                                                                                article,
+                                                                                index2,
+                                                                            ) => {
+                                                                                return (
+                                                                                    <p
+                                                                                        key={
+                                                                                            index1 *
+                                                                                                100 +
+                                                                                            index2
+                                                                                        }
+                                                                                    >
+                                                                                        {
+                                                                                            article
+                                                                                        }
+                                                                                    </p>
+                                                                                );
+                                                                            },
+                                                                        )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                );
+                                            })
+                                        ) : (
+                                            <div className="h-full w-full">
+                                                <Spinner size="large" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                     <style>

@@ -46,7 +46,7 @@ export enum ManagementPageName {
     POSTS = 'posts',
     RECOMMENDATIONS = 'recommendations',
     EXERCISES = 'exercises',
-    DONATIONS = 'donations',
+    // DONATIONS = 'donations',
     QnA = 'QnA',
 }
 
@@ -73,15 +73,42 @@ export type EntityData = {
     type: EntityType;
 } | null;
 
+export type UnreadMessages =
+    | {
+          id: number;
+          counter: number;
+      }[]
+    | null;
+
 export const PageTitleMap = {
-    [ManagementPageName.STATISTICS]: 'Головна',
+    [ManagementPageName.STATISTICS]: 'Статистика',
     [ManagementPageName.USERS]: 'Користувачі',
     [ManagementPageName.OPERATORS]: 'Оператори',
     [ManagementPageName.POSTS]: 'Дописи',
     [ManagementPageName.RECOMMENDATIONS]: 'Рекомендації',
     [ManagementPageName.EXERCISES]: 'Вправи',
-    [ManagementPageName.DONATIONS]: 'Пожертви',
+    // [ManagementPageName.DONATIONS]: 'Пожертви',
     [ManagementPageName.QnA]: 'Запитання та відповіді',
+};
+
+export const PermissionEntity = {
+    [ManagementPageName.STATISTICS]: 'stats',
+    [ManagementPageName.USERS]: 'user',
+    [ManagementPageName.OPERATORS]: 'user',
+    [ManagementPageName.POSTS]: 'post',
+    [ManagementPageName.RECOMMENDATIONS]: 'recommendation',
+    [ManagementPageName.EXERCISES]: 'exercise',
+    [ManagementPageName.QnA]: 'qanda',
+};
+
+export const PermissionAction = {
+    [ManagementPageName.STATISTICS]: '*',
+    [ManagementPageName.USERS]: 'list',
+    [ManagementPageName.OPERATORS]: 'list',
+    [ManagementPageName.POSTS]: 'list',
+    [ManagementPageName.RECOMMENDATIONS]: 'list',
+    [ManagementPageName.EXERCISES]: 'list',
+    [ManagementPageName.QnA]: '*',
 };
 
 export const SearchableUserFields = {

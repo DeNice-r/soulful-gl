@@ -12,6 +12,7 @@ import Recommendations from '~/components/management/Recommendation';
 import Exercises from '~/components/management/Exercise';
 import QnA from '~/components/management/QnA';
 import { PageProvider } from '../Exercise/PageProvider';
+import Head from 'next/head';
 
 const pages = {
     [ManagementPageName.STATISTICS]: <Statistics />,
@@ -20,7 +21,7 @@ const pages = {
     [ManagementPageName.POSTS]: <Posts />,
     [ManagementPageName.RECOMMENDATIONS]: <Recommendations />,
     [ManagementPageName.EXERCISES]: <Exercises />,
-    [ManagementPageName.DONATIONS]: `<Donations />`,
+    // [ManagementPageName.DONATIONS]: `<Donations />`,
     [ManagementPageName.QnA]: <QnA />,
 };
 
@@ -29,6 +30,9 @@ export const Layout: React.FC<{ entity?: ManagementPageName }> = ({
 }) => {
     return (
         <PageProvider>
+            <Head>
+                <title>Керування</title>
+            </Head>
             <div className="flex min-h-screen">
                 <Sidebar {...{ entity }} />
                 <div className="flex flex-grow flex-col">

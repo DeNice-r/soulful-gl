@@ -12,7 +12,7 @@ import {
     SetBooleanNumberIdSchema,
     AdminQandASchema,
 } from '~/utils/schemas';
-import { getIsFullAccess } from '~/utils/auth';
+import { getFullAccessConstraintWithAuthor } from '~/utils/auth';
 import { SearchableQnAFields } from '~/utils/types';
 import { sendQandaDeleteEmail, sendQandaEmail } from '~/utils/email/templates';
 
@@ -46,16 +46,12 @@ export const qandaRouter = createTRPCRouter({
                 };
 
                 const where: object = {
-                    ...(query && {
-                        where: {
-                            ...containsQuery,
-                            published: getIsFullAccess(ctx) ? undefined : true,
-                        },
-                    }),
+                    ...(query && containsQuery),
+                    ...getFullAccessConstraintWithAuthor(ctx),
                 };
 
                 const [count, values] = await ctx.db.$transaction([
-                    ctx.db.qandA.count(where),
+                    ctx.db.qandA.count({ where }),
                     ctx.db.qandA.findMany({
                         where,
                         orderBy: {

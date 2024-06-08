@@ -6,12 +6,10 @@ export const Footer: React.FC = () => {
         <footer className="flex w-full justify-center bg-neutral-200 py-12">
             <div className="flex w-2/3 flex-col gap-12 text-sm md:gap-16">
                 <div className="flex flex-col justify-between gap-12 md:flex-row md:gap-16">
-                    <div className="flex flex-col gap-2">
-                        <div className="space-y-1.5">
-                            <h3 className="text-base font-semibold">
-                                Зв&apos;язатись із нами
-                            </h3>
-                        </div>
+                    <div className="flex flex-col gap-2 md:items-center">
+                        <h3 className="text-base font-semibold">
+                            Зв&apos;язатись із нами
+                        </h3>
                         <div className="flex flex-col gap-1">
                             <Link className="font-medium underline" href="#">
                                 customer@support.soulful.pp.ua
@@ -19,50 +17,59 @@ export const Footer: React.FC = () => {
                             <p className="font-medium">+380412012345</p>
                         </div>
                     </div>
-                    <div className="flex flex-col gap-4">
-                        <div className="space-y-1.5">
-                            <h3 className="text-base font-semibold">
-                                Навігація
-                            </h3>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                            <Link className="font-medium underline" href="#">
+                    <div className="flex flex-col items-center gap-4 md:flex-grow">
+                        <h3 className="text-base font-semibold">Навігація</h3>
+                        <div className="flex flex-col items-center gap-1">
+                            <Link className="font-medium underline" href="/">
                                 Головна
                             </Link>
-                            <Link className="font-medium underline" href="#">
-                                Статті
+                            <Link
+                                className="font-medium underline"
+                                href="/posts"
+                            >
+                                Дописи
                             </Link>
-                            <Link className="font-medium underline" href="#">
-                                Чат
+                            <Link
+                                className="font-medium underline"
+                                href="/exercises"
+                            >
+                                Вправи
+                            </Link>
+                            <Link className="font-medium underline" href="/QnA">
+                                Запитання та відповіді
+                            </Link>
+                            <Link className="font-medium underline" href="/QnA">
+                                Підтримати
                             </Link>
                         </div>
                     </div>
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col items-center gap-2">
                         <h3 className="text-base font-semibold">Почати чат</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
                             Почати спілкування зі спеціалістом
                         </p>
-                        <div className="flex justify-between">
+                        <div className="flex w-full justify-between">
                             <Link
                                 className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 shadow-sm hover:shadow dark:bg-gray-800"
-                                href="#"
-                            >
-                                <FacebookIcon className="h-4 w-4" />
-                                <span className="sr-only">Facebook</span>
-                            </Link>
-                            <Link
-                                className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 shadow-sm hover:shadow dark:bg-gray-800"
-                                href="#"
+                                href="https://t.me/soulful_aid_bot"
                             >
                                 <TelegramIcon className="h-6 w-6" />
                                 <span className="sr-only">Twitter</span>
                             </Link>
                             <Link
                                 className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 shadow-sm hover:shadow dark:bg-gray-800"
-                                href="#"
+                                href="https://www.facebook.com/profile.php?id=100090500564311"
+                            >
+                                <FacebookIcon className="h-4 w-4" />
+                                <span className="sr-only">Facebook</span>
+                            </Link>
+
+                            <Link
+                                className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 shadow-sm hover:shadow dark:bg-gray-800"
+                                href="https://www.viber.com/sinapitest"
                             >
                                 <ViberIcon className="h-4 w-4" />
-                                <span className="sr-only">Instagram</span>
+                                <span className="sr-only">Viber</span>
                             </Link>
                         </div>
                     </div>
@@ -73,7 +80,7 @@ export const Footer: React.FC = () => {
     );
 };
 
-function FacebookIcon(
+export function FacebookIcon(
     props: React.JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>,
 ) {
     return (
@@ -94,7 +101,7 @@ function FacebookIcon(
     );
 }
 
-function ViberIcon(
+export function ViberIcon(
     props: React.JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>,
 ) {
     return (
@@ -112,7 +119,7 @@ function ViberIcon(
     );
 }
 
-function TelegramIcon(
+export function TelegramIcon(
     props: React.JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>,
 ) {
     return (

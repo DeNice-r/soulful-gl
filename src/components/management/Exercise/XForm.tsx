@@ -18,15 +18,16 @@ import { Input } from '~/components/ui/input';
 import type * as z from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ExerciseSchema } from '~/utils/schemas';
+import { ExerciseSchema, ExerciseStepSchema } from '~/utils/schemas';
 import { api, type RouterOutputs } from '~/utils/api';
 import { uploadImage } from '~/utils/s3/frontend';
 import { Editor } from '../common/Editor';
 import Modal from 'react-modal';
 import getCroppedImg from '../../utils/cropImage';
 import Cropper, { type Area, type Point } from 'react-easy-crop';
-import { MoveLeft, MoveRight, Trash2, X, Plus } from 'lucide-react';
+import { MoveLeft, MoveRight, Trash2, X, Plus, Upload } from 'lucide-react';
 import { usePageContext } from './PageProvider';
+import { toast } from '~/components/ui/use-toast';
 
 declare module 'react' {
     interface CSSProperties {
@@ -51,44 +52,70 @@ export const XForm: React.FC<{
 
     const {
         pages,
+        pagesRef,
         currentPage,
-        // savePageData,
+        savePageData,
         goToPreviousPage,
         goToNextPage,
         deletePage,
+        resetPages,
     } = usePageContext();
 
     const currentPageData = pages[currentPage]?.data || {
         image: '',
         title: '',
         description: '',
+        timeSeconds: '',
     };
 
     useEffect(() => {
         form.setValue('image', currentPageData.image);
         form.setValue('title', currentPageData.title);
         form.setValue('description', currentPageData.description);
+        form.setValue('timeSeconds', currentPageData.timeSeconds);
     }, [currentPage]);
 
-    const form = useForm<z.infer<typeof ExerciseSchema>>({
-        resolver: zodResolver(ExerciseSchema),
+    const form = useForm<z.infer<typeof ExerciseStepSchema>>({
+        resolver: zodResolver(ExerciseStepSchema),
         defaultValues: {
             title: entity?.title ?? currentPageData.title,
             description: entity?.description ?? currentPageData.description,
             image: entity?.image ?? currentPageData.image,
+            timeSeconds:
+                entity?.steps[currentPage - 1]?.timeSeconds?.toString() ??
+                currentPageData.timeSeconds?.toString(),
         },
     });
 
-    async function onSubmit(values: z.infer<typeof ExerciseSchema>) {
-        if (entity) {
-            await update.mutateAsync({ id: entity.id, ...values });
-        } else {
-            await create.mutateAsync(values);
+    async function onSubmit(values: z.infer<typeof ExerciseStepSchema>) {
+        savePageData(currentPage, values);
+        try {
+            const r = ExerciseSchema.parse({
+                ...pagesRef.current[0].data,
+                steps: pagesRef.current.slice(1).map((page) => ({
+                    ...page.data,
+                    ...(page.data.timeSeconds
+                        ? { timeSeconds: page.data.timeSeconds }
+                        : {}),
+                })),
+            });
+            if (entity) {
+                await update.mutateAsync({ id: entity.id, ...r });
+            } else {
+                await create.mutateAsync(r);
+            }
+            resetPages();
+            changeModalState();
+        } catch (e) {
+            toast({
+                title: 'Один з кроків вправи не відповідає вимогам',
+                variant: 'destructive',
+            });
+            return true;
         }
-        changeModalState();
     }
 
-    function createSetValue(field: keyof z.infer<typeof ExerciseSchema>) {
+    function createSetValue(field: keyof z.infer<typeof ExerciseStepSchema>) {
         return async function setDescription(value: string) {
             form.setValue(field, value);
         };
@@ -134,30 +161,58 @@ export const XForm: React.FC<{
     }
 
     function handlePreviousPage() {
-        const [image, title, description] = form.getValues([
+        const [image, title, description, timeSeconds] = form.getValues([
             'image',
             'title',
             'description',
+            'timeSeconds',
         ]);
         goToPreviousPage({
             image: image ?? '',
             title,
             description,
+            timeSeconds: timeSeconds ?? '',
         });
     }
 
     function handleNextPage() {
-        const [image, title, description] = form.getValues([
+        const [image, title, description, timeSeconds] = form.getValues([
             'image',
             'title',
             'description',
+            'timeSeconds',
         ]);
         goToNextPage({
             image: image ?? '',
             title,
             description,
+            timeSeconds: timeSeconds ?? '',
         });
     }
+
+    useEffect(() => {
+        resetPages(
+            entity && [
+                {
+                    id: 1,
+                    data: {
+                        image: entity.image ?? '',
+                        title: entity.title,
+                        description: entity.description,
+                    },
+                },
+                ...entity.steps.map((step, index) => ({
+                    id: index + 2,
+                    data: {
+                        image: step.image ?? '',
+                        title: step.title,
+                        description: step.description,
+                        timeSeconds: step.timeSeconds?.toString() ?? undefined,
+                    },
+                })),
+            ],
+        );
+    }, [entity]);
 
     return (
         <Form {...form}>
@@ -169,11 +224,19 @@ export const XForm: React.FC<{
                 <Button
                     className="absolute right-5 top-5 h-6 rounded-full border-none p-0 hover:bg-transparent focus-visible:ring-0"
                     variant="ghost"
-                    onClick={changeModalState}
+                    onClick={() => {
+                        resetPages();
+                        changeModalState();
+                    }}
                 >
                     <X className="hover:text-slate-700" />
                 </Button>
                 <div className="flex h-[90%] w-4/5 flex-col items-center justify-between gap-4">
+                    {currentPage < 1 ? (
+                        <h2>Титульна сторінка вправи</h2>
+                    ) : (
+                        <h2>Крок вправи</h2>
+                    )}
                     <FormField
                         control={form.control}
                         name="image"
@@ -185,12 +248,12 @@ export const XForm: React.FC<{
                                 >
                                     <div
                                         style={{
-                                            '--image-url': `url(${field.value ? field.value : entity?.image})`,
+                                            '--image-url': `url(${field.value ?? entity?.image ?? ''})`,
                                         }}
                                         className={`flex aspect-video w-72 items-center justify-center rounded-xl border-2 border-gray-400 bg-white bg-[image:var(--image-url)] bg-cover transition-all hover:opacity-80 dark:bg-gray-700`}
                                     >
                                         {!entity?.image && (
-                                            <UploadIcon className="h-8 w-8 text-gray-500 dark:text-gray-400" />
+                                            <Upload className="h-8 w-8 text-gray-500 dark:text-gray-400" />
                                         )}
                                     </div>
                                     <Input
@@ -200,6 +263,7 @@ export const XForm: React.FC<{
                                         type="file"
                                         onInput={onFileChange}
                                     />
+                                    <FormMessage />
                                 </label>
                                 <Modal
                                     isOpen={!!imageSrc}
@@ -266,19 +330,38 @@ export const XForm: React.FC<{
                     />
                     <div className="flex h-2/3 w-full gap-12">
                         <div className="flex flex-1 flex-col gap-4">
-                            <div className="flex w-full justify-between gap-4">
+                            <FormField
+                                control={form.control}
+                                name="title"
+                                render={({ field }) => (
+                                    <FormItem className="">
+                                        <FormLabel className="text-xl">
+                                            Заголовок
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                className="flex-grow outline outline-1 outline-neutral-400"
+                                                placeholder="Заспокоєння у стресовій ситуації"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            {currentPage > 0 && (
                                 <FormField
                                     control={form.control}
-                                    name="title"
+                                    name="timeSeconds"
                                     render={({ field }) => (
-                                        <FormItem className="basis-full">
+                                        <FormItem className="">
                                             <FormLabel className="text-xl">
-                                                Заголовок
+                                                Час на виконання кроку (с)
                                             </FormLabel>
                                             <FormControl>
                                                 <Input
                                                     className="flex-grow outline outline-1 outline-neutral-400"
-                                                    placeholder="Заспокоєння у стресовій ситуації"
+                                                    type="number"
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -286,7 +369,7 @@ export const XForm: React.FC<{
                                         </FormItem>
                                     )}
                                 />
-                            </div>
+                            )}
                             <FormField
                                 control={form.control}
                                 name="description"
@@ -339,7 +422,7 @@ export const XForm: React.FC<{
                                 className="px-7 py-6"
                                 onClick={handleNextPage}
                             >
-                                {currentPage + 1 == pages.length ? (
+                                {currentPage + 1 >= pagesRef.current.length ? (
                                     <Plus />
                                 ) : (
                                     <MoveRight />
@@ -349,7 +432,7 @@ export const XForm: React.FC<{
                         <div className="flex flex-grow basis-1 justify-center">
                             <Button
                                 className="text-wrap px-7 py-6"
-                                variant={'destructive'}
+                                variant="destructive"
                                 onClick={handleDeletePage}
                                 disabled={currentPage < 1 ?? true}
                             >
@@ -374,25 +457,4 @@ function readFile(file: Blob) {
         reader.addEventListener('load', () => resolve(reader.result), false);
         reader.readAsDataURL(file);
     });
-}
-
-function UploadIcon({ className }: { className?: string }) {
-    return (
-        <svg
-            className={className}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="17 8 12 3 7 8" />
-            <line x1="12" x2="12" y1="3" y2="15" />
-        </svg>
-    );
 }

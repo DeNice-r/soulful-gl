@@ -22,7 +22,7 @@ import { uploadImage } from '~/utils/s3/frontend';
 import Modal from 'react-modal';
 import { useSession } from 'next-auth/react';
 import { Editor } from '~/components/management/common/Editor';
-import { X } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import { Spinner } from '~/components/ui/spinner';
 import { toast } from '~/components/ui/use-toast';
 import { NO_REFETCH } from '~/utils/constants';
@@ -33,6 +33,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '~/components/ui/dialog';
+import Head from 'next/head';
 
 const Profile: React.FC = () => {
     const update = api.user.selfUpdate.useMutation();
@@ -167,6 +168,9 @@ const Profile: React.FC = () => {
 
     return (
         <Layout className="w-full">
+            <Head>
+                <title>Профіль</title>
+            </Head>
             {session ? (
                 <>
                     <Form {...mainForm}>
@@ -185,12 +189,12 @@ const Profile: React.FC = () => {
                                         >
                                             <div
                                                 style={{
-                                                    '--image-url': `url(${field.value ? field.value : entity.data?.image})`,
+                                                    '--image-url': `url(${field.value ?? entity.data?.image ?? ''})`,
                                                 }}
                                                 className={`flex h-24 w-24 items-center justify-center rounded-full border-2 border-gray-400 bg-white bg-[image:var(--image-url)] bg-cover transition-all hover:opacity-80 dark:bg-gray-700`}
                                             >
                                                 {!entity.data?.image && (
-                                                    <UploadIcon className="h-8 w-8 text-gray-500 dark:text-gray-400" />
+                                                    <Upload className="h-8 w-8 text-gray-500 dark:text-gray-400" />
                                                 )}
                                             </div>
                                             <Input
@@ -458,25 +462,4 @@ function readFile(file: Blob) {
         reader.addEventListener('load', () => resolve(reader.result), false);
         reader.readAsDataURL(file);
     });
-}
-
-function UploadIcon({ className }: { className?: string }) {
-    return (
-        <svg
-            className={className}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="17 8 12 3 7 8" />
-            <line x1="12" x2="12" y1="3" y2="15" />
-        </svg>
-    );
 }

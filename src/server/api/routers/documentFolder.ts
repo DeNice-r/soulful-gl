@@ -71,10 +71,15 @@ export const documentFolderRouter = createTRPCRouter({
             };
 
             const [folders, documents] = await Promise.all([
-                ctx.db.documentFolder.findMany({ where }),
+                ctx.db.documentFolder.findMany({
+                    where: {
+                        ...(!query && where),
+                        ...(query && { title: contains }),
+                    },
+                }),
                 ctx.db.document.findMany({
                     where: {
-                        ...where,
+                        ...(!query && where),
                         ...(query && {
                             OR: [
                                 { title: contains },
@@ -104,12 +109,14 @@ export const documentFolderRouter = createTRPCRouter({
                             connect: { id: parentId },
                         },
                     }),
-                    tags: {
-                        connectOrCreate: tags.map((tag) => ({
-                            where: { title: tag },
-                            create: { title: tag },
-                        })),
-                    },
+                    ...(tags && {
+                        tags: {
+                            connectOrCreate: tags.map((tag) => ({
+                                where: { title: tag },
+                                create: { title: tag },
+                            })),
+                        },
+                    }),
                     author: {
                         connect: { id: ctx.session.user.id },
                     },

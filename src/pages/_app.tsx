@@ -6,6 +6,7 @@ import { Truculenta } from 'next/font/google';
 import { api } from '~/utils/api';
 
 import '~/styles/globals.css';
+import Head from 'next/head';
 
 export const truculenta = Truculenta({
     subsets: ['latin'],
@@ -18,6 +19,9 @@ const App: AppType<{ session: Session | null }> = ({
 }) => {
     return (
         <SessionProvider session={session}>
+            <Head>
+                <title>Soulful</title>
+            </Head>
             <main className="h-full bg-neutral-50 font-sans">
                 <Component {...pageProps} />
             </main>

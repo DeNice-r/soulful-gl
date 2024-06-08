@@ -20,6 +20,7 @@ import { Editor } from '../common/Editor';
 import Modal from 'react-modal';
 import getCroppedImg from '../../utils/cropImage';
 import Cropper, { type Area, type Point } from 'react-easy-crop';
+import { Upload } from 'lucide-react';
 
 declare module 'react' {
     interface CSSProperties {
@@ -118,12 +119,12 @@ export const XForm: React.FC<{
                                 >
                                     <div
                                         style={{
-                                            '--image-url': `url(${field.value ? field.value : entity?.image})`,
+                                            '--image-url': `url(${field.value ?? entity?.image ?? ''})`,
                                         }}
                                         className={`flex aspect-video w-72 items-center justify-center rounded-xl border-2 border-gray-400 bg-white bg-[image:var(--image-url)] bg-cover transition-all hover:opacity-80 dark:bg-gray-700`}
                                     >
                                         {!entity?.image && (
-                                            <UploadIcon className="h-8 w-8 text-gray-500 dark:text-gray-400" />
+                                            <Upload className="h-8 w-8 text-gray-500 dark:text-gray-400" />
                                         )}
                                     </div>
                                     <Input
@@ -282,25 +283,4 @@ function readFile(file: Blob) {
         reader.addEventListener('load', () => resolve(reader.result), false);
         reader.readAsDataURL(file);
     });
-}
-
-function UploadIcon({ className }: { className?: string }) {
-    return (
-        <svg
-            className={className}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="17 8 12 3 7 8" />
-            <line x1="12" x2="12" y1="3" y2="15" />
-        </svg>
-    );
 }

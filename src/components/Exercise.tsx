@@ -6,12 +6,14 @@ import { truncateString } from '~/utils';
 import { cn } from '~/lib/utils';
 import { defaultFormatDateTime } from '~/utils/dates';
 
-export const Post: React.FC<{
-    post: RouterOutputs['post']['list']['values'][number];
+export const Exercise: React.FC<{
+    exercise: RouterOutputs['exercise']['list']['values'][number];
     onClick?: React.MouseEventHandler<HTMLElement>;
-    variant?: 'posts' | 'landing' | 'chat';
-}> = ({ post, onClick, variant }) => {
-    const authorName = post.author ? post.author.name : 'Unknown author';
+    variant?: 'exercise' | 'landing' | 'chat';
+}> = ({ exercise, onClick, variant }) => {
+    const authorName = exercise.author
+        ? exercise.author.name
+        : 'Unknown author';
     return (
         <article
             className={cn(
@@ -22,16 +24,16 @@ export const Post: React.FC<{
                 onClick
                     ? onClick
                     : async () => {
-                          await Router.push(`/posts/${post.id}`);
+                          await Router.push(`/exercises/${exercise.id}`);
                       }
             }
         >
-            {post.image && (
+            {exercise.image && (
                 <Image
-                    src={post.image}
+                    src={exercise.image}
                     width={1920}
                     height={1080}
-                    alt={truncateString(post.title)}
+                    alt={truncateString(exercise.title)}
                     className={cn(
                         'rounded-t-md object-contain',
                         variant === 'landing' &&
@@ -42,7 +44,7 @@ export const Post: React.FC<{
             <div
                 className={cn(
                     'flex h-full flex-col justify-between gap-2 md:gap-8 2xl:gap-0 ',
-                    variant === 'posts' && 'w-full',
+                    variant === 'exercise' && 'w-full',
                     variant === 'chat' && 'w-full p-6',
                     variant === 'landing' &&
                         'items-center md:w-3/5 md:items-start 2xl:w-full 2xl:items-center',
@@ -50,7 +52,7 @@ export const Post: React.FC<{
             >
                 <div
                     className={cn(
-                        variant === 'posts' &&
+                        variant === 'exercise' &&
                             'flex w-full flex-col gap-6 p-8 text-justify',
                         variant === 'chat' &&
                             'flex w-full flex-col gap-4 text-justify',
@@ -61,38 +63,19 @@ export const Post: React.FC<{
                     <p
                         className={cn(
                             'font-bold',
-                            variant === 'posts' && 'md:text-xl 2xl:text-3xl',
+                            variant === 'exercise' && 'md:text-xl 2xl:text-3xl',
                             variant === 'landing' && 'md:pb-4 2xl:py-4',
                             variant === 'chat' && 'text-xl',
                         )}
                     >
-                        {truncateString(post.title)}
+                        {truncateString(exercise.title)}
                     </p>
-                    {/*<div*/}
-                    {/*    className={cn(*/}
-                    {/*        'text-sm md:text-base',*/}
-                    {/*        variant === 'landing' && 'py-2 md:py-4',*/}
-                    {/*    )}*/}
-                    {/*    dangerouslySetInnerHTML={{*/}
-                    {/*        __html: truncateString(*/}
-                    {/*            post.description,*/}
-                    {/*            variant === 'posts'*/}
-                    {/*                ? MAX_POSTS_DESCRIPTION_LENGTH*/}
-                    {/*                : MAX_LANDING_POSTS_DESCRIPTION_LENGTH,*/}
-                    {/*        ),*/}
-                    {/*    }}*/}
-                    {/*/>*/}
                 </div>
-                <div
-                    className={cn(
-                        'flex justify-between',
-                        variant === 'landing' && 'w-full',
-                    )}
-                >
+                <div className="flex justify-between">
                     <small
                         className={cn(
                             'text-xs font-light',
-                            variant === 'posts' && 'self-start px-8 pb-8',
+                            variant === 'exercise' && 'self-start px-8 pb-8',
                             variant === 'landing' && 'md:self-end 2xl:mt-4',
                         )}
                     >
@@ -101,13 +84,11 @@ export const Post: React.FC<{
                     <small
                         className={cn(
                             'text-xs font-light',
-                            variant === 'posts' && 'self-start px-8 pb-8',
+                            variant === 'exercise' && 'self-start px-8 pb-8',
                             variant === 'landing' && 'md:self-end 2xl:mt-4',
                         )}
                     >
-                        {defaultFormatDateTime(post.createdAt)}
-                        {/*{post.createdAt != post.updatedAt &&*/}
-                        {/*    ` (оновлено ${defaultFormatDt(post.updatedAt)})`}*/}
+                        {defaultFormatDateTime(exercise.createdAt)}
                     </small>
                 </div>
             </div>

@@ -55,12 +55,10 @@ export const postRouter = createTRPCRouter({
                     ],
                 };
 
-                const where: object = query
-                    ? {
-                          ...containsQuery,
-                          ...getFullAccessConstraintWithAuthor(ctx),
-                      }
-                    : {};
+                const where: object = {
+                    ...(query && containsQuery),
+                    ...getFullAccessConstraintWithAuthor(ctx),
+                };
 
                 const [count, values] = await ctx.db.$transaction([
                     ctx.db.post.count({ where }),

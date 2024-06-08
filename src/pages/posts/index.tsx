@@ -7,6 +7,9 @@ import { Spinner } from '~/components/ui/spinner';
 import { api, type RouterOutputs } from '~/utils/api';
 import { DEFAULT_POSTS_LAYOUT_LIMIT } from '~/utils/constants';
 import { Input } from '~/components/ui/input';
+import { Label } from '~/components/ui/label';
+import { Search } from 'lucide-react';
+import Head from 'next/head';
 
 const Posts: React.FC = () => {
     const router = useRouter();
@@ -61,22 +64,33 @@ const Posts: React.FC = () => {
 
     return (
         <Layout className="bg-homepage-cover">
+            <Head>
+                <title>Дописи</title>
+            </Head>
             <div className="flex w-full flex-col items-center pb-8 md:w-2/3">
                 <div className="flex w-full flex-wrap justify-between gap-8 py-10 text-slate-800">
-                    <h3 className="w-full pb-4 text-center font-bold">
-                        Дописи з порадами щодо ментального здоров&apos;я
-                    </h3>
-                    <Input
-                        type="search"
-                        name="query"
-                        id="default-search"
-                        className="w-full ps-10"
-                        placeholder="Шукати дописи"
-                        defaultValue={query}
-                        onChange={(e) =>
-                            debounce(() => setQuery(e.target.value), 1000)
-                        }
-                    />
+                    <div className="flex w-full flex-col items-center gap-8">
+                        <h3 className="w-full text-center font-bold">
+                            Дописи з порадами щодо ментального здоров&apos;я
+                        </h3>
+                        <Label className="relative flex w-2/3">
+                            <Input
+                                type="search"
+                                name="query"
+                                id="default-search"
+                                placeholder="Шукати дописи..."
+                                className="ps-14"
+                                onChange={(e) =>
+                                    debounce(
+                                        () => setQuery(e.target.value),
+                                        1000,
+                                    )
+                                }
+                                defaultValue={query}
+                            />
+                            <Search className="absolute start-4 top-0 flex h-full w-5 items-center text-neutral-500" />
+                        </Label>
+                    </div>
                     {posts?.data?.values
                         .slice(0, Math.ceil(limit / 2))
                         .map((post) => PostHelper(post))}
@@ -127,7 +141,7 @@ const Posts: React.FC = () => {
     );
 };
 
-function SunIcon() {
+export function SunIcon() {
     return (
         <svg
             version="1.1"

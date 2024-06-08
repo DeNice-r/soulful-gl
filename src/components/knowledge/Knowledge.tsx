@@ -1,4 +1,4 @@
-import React, { type MouseEvent, useEffect, useState } from 'react';
+import React, { type MouseEvent, useEffect, useRef, useState } from 'react';
 import {
     Breadcrumb,
     BreadcrumbEllipsis,
@@ -53,10 +53,14 @@ const Knowledge: React.FC<{
 
     const [editingEntity, setEditingEntity] = useState<EntityData>(null);
 
+    const debounceRef = useRef<NodeJS.Timeout | null>(null);
+    const [query, setQuery] = useState<string>('');
+
     const { client: apiClient } = api.useUtils();
 
-    const documentFolders = api.documentFolder.list.useQuery({
+    const folderContent = api.documentFolder.list.useQuery({
         id: currentEntity?.id,
+        query: query.trim() !== '' ? query : undefined,
     });
 
     const deleteMutation = {
@@ -73,6 +77,13 @@ const Knowledge: React.FC<{
         folder: api.documentFolder.create.useMutation(),
         document: api.document.create.useMutation(),
     };
+
+    function debounceQuery(query: string) {
+        debounceRef.current && clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            setQuery(query);
+        }, 1500);
+    }
 
     function openCreateEntityWindow(type: 'folder' | 'document') {
         setIsDialogOpen(true);
@@ -99,7 +110,7 @@ const Knowledge: React.FC<{
             return;
         }
         await deleteMutation[editingEntity.type].mutateAsync(editingEntity.id);
-        await documentFolders.refetch();
+        await folderContent.refetch();
     };
 
     const handleTitleChange = async (
@@ -112,7 +123,7 @@ const Knowledge: React.FC<{
                 id: id,
                 title: inputElement.value,
             });
-            await documentFolders.refetch();
+            await folderContent.refetch();
             setIsEditing(false);
         }
     };
@@ -130,7 +141,7 @@ const Knowledge: React.FC<{
                             : null,
                 });
                 setNewEntityName('Нова папка');
-                await documentFolders.refetch();
+                await folderContent.refetch();
             })();
         });
     };
@@ -206,13 +217,13 @@ const Knowledge: React.FC<{
     }
 
     const topParentId =
-        documentFolders.data?.parent?.parentId ??
+        folderContent.data?.parent?.parentId ??
         (document?.parent?.parentId || null);
     const parentId =
-        documentFolders.data?.parent?.id ?? document?.parent?.id ?? null;
+        folderContent.data?.parent?.id ?? document?.parent?.id ?? null;
     const parentTitle =
-        documentFolders.data?.parent?.title ?? document?.parent?.title ?? null;
-    const title = documentFolders.data?.title ?? document?.title ?? null;
+        folderContent.data?.parent?.title ?? document?.parent?.title ?? null;
+    const title = folderContent.data?.title ?? document?.title ?? null;
 
     return (
         <div
@@ -223,6 +234,11 @@ const Knowledge: React.FC<{
                     'overflow-y-auto rounded-none bg-neutral-300 px-8 drop-shadow-none',
             )}
         >
+            <Input
+                className="h-12 w-full rounded-md border-neutral-100 bg-neutral-300 px-4"
+                placeholder="Пошук"
+                onChange={(e) => debounceQuery(e.target.value)}
+            />
             <Breadcrumb className="select-none">
                 <BreadcrumbList
                     className={cn(
@@ -240,7 +256,7 @@ const Knowledge: React.FC<{
                                 })
                             }
                         >
-                            Головна
+                            {query ? 'Пошук' : 'Документи'}
                         </span>
                     </BreadcrumbItem>
                     {topParentId && (
@@ -279,7 +295,7 @@ const Knowledge: React.FC<{
                     )}
                 </BreadcrumbList>
             </Breadcrumb>
-            {!document && !documentFolders.data && (
+            {!document && !folderContent.data && (
                 <Spinner size="large"></Spinner>
             )}
             {document ? (
@@ -382,23 +398,21 @@ const Knowledge: React.FC<{
                                 chat ? '2xl:grid-cols-auto' : '2xl:grid-cols-4',
                             )}
                         >
-                            {!!documentFolders?.data?.folders?.length &&
-                                documentFolders?.data?.folders?.map(
-                                    (entity) => (
-                                        <FSEntity
-                                            key={entity.id}
-                                            {...{
-                                                type: 'folder',
-                                                entity,
-                                                handleTitleChange,
-                                                editingEntity,
-                                                isEditing,
-                                            }}
-                                        />
-                                    ),
-                                )}
-                            {!!documentFolders?.data?.documents?.length &&
-                                documentFolders?.data?.documents?.map(
+                            {!!folderContent?.data?.folders?.length &&
+                                folderContent?.data?.folders?.map((entity) => (
+                                    <FSEntity
+                                        key={entity.id}
+                                        {...{
+                                            type: 'folder',
+                                            entity,
+                                            handleTitleChange,
+                                            editingEntity,
+                                            isEditing,
+                                        }}
+                                    />
+                                ))}
+                            {!!folderContent?.data?.documents?.length &&
+                                folderContent?.data?.documents?.map(
                                     (entity) => (
                                         <FSEntity
                                             key={entity.id}
@@ -416,7 +430,7 @@ const Knowledge: React.FC<{
                                 {!(
                                     currentEntity?.type === EntityType.DOCUMENT
                                 ) &&
-                                    documentFolders.data && (
+                                    folderContent.data && (
                                         <PopoverTrigger asChild>
                                             <Button className="flex h-14 w-14 rounded-full bg-neutral-300 text-slate-800 drop-shadow-md hover:bg-neutral-400/40 active:drop-shadow-none">
                                                 <Plus />

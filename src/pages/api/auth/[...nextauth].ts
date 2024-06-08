@@ -63,13 +63,14 @@ export function requestWrapper(
 
     const opts: NextAuthOptions = {
         adapter,
+        pages: { signIn: '/signin' },
         callbacks: {
             async session({ session, user }) {
                 if (user.suspended) throw new Error('User is suspended');
 
                 session.user.id = user.id;
                 session.user.name = user.name ?? '';
-                session.user.image = user.image ?? '/image/default_avatar.png';
+                session.user.image = user.image ?? '/images/default_avatar.png';
                 session.user.email = user.email;
                 session.user.busyness = user.busyness;
 

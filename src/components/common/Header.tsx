@@ -5,12 +5,10 @@ import { useSession } from 'next-auth/react';
 import { NavLink } from '../utils/NavLink';
 import { Logo } from './Logo';
 import ProfilePopup from './ProfilePopup';
+import { hasAccess } from '~/utils/authAssertions';
 
 export const Header: React.FC = () => {
     const { data: session } = useSession();
-
-    const image = session?.user?.image ?? '/images/placeholder.svg';
-    const name = session?.user?.name ?? 'Користувач';
 
     const router = useRouter();
 
@@ -18,7 +16,7 @@ export const Header: React.FC = () => {
         router.pathname === pathname;
 
     return (
-        <header className="sticky top-0 z-10 flex justify-center border-b bg-neutral-200 shadow-lg dark:bg-gray-950">
+        <header className="sticky top-0 z-10 flex justify-center border-b bg-neutral-200 drop-shadow-sm dark:bg-gray-950">
             <div className="flex h-16 w-2/3 items-center justify-between">
                 <Logo className="hidden" />
                 <nav className="flex basis-3/5 justify-center gap-4 lg:gap-8">
@@ -28,9 +26,17 @@ export const Header: React.FC = () => {
                     }
                     <NavLink href="/posts">Дописи</NavLink>
                     <NavLink href="/exercises">Вправи</NavLink>
-                    <NavLink href="/knowledge/f">База знань</NavLink>
+                    {hasAccess(
+                        session?.user?.permissions ?? [],
+                        'documentFolder',
+                        'list',
+                    ) && <NavLink href="/knowledge/f">База знань</NavLink>}
                     <NavLink href="/QnA">Запитання та відповіді</NavLink>
-                    <NavLink href="/chat">Чати</NavLink>
+                    {hasAccess(
+                        session?.user?.permissions ?? [],
+                        'chat',
+                        '*',
+                    ) && <NavLink href="/chat">Чати</NavLink>}
                     <NavLink href="/donate">Підтримати</NavLink>
                 </nav>
                 {session ? (
