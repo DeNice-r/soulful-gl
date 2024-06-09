@@ -53,6 +53,9 @@ export const permissionRouter = createTRPCRouter({
     setForUser: spaProcedure
         .input(MultiPermissionUserSchema)
         .mutation(async ({ ctx, input: { entityId, titles } }) => {
+            if (entityId === ctx.session.user.id) {
+                throw new Error('Ви не можете змінювати власні доступи');
+            }
             return ctx.db.user.update(getSetArgs(entityId, titles));
         }),
 
