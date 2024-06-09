@@ -140,7 +140,11 @@ const Knowledge: React.FC<{
                             ? currentEntity?.id
                             : null,
                 });
-                setNewEntityName('Нова папка');
+                setNewEntityName(
+                    currentEntity?.type === EntityType.FOLDER
+                        ? 'Нова папка'
+                        : 'Новий файл',
+                );
                 await folderContent.refetch();
             })();
         });
@@ -511,7 +515,12 @@ const Knowledge: React.FC<{
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Створити папку</DialogTitle>
+                        <DialogTitle>
+                            Створити{' '}
+                            {creationEntity === EntityType.FOLDER
+                                ? 'папку'
+                                : 'файл'}
+                        </DialogTitle>
                     </DialogHeader>
                     <div className="flex gap-4 py-4">
                         <div className="flex w-full items-center justify-center gap-4">
@@ -520,7 +529,11 @@ const Knowledge: React.FC<{
                             </Label>
                             <Input
                                 id="name"
-                                placeholder="Нова папка"
+                                placeholder={
+                                    creationEntity === EntityType.FOLDER
+                                        ? 'Нова папка'
+                                        : 'Новий файл'
+                                }
                                 className="w-3/5"
                                 onChange={(e) =>
                                     setNewEntityName(e.target.value)
