@@ -1,8 +1,9 @@
 import {
     createTRPCRouter,
+    multilevelPermissionProcedure,
     permissionProcedure,
-    publicPermissionProcedure,
-    publicProcedure,
+    publicMultilevelPermissionProcedure,
+    publicMultilevelSpaProcedure,
 } from '~/server/api/trpc';
 import {
     CUIDSchema,
@@ -15,7 +16,7 @@ import { SearchablePostFields } from '~/utils/types';
 import { getFullAccessConstraintWithAuthor } from '~/utils/auth';
 
 export const postRouter = createTRPCRouter({
-    list: publicPermissionProcedure
+    list: publicMultilevelPermissionProcedure
         .input(PageSchema)
         .query(
             async ({ input: { page, limit, query, orderBy, order }, ctx }) => {
@@ -55,16 +56,12 @@ export const postRouter = createTRPCRouter({
                 };
 
                 const where: object = {
-                    ...(query && {
-                        where: {
-                            ...containsQuery,
-                            ...getFullAccessConstraintWithAuthor(ctx),
-                        },
-                    }),
+                    ...(query && containsQuery),
+                    ...getFullAccessConstraintWithAuthor(ctx),
                 };
 
                 const [count, values] = await ctx.db.$transaction([
-                    ctx.db.post.count(where),
+                    ctx.db.post.count({ where }),
                     ctx.db.post.findMany({
                         where,
                         include: {
@@ -89,16 +86,18 @@ export const postRouter = createTRPCRouter({
             },
         ),
 
-    get: publicProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
-        return ctx.db.post.findUnique({
-            where: { id: input, ...getFullAccessConstraintWithAuthor(ctx) },
-            include: {
-                author: {
-                    select: { name: true },
+    get: publicMultilevelSpaProcedure
+        .input(CUIDSchema)
+        .query(async ({ input, ctx }) => {
+            return ctx.db.post.findUnique({
+                where: { id: input, ...getFullAccessConstraintWithAuthor(ctx) },
+                include: {
+                    author: {
+                        select: { name: true },
+                    },
                 },
-            },
-        });
-    }),
+            });
+        }),
 
     create: permissionProcedure
         .input(PostSchema)
@@ -122,7 +121,7 @@ export const postRouter = createTRPCRouter({
             });
         }),
 
-    update: permissionProcedure
+    update: multilevelPermissionProcedure
         .input(PostUpdateSchema)
         .mutation(async ({ ctx, input }) => {
             const { tags, ...noTagsInput } = input;
@@ -146,7 +145,7 @@ export const postRouter = createTRPCRouter({
             });
         }),
 
-    publish: permissionProcedure
+    publish: multilevelPermissionProcedure
         .input(SetBooleanSchema)
         .mutation(async ({ ctx, input: { id, value } }) => {
             return ctx.db.post.update({
@@ -160,7 +159,7 @@ export const postRouter = createTRPCRouter({
             });
         }),
 
-    delete: permissionProcedure
+    delete: multilevelPermissionProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.post.delete({

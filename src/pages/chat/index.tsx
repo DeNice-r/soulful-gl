@@ -1,15 +1,25 @@
 import * as React from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { type Message } from '@prisma/client';
-import { Alert, Fade, Grid } from '@mui/material';
-import { Layout } from '~/components/common/Layout';
 import { useSession } from 'next-auth/react';
 import { api, type RouterOutputs } from '~/utils/api';
 import { ChatBar } from '~/components/chat/ChatBar';
 import { ChatMessageWindow } from '~/components/chat/ChatMessageWindow';
-import { Cross1Icon } from '@radix-ui/react-icons';
-import { Button } from '@mui/material';
+import { Button } from '~/components/ui/button';
 import { LoaderIcon } from 'lucide-react';
+import { Logo } from '~/components/common/Logo';
+import {
+    ResizableHandle,
+    ResizablePanel,
+    ResizablePanelGroup,
+} from '~/components/ui/resizable';
+
+// @ts-expect-error no types included in library
+import useSound from 'use-sound';
+import { Toaster } from '~/components/ui/toaster';
+import { useToast } from '~/components/ui/use-toast';
+import { type UnreadMessages } from '~/utils/types';
+import Head from 'next/head';
 
 type FullChats = NonNullable<RouterOutputs['chat']['listFull']>;
 
@@ -17,16 +27,20 @@ const ChatUI = () => {
     const { data: session, status } = useSession();
 
     const { client: apiClient } = api.useUtils();
+
     const chatListFullQuery = api.chat.listFull.useQuery(undefined, {
         enabled: false,
     });
     const unassignedChatsQuery = api.chat.listUnassigned.useQuery(undefined, {
         enabled: false,
     });
+
+    const { toast } = useToast();
+
     const unassignedChatsQueryRef = useRef<NodeJS.Timeout | null>(null);
 
     const chatsRef = useRef<FullChats>({});
-    const [_, changeState] = React.useState<number>(0);
+    const [_, changeState] = useState<number>(0);
 
     const unassignedChatsRef = useRef<
         NonNullable<RouterOutputs['chat']['listUnassigned']>
@@ -36,14 +50,23 @@ const ChatUI = () => {
         changeState((prevState) => prevState + 1);
     }
 
-    const [error, setError] = React.useState(false);
-    const [currentChat, setCurrentChat] = React.useState<number>(-1);
+    const [currentChat, setCurrentChat] = useState<number>(-1);
 
-    const inputRef = React.useRef<{ value: string; focus: () => void }>();
-    const messageEndRef = React.useRef();
+    const inputRef = useRef<HTMLInputElement | null>();
+    const messageEndRef = useRef();
 
-    const wsRef = React.useRef<WebSocket>();
-    const wsReconnectInterval = React.useRef<NodeJS.Timeout>();
+    const wsRef = useRef<WebSocket>();
+    const wsReconnectInterval = useRef<NodeJS.Timeout>();
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+    const [notification] = useSound('/sounds/notification.mp3', {
+        volume: 0.3,
+        interrupt: true,
+    });
+
+    const [messageText, setMessageText] = useState<string | null>();
+
+    const [unreadMessages, setUnreadMessages] = useState<UnreadMessages>(null);
 
     useEffect(() => {
         if (
@@ -109,14 +132,7 @@ const ChatUI = () => {
 
         rerender();
 
-        setTimeout(() => {
-            // @ts-expect-error - ref is legacy todo: replace
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            messageEndRef.current.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center',
-            });
-        }, 0);
+        scrollToBottom();
     }
 
     async function wsConnect() {
@@ -157,39 +173,82 @@ const ChatUI = () => {
     async function wsOnMessage(event: MessageEvent<string>) {
         const message = JSON.parse(event.data) as Message;
         await pushMessage(message);
+        if (message.isFromUser && message.chatId !== currentChat) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+            notification();
+            setUnreadMessages((prev) => {
+                if (prev === null) {
+                    return [{ id: message.chatId, counter: 1 }];
+                }
+
+                const chatIndex = prev.findIndex(
+                    (chat) => chat?.id === message.chatId,
+                );
+                if (chatIndex !== -1) {
+                    const newUnreadMessages = [...prev];
+                    newUnreadMessages[chatIndex] = {
+                        ...newUnreadMessages[chatIndex],
+                        counter: newUnreadMessages[chatIndex].counter + 1,
+                    };
+                    return newUnreadMessages;
+                } else {
+                    return [...prev, { id: message.chatId, counter: 1 }];
+                }
+            });
+        }
     }
 
     const handleSend = () => {
-        if (!session || !inputRef.current || !wsRef.current) return;
-        const message = inputRef.current.value;
-        if (message.trim() !== '') {
-            if (wsRef.current && wsRef.current.readyState !== WebSocket.OPEN) {
-                setError(true);
-                setTimeout(() => {
-                    setError(false);
-                }, 5000);
-                return;
-            }
-
+        if (!messageText) return;
+        if (
+            !session ||
+            !wsRef.current ||
+            wsRef.current.readyState !== WebSocket.OPEN
+        ) {
+            toast({
+                title: `З'єднання з сервером не встановлено`,
+                variant: 'destructive',
+            });
+            return;
+        }
+        if (messageText.trim() !== '') {
             if (!chatsRef.current[currentChat]) return;
 
             const chat = chatsRef.current[currentChat];
             wsRef.current.send(
                 JSON.stringify({
-                    text: message,
+                    text: messageText,
                     userId: chat.userId,
                     chatId: chat.id,
                     isFromUser: false,
                 }),
             );
         }
-        inputRef.current.value = '';
-        inputRef.current.focus();
+        setMessageText('');
         scrollToBottom();
     };
 
     function changeChat(index: number) {
         if (index !== currentChat) setCurrentChat(index);
+
+        if (index === -1) return;
+
+        setUnreadMessages((prev) => {
+            if (prev === null) {
+                return null;
+            }
+
+            const chatIndex = prev.findIndex((chat) => chat?.id === index);
+            if (chatIndex !== -1) {
+                const newUnreadMessages = [...prev];
+                delete newUnreadMessages[chatIndex];
+                return newUnreadMessages;
+            } else {
+                return [...prev];
+            }
+        });
+
+        setMessageText('');
 
         scrollToBottom(false);
 
@@ -197,10 +256,10 @@ const ChatUI = () => {
         inputRef.current.focus();
     }
 
-    async function closeCurrentChat() {
-        await apiClient.chat.archive.mutate(currentChat);
+    async function closeChat(chatID: number) {
+        await apiClient.chat.archive.mutate(chatID);
         setCurrentChat(-1);
-        delete chatsRef.current[currentChat];
+        delete chatsRef.current[chatID];
         rerender();
     }
 
@@ -225,62 +284,53 @@ const ChatUI = () => {
     }
 
     return (
-        <Layout footer={false}>
-            <Fade in={error}>
-                <Alert
-                    variant="filled"
-                    severity="warning"
-                    sx={{ position: 'absolute', 'z-index': 1 }}
-                >
-                    Встановлення з&apos;єднання з сервером...
-                </Alert>
-            </Fade>
-            {currentChat !== -1 && (
-                <>
+        <ResizablePanelGroup
+            direction="horizontal"
+            className="flex max-h-screen min-h-screen"
+        >
+            <Head>
+                <title>Чати</title>
+            </Head>
+            <Toaster />
+            <ResizablePanel
+                className="relative flex h-screen min-w-56 flex-col"
+                defaultSize={20}
+                minSize={20}
+                maxSize={33}
+            >
+                <Logo className="min-h-16 px-4" />
+                <ChatBar
+                    chats={chatsRef.current}
+                    {...{ changeChat, closeChat, currentChat, unreadMessages }}
+                />
+                {unassignedChatsRef.current.length > 0 && (
                     <Button
-                        variant="contained"
-                        className="top-15 absolute right-0 z-20"
-                        color="error"
-                        onClick={closeCurrentChat}
+                        className="absolute bottom-0 w-full rounded-none bg-green-800 py-6 hover:bg-green-700"
+                        onClick={() =>
+                            takeUnassignedChat(unassignedChatsRef.current[0].id)
+                        }
                     >
-                        <Cross1Icon />
+                        <LoaderIcon />
                     </Button>
-                    <Button
-                        variant="contained"
-                        className="absolute bottom-0 left-0 z-20"
-                        color="error"
-                        onClick={closeCurrentChatAndReport}
-                    >
-                        {/*<Trash2Icon />*/}
-                        Report
-                    </Button>
-                </>
-            )}
-            {unassignedChatsRef.current.length > 0 && (
-                <Button
-                    variant="contained"
-                    className="top-15 absolute left-0 z-20"
-                    color="success"
-                    onClick={() =>
-                        takeUnassignedChat(unassignedChatsRef.current[0].id)
-                    }
-                >
-                    <LoaderIcon />
-                </Button>
-            )}
-            <Grid container spacing={0}>
-                <ChatBar chats={chatsRef.current} changeChat={changeChat} />
+                )}
+            </ResizablePanel>
+            <ResizableHandle />
+            <ResizablePanel>
                 <ChatMessageWindow
                     chats={chatsRef.current}
                     {...{
+                        messageText,
                         currentChat,
                         handleSend,
-                        inputRef,
+                        setMessageText,
                         messageEndRef,
+                        closeCurrentChatAndReport,
+                        setCurrentChat,
+                        closeChat,
                     }}
                 />
-            </Grid>
-        </Layout>
+            </ResizablePanel>
+        </ResizablePanelGroup>
     );
 };
 

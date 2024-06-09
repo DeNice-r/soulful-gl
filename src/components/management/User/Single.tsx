@@ -7,25 +7,32 @@ import {
     PopoverContent,
 } from '~/components/ui/popover';
 import { Button } from '../../ui/button';
-import { defaultFormatDt } from '~/utils/dates';
+import { defaultFormatDateTime } from '~/utils/dates';
 import { useToast } from '~/components/ui/use-toast';
 import Image from 'next/image';
+import { MoreHorizontalIcon } from 'lucide-react';
 
 export const Single: React.FC<{
     entity: RouterOutputs['user']['list']['values'][number];
     edit: (arg: string) => void;
     refetch: () => void;
 }> = ({ entity, edit, refetch }) => {
+    const resetPassword = api.user.resetPassword.useMutation();
     const suspend = api.user.suspend.useMutation();
     const delete_ = api.user.delete.useMutation();
     const { toast } = useToast();
 
-    async function suspendHandler(id: string) {
+    function successToast(description: string) {
+        toast({
+            title: 'Успіх',
+            description,
+        });
+    }
+
+    async function resetPasswordHandler() {
         try {
-            await suspend.mutateAsync({
-                id,
-                value: !entity.suspended,
-            });
+            await resetPassword.mutateAsync(entity.id);
+            successToast('Пароль скинуто');
         } catch (e) {
             console.error(e);
             toast({
@@ -38,9 +45,29 @@ export const Single: React.FC<{
         void refetch();
     }
 
-    async function deleteHandler(id: string) {
+    async function suspendHandler() {
         try {
-            await delete_.mutateAsync(id);
+            await suspend.mutateAsync({
+                id: entity.id,
+                value: !entity.suspended,
+            });
+            successToast('Статус змінено');
+        } catch (e) {
+            console.error(e);
+            toast({
+                title: 'Помилка',
+                description:
+                    e instanceof Error ? e.message : 'Невідома помилка',
+                variant: 'destructive',
+            });
+        }
+        void refetch();
+    }
+
+    async function deleteHandler() {
+        try {
+            await delete_.mutateAsync(entity.id);
+            successToast('Запис видалено');
         } catch (e) {
             console.error(e);
             toast({
@@ -69,8 +96,8 @@ export const Single: React.FC<{
             <TableCell>{entity.id}</TableCell>
             <TableCell>{entity.email ?? '📲'}</TableCell>
             <TableCell>{entity.name ?? '👤'}</TableCell>
-            <TableCell>{defaultFormatDt(entity.createdAt)}</TableCell>
-            <TableCell>{defaultFormatDt(entity.updatedAt)}</TableCell>
+            <TableCell>{defaultFormatDateTime(entity.createdAt)}</TableCell>
+            <TableCell>{defaultFormatDateTime(entity.updatedAt)}</TableCell>
             <TableCell>{entity.reportCount}</TableCell>
             <TableCell>{entity.suspended ? '⛔' : '✅'}</TableCell>
             <TableCell className="text-right">
@@ -87,15 +114,15 @@ export const Single: React.FC<{
                         </Button>
                         <Button
                             variant="outline"
-                            onClick={() => suspendHandler(entity.id)}
+                            onClick={resetPasswordHandler}
                         >
+                            Скинути пароль
+                        </Button>
+                        <Button variant="outline" onClick={suspendHandler}>
                             {entity.suspended ? 'Увімкнути' : 'Відключити'}{' '}
                             запис
                         </Button>
-                        <Button
-                            variant={'destructive'}
-                            onClick={() => deleteHandler(entity.id)}
-                        >
+                        <Button variant={'destructive'} onClick={deleteHandler}>
                             Видалити
                         </Button>
                     </PopoverContent>
@@ -104,26 +131,3 @@ export const Single: React.FC<{
         </>
     );
 };
-
-function MoreHorizontalIcon(
-    props: React.JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>,
-) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <circle cx="12" cy="12" r="1" />
-            <circle cx="19" cy="12" r="1" />
-            <circle cx="5" cy="12" r="1" />
-        </svg>
-    );
-}

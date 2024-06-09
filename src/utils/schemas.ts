@@ -1,6 +1,14 @@
 import { z } from '~/utils/zod';
-import { BackgroundPattern, Order } from '~/utils/types';
+import {
+    BackgroundPattern,
+    LiqpayPeriodicity,
+    Order,
+    PaymentAction,
+    PaymentCurrency,
+    PaymentLanguage,
+} from '~/utils/types';
 import { MAX_ASSET_LIMIT } from '~/utils/constants';
+import { env } from '~/env';
 
 const FirstPage = 1;
 const DefaultLimit = 10;
@@ -33,6 +41,54 @@ export const TitleSchema = z.string().min(1).max(200);
 export const QuerySchema = z.string().min(1).max(200);
 export const RichTextSchema = z.string().max(15000);
 
+export const MaybeStringifiedNumberSchema = z.union([
+    z
+        .string()
+        .transform((value) => {
+            return Number(value);
+        })
+        .refine((value) => !isNaN(value)),
+    z.number(),
+]);
+export const AnyToStringSchema = z
+    .union([z.string(), z.number()])
+    .transform((value) => String(value));
+
+export const LiqpayAPIVersionSchema = z.number().int().min(1).max(3).default(3);
+export const LiqpayAmountSchema = z
+    .number()
+    .int()
+    .min(1)
+    .max(10000)
+    .default(20);
+
+export const UserCNBSchema = z.object({
+    amount: MaybeStringifiedNumberSchema.default(20).refine((value) => {
+        const r = LiqpayAmountSchema.safeParse(value);
+        return r.success;
+    }),
+    currency: z.nativeEnum(PaymentCurrency).default(PaymentCurrency.UAH),
+    action: z.nativeEnum(PaymentAction).default(PaymentAction.PAYDONATE),
+    subscribe_periodicity: z
+        .nativeEnum(LiqpayPeriodicity)
+        .default(LiqpayPeriodicity.MONTH),
+});
+
+export const CNBSchema = UserCNBSchema.extend({
+    public_key: z
+        .string()
+        .refine((value) => value === env.NEXT_PUBLIC_LIQPAY_PUBLIC_KEY)
+        .default(env.NEXT_PUBLIC_LIQPAY_PUBLIC_KEY),
+    version: MaybeStringifiedNumberSchema.default(3).refine((value) => {
+        const r = LiqpayAPIVersionSchema.safeParse(value);
+        return r.success;
+    }),
+    description: ShortStringSchema.default('Пожертва команді Soulful'),
+    language: z.nativeEnum(PaymentLanguage).default(PaymentLanguage.UK),
+    subscribe_date_start: z.string().default('2024-01-01 00:00:00'),
+    result_url: z.string().default(`${env.NEXT_PUBLIC_URL}/donate/thankyou`),
+});
+
 // const ImageBucketRegex = new RegExp(
 //     `https://${env.NEXT_PUBLIC_AWS_S3_BUCKET}\\.s3(?:\\.${env.NEXT_PUBLIC_AWS_REGION})?\\.amazonaws\\.com/.+`,
 // );
@@ -64,14 +120,29 @@ export const CreateUserSchema = z.object({
     notes: z.string().optional(),
 });
 
-export const UpdateUserSchema = z.object({
-    id: StringIdSchema,
-
+export const SelfUpdateUserSchema = z.object({
     name: ShortStringSchema.optional(),
     image: ImageSchema.optional(),
     description: RichTextSchema.optional(),
+});
+
+export const UpdateUserSchema = SelfUpdateUserSchema.extend({
+    id: CUIDSchema,
+
+    email: EmailSchema.optional(),
     notes: z.string().optional(),
 });
+
+export const ChangePasswordSchema = z
+    .object({
+        oldPassword: z.string(),
+        newPassword: z.string().min(8).max(200),
+        newPasswordRepeat: z.string(),
+    })
+    .refine((values) => values.newPassword === values.newPasswordRepeat, {
+        message: 'Паролі не співпадають',
+        path: ['newPasswordRepeat'],
+    });
 
 export const SetBooleanSchema = z.object({
     id: z.string(),
@@ -86,9 +157,9 @@ export const SetBooleanNumberIdSchema = z.object({
 });
 
 export const SetNotesSchema = z.object({
-    id: CUIDSchema,
+    id: StringIdSchema,
 
-    notes: z.string(),
+    notes: z.string().optional(),
 });
 
 export const SinglePermissionUserSchema = z.object({
@@ -125,7 +196,7 @@ export const RecommendationUpdateSchema = TDIUpdateSchema.extend({
     published: z.boolean().optional(),
 });
 
-export const CountSchema = z.number().min(1).max(MAX_ASSET_LIMIT).default(4);
+export const CountSchema = z.number().min(1).max(MAX_ASSET_LIMIT).default(2);
 
 export const PostSchema = TDISchema.extend({
     tags: z.array(z.string()).min(1).max(25).default([]).optional(),
@@ -146,8 +217,8 @@ export const PostUpdateSchema = TDIUpdateSchema.extend({
 
 export const ExerciseStepSchema = TDISchema.extend({
     id: z.string().cuid().optional(),
-    backgroundPattern: z.nativeEnum(BackgroundPattern).optional(),
-    timeSeconds: z.number().min(1).max(3600),
+
+    timeSeconds: z.string().optional(),
 });
 
 export const ExerciseStepUpdateSchema = TDIUpdateSchema.extend({
@@ -158,7 +229,7 @@ export const ExerciseStepUpdateSchema = TDIUpdateSchema.extend({
 });
 
 export const ExerciseSchema = TDISchema.extend({
-    tags: z.array(z.string()).min(1).max(25),
+    tags: z.array(z.string()).min(1).max(25).default([]).optional(),
     steps: z.array(ExerciseStepSchema).min(1).max(100),
 });
 
@@ -197,7 +268,7 @@ export const QandAUdateSchema = z.object({
 export const DocumentSchema = TDISchema.extend({
     parentId: CUIDSchema.nullable().optional(),
 
-    tags: z.array(z.string()).max(25).default([]),
+    tags: z.array(z.string()).max(25).default([]).optional(),
 });
 
 export const DocumentUpdateSchema = TDIUpdateSchema.extend({
@@ -213,7 +284,7 @@ export const DocumentFolderSchema = z.object({
 
     title: ShortStringSchema,
 
-    tags: z.array(z.string()).max(25).default([]),
+    tags: z.array(z.string()).max(25).default([]).optional(),
 });
 
 export const DocumentFolderUpdateSchema = z.object({

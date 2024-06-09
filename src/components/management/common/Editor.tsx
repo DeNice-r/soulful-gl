@@ -4,6 +4,7 @@ import 'react-quill/dist/quill.snow.css';
 import { uploadImage } from '~/utils/s3/frontend';
 import { type ReactQuillProps } from 'react-quill';
 import { useToast } from '~/components/ui/use-toast';
+import { cn } from '~/lib/utils';
 
 const ReactQuill = dynamic(
     async () => {
@@ -45,16 +46,27 @@ export const Editor = ({
     defaultValue,
     onChange,
     value,
+    className,
+    containerClassName,
+    emitOnOutsideChanges = true,
 }: {
     defaultValue?: string;
     onChange: (value: string) => void;
     value?: string;
+    className?: string;
+    containerClassName?: string;
+    emitOnOutsideChanges?: boolean;
 }) => {
     const { toast } = useToast();
     const quillRef = useRef<ActualReactQuill>(null);
+    const lastChangeOutsideRef = useRef<number>(0);
     const [text, setText] = useState(defaultValue);
     function changeValue(newValue: string) {
         setText(newValue);
+        if (!emitOnOutsideChanges && lastChangeOutsideRef.current) {
+            lastChangeOutsideRef.current--;
+            return;
+        }
         onChange(newValue);
     }
 
@@ -104,6 +116,7 @@ export const Editor = ({
     useEffect(() => {
         if (value !== undefined) {
             setText(value);
+            lastChangeOutsideRef.current += emitOnOutsideChanges ? 0 : 1;
         }
     }, [value]);
 
@@ -145,9 +158,9 @@ export const Editor = ({
     ];
 
     return (
-        <div className="text-editor">
+        <div className={cn('text-editor', containerClassName)}>
             <ReactQuill
-                className="bg-slate-50"
+                className={cn('rounded-md bg-neutral-50', className)}
                 theme="snow"
                 modules={modules}
                 formats={formats}

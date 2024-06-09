@@ -9,14 +9,15 @@ import {
 
 import {
     createTRPCRouter,
+    multilevelPermissionProcedure,
     permissionProcedure,
-    publicProcedure,
+    publicMultilevelPermissionProcedure,
 } from '~/server/api/trpc';
 import { SearchableExerciseFields } from '~/utils/types';
 import { getFullAccessConstraintWithAuthor } from '~/utils/auth';
 
 export const exerciseRouter = createTRPCRouter({
-    list: publicProcedure
+    list: publicMultilevelPermissionProcedure
         .input(PageSchema)
         .query(
             async ({ input: { page, limit, query, orderBy, order }, ctx }) => {
@@ -58,16 +59,12 @@ export const exerciseRouter = createTRPCRouter({
                 };
 
                 const where: object = {
-                    ...(query && {
-                        where: {
-                            ...containsQuery,
-                            ...getFullAccessConstraintWithAuthor(ctx),
-                        },
-                    }),
+                    ...(query && containsQuery),
+                    ...getFullAccessConstraintWithAuthor(ctx),
                 };
 
                 const [count, values] = await ctx.db.$transaction([
-                    ctx.db.exercise.count(where),
+                    ctx.db.exercise.count({ where }),
                     ctx.db.exercise.findMany({
                         where,
                         include: {
@@ -92,38 +89,46 @@ export const exerciseRouter = createTRPCRouter({
             },
         ),
 
-    get: publicProcedure.input(CUIDSchema).query(async ({ input, ctx }) => {
-        return ctx.db.exercise.findUnique({
-            where: {
-                id: input,
-                ...getFullAccessConstraintWithAuthor(ctx),
-            },
-            include: {
-                author: {
-                    select: { name: true },
+    get: publicMultilevelPermissionProcedure
+        .input(CUIDSchema)
+        .query(async ({ input, ctx }) => {
+            return ctx.db.exercise.findUnique({
+                where: {
+                    id: input,
+                    ...getFullAccessConstraintWithAuthor(ctx),
                 },
-                steps: true,
-            },
-        });
-    }),
+                include: {
+                    author: {
+                        select: { name: true },
+                    },
+                    steps: true,
+                },
+            });
+        }),
 
     create: permissionProcedure
         .input(ExerciseSchema)
         .mutation(async ({ ctx, input }) => {
+            const { tags, steps, ...tdi } = input;
             return ctx.db.exercise.create({
                 data: {
-                    ...input,
-                    tags: {
-                        connectOrCreate: input.tags.map((tag) => ({
-                            where: { title: tag },
-                            create: { title: tag },
-                        })),
-                    },
+                    ...tdi,
+                    ...(tags && {
+                        tags: {
+                            connectOrCreate: tags.map((tag) => ({
+                                where: { title: tag },
+                                create: { title: tag },
+                            })),
+                        },
+                    }),
                     steps: {
-                        connectOrCreate: input.steps.map((step) => ({
-                            where: { id: step.id },
-                            create: { ...step },
+                        create: steps.map((step) => ({
+                            ...step,
+                            timeSeconds: step.timeSeconds
+                                ? Number(step.timeSeconds)
+                                : undefined,
                         })),
+                        // ...(step.id && { where: { id: step.id } }),  // could be used if exercise steps were reusable, which is dropped for now
                     },
                     author: {
                         connect: { id: ctx.session.user.id },
@@ -138,6 +143,7 @@ export const exerciseRouter = createTRPCRouter({
             return ctx.db.exerciseStep.create({
                 data: {
                     ...input,
+                    timeSeconds: Number(input.timeSeconds),
                     author: {
                         connect: { id: ctx.session.user.id },
                     },
@@ -145,32 +151,34 @@ export const exerciseRouter = createTRPCRouter({
             });
         }),
 
-    update: permissionProcedure
+    update: multilevelPermissionProcedure
         .input(ExerciseUpdateSchema)
         .mutation(async ({ ctx, input }) => {
+            const { tags, steps, ...tdi } = input;
             return ctx.db.exercise.update({
                 where: {
                     id: input.id,
                     ...(!ctx.isFullAccess && { authorId: ctx.session.user.id }),
                 },
                 data: {
-                    title: input.title,
-                    description: input.description,
-                    image: input.image,
+                    ...tdi,
 
-                    ...(input.tags && {
+                    ...(tags && {
                         tags: {
-                            connectOrCreate: input.tags.map((tag) => ({
+                            connectOrCreate: tags.map((tag) => ({
                                 where: { title: tag },
                                 create: { title: tag },
                             })),
                         },
                     }),
-                    ...(input.steps && {
+                    ...(steps && {
                         steps: {
-                            connectOrCreate: input.steps.map((step) => ({
-                                where: { id: step.id },
-                                create: { ...step },
+                            deleteMany: {},
+                            create: steps.map((step) => ({
+                                ...step,
+                                timeSeconds: step.timeSeconds
+                                    ? Number(step.timeSeconds)
+                                    : undefined,
                             })),
                         },
                     }),
@@ -178,7 +186,7 @@ export const exerciseRouter = createTRPCRouter({
             });
         }),
 
-    updateStep: permissionProcedure
+    updateStep: multilevelPermissionProcedure
         .input(ExerciseStepSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.exerciseStep.update({
@@ -194,7 +202,7 @@ export const exerciseRouter = createTRPCRouter({
             });
         }),
 
-    publish: permissionProcedure
+    publish: multilevelPermissionProcedure
         .input(SetBooleanSchema)
         .mutation(async ({ ctx, input: { id, value } }) => {
             return ctx.db.exercise.update({
@@ -208,7 +216,7 @@ export const exerciseRouter = createTRPCRouter({
             });
         }),
 
-    delete: permissionProcedure
+    delete: multilevelPermissionProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.exercise.delete({
@@ -219,7 +227,7 @@ export const exerciseRouter = createTRPCRouter({
             });
         }),
 
-    deleteStep: permissionProcedure
+    deleteStep: multilevelPermissionProcedure
         .input(CUIDSchema)
         .mutation(async ({ ctx, input }) => {
             return ctx.db.exerciseStep.delete({

@@ -1,4 +1,9 @@
-import React, { type RefObject, type ChangeEvent, useState } from 'react';
+import React, {
+    type RefObject,
+    type ChangeEvent,
+    useState,
+    useMemo,
+} from 'react';
 import {
     Form,
     FormControl,
@@ -20,6 +25,11 @@ import { Editor } from '../common/Editor';
 import Modal from 'react-modal';
 import getCroppedImg from '../../utils/cropImage';
 import Cropper, { type Area, type Point } from 'react-easy-crop';
+import { useToast } from '~/components/ui/use-toast';
+import Select, { type MultiValue } from 'react-select';
+import { useSession } from 'next-auth/react';
+import { hasAccess } from '~/utils/authAssertions';
+import { Upload } from 'lucide-react';
 
 declare module 'react' {
     interface CSSProperties {
@@ -32,8 +42,13 @@ export const XForm: React.FC<{
     changeModalState: () => void;
     formRef: RefObject<HTMLFormElement>;
 }> = ({ entity, changeModalState, formRef }) => {
+    const { data: session } = useSession();
+
     const create = api.user.create.useMutation();
     const update = api.user.update.useMutation();
+
+    const permissions = api.permission.list.useQuery();
+    const setForUserMutation = api.permission.setForUser.useMutation();
 
     const [imageSrc, setImageSrc] = useState<string | null>(null);
     const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
@@ -41,6 +56,22 @@ export const XForm: React.FC<{
     const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(
         null,
     );
+
+    const [entityPermissions, setEntityPermissions] = useState<
+        MultiValue<{
+            value: string;
+            label: string;
+        }>
+    >();
+
+    const { toast } = useToast();
+
+    function successToast(description: string) {
+        toast({
+            title: 'Успіх',
+            description,
+        });
+    }
 
     const form = useForm<z.infer<typeof CreateUserSchema>>({
         resolver: zodResolver(CreateUserSchema),
@@ -52,11 +83,26 @@ export const XForm: React.FC<{
             notes: entity?.notes ?? '',
         },
     });
+
     async function onSubmit(values: z.infer<typeof CreateUserSchema>) {
         if (entity) {
+            try {
+                await setForUserMutation.mutateAsync({
+                    entityId: entity.id,
+                    titles: entityPermissions
+                        ? entityPermissions.map(
+                              (permission) => permission.value,
+                          )
+                        : [],
+                });
+            } catch (e) {
+                console.error(e);
+            }
             await update.mutateAsync({ id: entity.id, ...values });
+            successToast('Користувача оновлено');
         } else {
             await create.mutateAsync(values);
+            successToast('Користувача створено');
         }
         changeModalState();
     }
@@ -101,6 +147,27 @@ export const XForm: React.FC<{
             setImageSrc(imageDataUrl?.toString() ?? '');
         }
     };
+
+    const options = useMemo(
+        () =>
+            permissions.data?.map((permission) => ({
+                value: permission.title,
+                label: permission.title,
+            })),
+        [permissions.data],
+    );
+
+    const defaultOptions = useMemo(
+        () =>
+            entity
+                ? entity.permissions.map((permission) => ({
+                      value: permission.title,
+                      label: permission.title,
+                  }))
+                : [],
+        [entity],
+    );
+
     return (
         <Form {...form}>
             <form
@@ -120,12 +187,12 @@ export const XForm: React.FC<{
                                 >
                                     <div
                                         style={{
-                                            '--image-url': `url(${field.value ? field.value : entity?.image})`,
+                                            '--image-url': `url(${field.value ?? entity?.image ?? ''})`,
                                         }}
                                         className={`flex h-24 w-24 items-center justify-center rounded-full border-2 border-gray-400 bg-white bg-[image:var(--image-url)] bg-cover transition-all hover:opacity-80 dark:bg-gray-700`}
                                     >
                                         {!entity?.image && (
-                                            <UploadIcon className="h-8 w-8 text-gray-500 dark:text-gray-400" />
+                                            <Upload className="h-8 w-8 text-gray-500 dark:text-gray-400" />
                                         )}
                                     </div>
                                     <Input
@@ -201,7 +268,7 @@ export const XForm: React.FC<{
                             </FormItem>
                         )}
                     />
-                    <div className="flex h-2/3 w-full gap-12">
+                    <div className="flex h-2/3 w-full gap-12 overflow-y-auto px-1">
                         <div className="flex flex-1 flex-col gap-4">
                             <div className="flex w-full justify-between gap-4">
                                 <FormField
@@ -214,8 +281,7 @@ export const XForm: React.FC<{
                                             </FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    className="flex-grow outline outline-1 outline-neutral-400"
-                                                    disabled={!!entity}
+                                                    className="flex-grow border border-neutral-400"
                                                     placeholder={
                                                         !entity || entity.email
                                                             ? 'anton@gmail.com'
@@ -238,7 +304,7 @@ export const XForm: React.FC<{
                                             </FormLabel>
                                             <FormControl>
                                                 <Input
-                                                    className="flex-grow outline outline-1 outline-neutral-400"
+                                                    className="flex-grow border border-neutral-400"
                                                     placeholder="Антон"
                                                     {...field}
                                                 />
@@ -306,30 +372,23 @@ export const XForm: React.FC<{
                                     </FormItem>
                                 )}
                             />
+                            <Select
+                                options={options}
+                                onChange={(e) => {
+                                    setEntityPermissions(e);
+                                }}
+                                isMulti
+                                className="max-h-20"
+                                defaultValue={defaultOptions}
+                                isDisabled={
+                                    !hasAccess(
+                                        session?.user?.permissions ?? [],
+                                        'permission',
+                                        'setForUser',
+                                    )
+                                }
+                            />
                         </div>
-                        {/* todo: userRole */}
-                        {/* <FormField
-                            control={form.control}
-                            name="role"
-                            render={({ field }) => (
-                                <FormItem className="flex-1">
-                                    <FormLabel className="text-xl">
-                                        Username
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            className="flex-grow outline outline-1 outline-neutral-400"
-                                            placeholder="anton@gmail.com"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormDescription>
-                                        This is your public display name.
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        /> */}
                     </div>
 
                     <div className="flex gap-8 self-end">
@@ -356,25 +415,4 @@ function readFile(file: Blob) {
         reader.addEventListener('load', () => resolve(reader.result), false);
         reader.readAsDataURL(file);
     });
-}
-
-function UploadIcon({ className }: { className?: string }) {
-    return (
-        <svg
-            className={className}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="17 8 12 3 7 8" />
-            <line x1="12" x2="12" y1="3" y2="15" />
-        </svg>
-    );
 }

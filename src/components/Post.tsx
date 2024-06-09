@@ -4,12 +4,13 @@ import Image from 'next/image';
 import { type RouterOutputs } from '~/utils/api';
 import { truncateString } from '~/utils';
 import { cn } from '~/lib/utils';
-import { defaultFormatDt } from '~/utils/dates';
+import { defaultFormatDateTime } from '~/utils/dates';
 
 export const Post: React.FC<{
     post: RouterOutputs['post']['list']['values'][number];
-    variant?: 'posts' | 'landing';
-}> = ({ post, variant }) => {
+    onClick?: React.MouseEventHandler<HTMLElement>;
+    variant?: 'posts' | 'landing' | 'chat';
+}> = ({ post, onClick, variant }) => {
     const authorName = post.author ? post.author.name : 'Unknown author';
     return (
         <article
@@ -17,7 +18,13 @@ export const Post: React.FC<{
                 'flex h-full flex-col items-center gap-4 text-center text-inherit text-slate-800 md:gap-8 md:text-left  2xl:gap-0 2xl:text-center',
                 variant === 'landing' && 'p-6 md:flex-row 2xl:flex-col',
             )}
-            onClick={() => Router.push(`/posts/${post.id}`)}
+            onClick={
+                onClick
+                    ? onClick
+                    : async () => {
+                          await Router.push(`/posts/${post.id}`);
+                      }
+            }
         >
             {post.image && (
                 <Image
@@ -35,23 +42,28 @@ export const Post: React.FC<{
             <div
                 className={cn(
                     'flex h-full flex-col justify-between gap-2 md:gap-8 2xl:gap-0 ',
-                    variant === 'posts'
-                        ? 'w-full'
-                        : 'items-center md:w-3/5 md:items-start 2xl:w-full 2xl:items-center',
+                    variant === 'posts' && 'w-full',
+                    variant === 'chat' && 'w-full p-6',
+                    variant === 'landing' &&
+                        'items-center md:w-3/5 md:items-start 2xl:w-full 2xl:items-center',
                 )}
             >
                 <div
                     className={cn(
                         variant === 'posts' &&
-                            'flex w-full flex-col gap-6 px-8 py-8 text-justify',
+                            'flex w-full flex-col gap-6 p-8 text-justify',
+                        variant === 'chat' &&
+                            'flex w-full flex-col gap-4 text-justify',
                         variant === 'landing' &&
                             'divide-stone-700 md:w-4/5 md:divide-y 2xl:w-full',
                     )}
                 >
                     <p
                         className={cn(
-                            'font-bold md:text-xl 2xl:text-3xl',
+                            'font-bold',
+                            variant === 'posts' && 'md:text-xl 2xl:text-3xl',
                             variant === 'landing' && 'md:pb-4 2xl:py-4',
+                            variant === 'chat' && 'text-xl',
                         )}
                     >
                         {truncateString(post.title)}
@@ -71,7 +83,12 @@ export const Post: React.FC<{
                     {/*    }}*/}
                     {/*/>*/}
                 </div>
-                <div className="flex justify-between">
+                <div
+                    className={cn(
+                        'flex justify-between',
+                        variant === 'landing' && 'w-full',
+                    )}
+                >
                     <small
                         className={cn(
                             'text-xs font-light',
@@ -88,7 +105,7 @@ export const Post: React.FC<{
                             variant === 'landing' && 'md:self-end 2xl:mt-4',
                         )}
                     >
-                        {defaultFormatDt(post.createdAt)}
+                        {defaultFormatDateTime(post.createdAt)}
                         {/*{post.createdAt != post.updatedAt &&*/}
                         {/*    ` (оновлено ${defaultFormatDt(post.updatedAt)})`}*/}
                     </small>

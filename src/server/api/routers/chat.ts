@@ -1,6 +1,7 @@
 import { createTRPCRouter, spaProcedure } from '~/server/api/trpc';
 import { BusynessSchema, NumberIdSchema } from '~/utils/schemas';
 import { archiveChat } from '~/server/api/routers/common';
+import { getHelp } from '~/utils/openai';
 
 export const chatRouter = createTRPCRouter({
     list: spaProcedure.query(async ({ ctx }) => {
@@ -126,6 +127,115 @@ export const chatRouter = createTRPCRouter({
                 },
                 data: {
                     busyness,
+                },
+            });
+        }),
+
+    listHelp: spaProcedure
+        .input(NumberIdSchema)
+        .query(async ({ ctx, input: chatId }) => {
+            return (
+                ctx.db.gptMessage.findMany({
+                    where: {
+                        chatId,
+                        chat: {
+                            personnelId: ctx.session.user.id,
+                        },
+                    },
+                    include: {
+                        message: {
+                            select: {
+                                text: true,
+                            },
+                        },
+                    },
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
+                }) ?? []
+            );
+        }),
+
+    getHelp: spaProcedure
+        .input(NumberIdSchema)
+        .mutation(async ({ ctx, input: chatId }) => {
+            const [messages, qandA] = await ctx.db.$transaction([
+                ctx.db.message.findMany({
+                    where: {
+                        chatId,
+                        chat: {
+                            personnelId: ctx.session.user.id,
+                        },
+                    },
+                    orderBy: {
+                        createdAt: 'asc',
+                    },
+                    select: {
+                        id: true,
+                        text: true,
+                        isFromUser: true,
+                    },
+                }),
+                ctx.db.qandA.findMany({
+                    where: {
+                        published: true,
+                    },
+                    select: {
+                        question: true,
+                        answer: true,
+                    },
+                }),
+            ]);
+            if (!messages) throw new Error('Чат не знайдено');
+
+            let lastUserMessageId: number | null = null;
+            for (let x = messages.length - 1; x >= 0; x--) {
+                if (messages[x].isFromUser) {
+                    lastUserMessageId = messages[x].id;
+                    break;
+                }
+            }
+
+            if (!lastUserMessageId)
+                throw new Error('Користувач не відправив повідомлення');
+
+            const oldHelp = await ctx.db.gptMessage.findFirst({
+                where: {
+                    messageId: lastUserMessageId,
+                },
+                select: {
+                    id: true,
+                },
+            });
+            if (oldHelp)
+                throw new Error(
+                    'Ви вже отримали допомогу для цього повідомлення',
+                );
+
+            const gptMessage = await getHelp([
+                ...qandA.map(({ question, answer }) => ({
+                    role: 'system' as const,
+                    content: `${question}\n${answer}`,
+                })),
+                ...messages.map((message) => ({
+                    role: 'user' as const,
+                    name: message.isFromUser ? 'user' : 'psychologist',
+                    content: message.text,
+                })),
+            ]);
+
+            return ctx.db.gptMessage.create({
+                data: {
+                    chatId,
+                    messageId: lastUserMessageId,
+                    text: gptMessage,
+                },
+                include: {
+                    message: {
+                        select: {
+                            text: true,
+                        },
+                    },
                 },
             });
         }),

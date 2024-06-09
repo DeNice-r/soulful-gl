@@ -47,28 +47,30 @@ export function CustomPagination({
 
     return (
         <Pagination>
-            <PaginationContent>
+            <PaginationContent className="flex w-full flex-wrap justify-center">
                 <PaginationItem>
                     <PaginationPrevious
                         disabled={page <= 1}
                         onClick={() => goToPage(page - 1)}
                     />
                 </PaginationItem>
-                {1 < page - 2 && <PageShortcut target={1} />}
-                {1 < page - 4 && (
-                    <PaginationItem>
-                        <PaginationEllipsis />
-                    </PaginationItem>
-                )}
-                {1 === page - 4 && <PageShortcut target={3} />}
-                {getButtons()}
-                {total === page + 4 && <PageShortcut target={total - 1} />}
-                {page + 4 < total && (
-                    <PaginationItem>
-                        <PaginationEllipsis />
-                    </PaginationItem>
-                )}
-                {page + 2 < total && <PageShortcut target={total} />}
+                <>
+                    {1 < page - 2 && <PageShortcut target={1} />}
+                    {1 < page - 4 && (
+                        <PaginationItem>
+                            <PaginationEllipsis />
+                        </PaginationItem>
+                    )}
+                    {1 === page - 4 && <PageShortcut target={3} />}
+                    {getButtons()}
+                    {total === page + 4 && <PageShortcut target={total - 1} />}
+                    {page + 4 < total && (
+                        <PaginationItem>
+                            <PaginationEllipsis />
+                        </PaginationItem>
+                    )}
+                    {page + 2 < total && <PageShortcut target={total} />}
+                </>
                 <PaginationItem>
                     <PaginationNext
                         disabled={page >= total}
