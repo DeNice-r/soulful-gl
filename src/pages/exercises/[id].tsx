@@ -55,7 +55,7 @@ const ExerciseId: React.FC = () => {
     }
 
     return (
-        <Layout className="min-h-[calc(100vh-65px)] w-full items-center bg-hero-pattern">
+        <Layout className="min-h-[calc(100vh-65px)] w-full items-center bg-hero-pattern py-14">
             <Head>
                 <title>{exercise?.title}</title>
             </Head>

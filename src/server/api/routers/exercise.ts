@@ -59,8 +59,10 @@ export const exerciseRouter = createTRPCRouter({
                 };
 
                 const where: object = {
-                    ...(query && containsQuery),
-                    ...getFullAccessConstraintWithAuthor(ctx),
+                    AND: [
+                        query && containsQuery,
+                        getFullAccessConstraintWithAuthor(ctx),
+                    ].filter((x) => !!x),
                 };
 
                 const [count, values] = await ctx.db.$transaction([

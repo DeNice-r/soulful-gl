@@ -8,7 +8,7 @@ import {
     BreadcrumbSeparator,
 } from '~/components/ui/breadcrumb';
 import { Button } from '~/components/ui/button';
-import { Pencil, Plus } from 'lucide-react';
+import { Pencil, Plus, Search } from 'lucide-react';
 import {
     ContextMenu,
     ContextMenuContent,
@@ -140,7 +140,11 @@ const Knowledge: React.FC<{
                             ? currentEntity?.id
                             : null,
                 });
-                setNewEntityName('Нова папка');
+                setNewEntityName(
+                    currentEntity?.type === EntityType.FOLDER
+                        ? 'Нова папка'
+                        : 'Новий файл',
+                );
                 await folderContent.refetch();
             })();
         });
@@ -234,11 +238,20 @@ const Knowledge: React.FC<{
                     'overflow-y-auto rounded-none bg-neutral-300 px-8 drop-shadow-none',
             )}
         >
-            <Input
-                className="h-12 w-full rounded-md border-neutral-100 bg-neutral-300 px-4"
-                placeholder="Пошук"
-                onChange={(e) => debounceQuery(e.target.value)}
-            />
+            {!document && (
+                <Label className="relative flex w-full self-center">
+                    <Input
+                        type="search"
+                        name="query"
+                        id="default-search"
+                        placeholder="Шукати документи..."
+                        className="ps-14"
+                        onChange={(e) => debounceQuery(e.target.value)}
+                        defaultValue={query}
+                    />
+                    <Search className="absolute start-4 top-0 flex h-full w-5 items-center text-neutral-500" />
+                </Label>
+            )}
             <Breadcrumb className="select-none">
                 <BreadcrumbList
                     className={cn(
@@ -270,9 +283,9 @@ const Knowledge: React.FC<{
                     {parentId && (
                         <>
                             <BreadcrumbSeparator className="[&>svg]:size-5" />
-                            <BreadcrumbItem>
+                            <BreadcrumbItem className="max-w-32 truncate text-nowrap">
                                 <span
-                                    className="cursor-pointer"
+                                    className="cursor-pointer truncate"
                                     onClick={() =>
                                         setCurrentEntity({
                                             id: parentId,
@@ -288,8 +301,10 @@ const Knowledge: React.FC<{
                     {title && (
                         <>
                             <BreadcrumbSeparator className="[&>svg]:size-5" />
-                            <BreadcrumbItem>
-                                <BreadcrumbPage>{title}</BreadcrumbPage>
+                            <BreadcrumbItem className="max-w-32 truncate text-nowrap">
+                                <BreadcrumbPage className="truncate">
+                                    {title}
+                                </BreadcrumbPage>
                             </BreadcrumbItem>
                         </>
                     )}
@@ -300,19 +315,21 @@ const Knowledge: React.FC<{
             )}
             {document ? (
                 <div className="flex h-full flex-col items-center">
-                    <div className="flex w-full items-center justify-between py-4">
+                    <div className="flex w-full items-center justify-between gap-8 py-4">
                         {!isEditing ? (
-                            <h3 className="font-semibold">{document.title}</h3>
+                            <h3 className="text-justify font-semibold">
+                                {document.title}
+                            </h3>
                         ) : (
-                            <div className="relative">
-                                <Pencil className="pointer-events-none absolute bottom-2 end-0 mr-2 flex h-4 w-4 items-center text-neutral-500" />
+                            <div className="relative flex flex-grow">
                                 <Input
-                                    className="h-9 w-40 rounded-none border-0 border-b border-neutral-900 bg-neutral-200 px-1 py-0 text-3xl font-semibold focus:rounded-md focus:border-b-0 focus-visible:ring-transparent"
+                                    className="h-9 w-full rounded-none border-0 border-b border-neutral-900 bg-neutral-200 px-1 py-0 pe-8 text-3xl font-semibold leading-4 focus:rounded-md focus:border-b-0 focus-visible:ring-transparent"
                                     defaultValue={document.title}
                                     onChange={(e) => {
                                         document.title = e.target.value;
                                     }}
                                 />
+                                <Pencil className="pointer-events-none absolute bottom-2 end-0 mr-2 flex h-4 w-4 items-center text-neutral-500" />
                             </div>
                         )}
                         <Button onClick={handleDocumentEdit}>
@@ -511,7 +528,12 @@ const Knowledge: React.FC<{
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Створити папку</DialogTitle>
+                        <DialogTitle>
+                            Створити{' '}
+                            {creationEntity === EntityType.FOLDER
+                                ? 'папку'
+                                : 'файл'}
+                        </DialogTitle>
                     </DialogHeader>
                     <div className="flex gap-4 py-4">
                         <div className="flex w-full items-center justify-center gap-4">
@@ -520,7 +542,11 @@ const Knowledge: React.FC<{
                             </Label>
                             <Input
                                 id="name"
-                                placeholder="Нова папка"
+                                placeholder={
+                                    creationEntity === EntityType.FOLDER
+                                        ? 'Нова папка'
+                                        : 'Новий файл'
+                                }
                                 className="w-3/5"
                                 onChange={(e) =>
                                     setNewEntityName(e.target.value)
