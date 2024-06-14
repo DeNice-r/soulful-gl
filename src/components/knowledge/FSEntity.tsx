@@ -23,7 +23,7 @@ export const FSEntity: React.FC<{
             name={type}
             className="flex h-14 flex-grow items-center justify-between gap-4 rounded-3xl bg-neutral-300 px-6 text-slate-800 drop-shadow-md hover:bg-neutral-400/40 active:drop-shadow-none"
         >
-            <div className="flex flex-grow items-center gap-4">
+            <div className="flex flex-grow items-center gap-4 truncate">
                 {type === 'folder' ? (
                     <FolderClosed className="min-h-6 min-w-6" />
                 ) : (
@@ -36,7 +36,7 @@ export const FSEntity: React.FC<{
                         onKeyDown={(e) => handleTitleChange(e, entity.id)}
                     ></Input>
                 ) : (
-                    <p className="select-none">{entity.title}</p>
+                    <p className="select-none truncate">{entity.title}</p>
                 )}
             </div>
         </Button>
