@@ -86,19 +86,25 @@ export const XForm: React.FC<{
 
     async function onSubmit(values: z.infer<typeof CreateUserSchema>) {
         if (entity) {
-            try {
-                await setForUserMutation.mutateAsync({
-                    entityId: entity.id,
-                    titles: entityPermissions
-                        ? entityPermissions.map(
-                              (permission) => permission.value,
-                          )
-                        : [],
-                });
-            } catch (e) {
-                console.error(e);
-            }
             await update.mutateAsync({ id: entity.id, ...values });
+            try {
+                if (entityPermissions)
+                    await setForUserMutation.mutateAsync({
+                        entityId: entity.id,
+                        titles: entityPermissions.map(
+                            (permission) => permission.value,
+                        ),
+                    });
+            } catch (e) {
+                toast({
+                    title: 'Помилка',
+                    description:
+                        e instanceof Error ? e.message : 'Невідома помилка',
+                    variant: 'destructive',
+                });
+                console.error(e);
+                return;
+            }
             successToast('Користувача оновлено');
         } else {
             await create.mutateAsync(values);
@@ -372,6 +378,7 @@ export const XForm: React.FC<{
                                     </FormItem>
                                 )}
                             />
+                            <FormLabel className="text-xl">Доступи</FormLabel>
                             <Select
                                 options={options}
                                 onChange={(e) => {

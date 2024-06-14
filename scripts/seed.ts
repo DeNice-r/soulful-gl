@@ -407,8 +407,8 @@ const caller = createCaller({
         },
         expires: 'no 😎',
     },
-    entity: 'world',
-    action: '6 days of creation 😈',
+    entity: 'any',
+    action: 'any',
     host: 'localhost',
 });
 

@@ -487,7 +487,7 @@ export const ChatMessageWindow: React.FC<{
                             {tabType === ChatTabType.NOTES && (
                                 <>
                                     {/* todo: parse notes */}
-                                    {notes ? (
+                                    {notes === '' || notes ? (
                                         <Editor
                                             className="fadeIn h-full max-h-[calc(100vh-42.84px)] rounded-none border-0 border-none bg-neutral-300"
                                             containerClassName="h-full"

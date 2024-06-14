@@ -81,7 +81,7 @@ const ChatItem: React.FC<ChatItemProps> = ({
                 <p className="truncate">
                     {/*{chat.lastMessage}*/}
                     {chat?.messages?.length > 0 &&
-                        truncateString(chat.messages.slice(-1)[0].text, 20)}
+                        truncateString(chat.messages.slice(-1)[0].text, 35)}
                 </p>
             </div>
             <div
